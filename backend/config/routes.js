@@ -20,6 +20,16 @@ module.exports.routes = {
   ***************************************************************************/
 
   '/': { view: 'pages/homepage' },
+  '/list': { view: 'pages/roomlist' },
+  '/join/:roomID': 'RoomController.joinUser',
+  '/join': 'RoomController.joinUser',
+  '/leave': 'RoomController.leaveUser',
+  'GET /create': { view: 'pages/create' },
+  'POST /create': 'RoomController.newRoom',
+  '/room/:roomID': 'RoomController.access',
+  '/socketconnect': 'RoomController.socketconnect',
+  '/chatpost': 'ChatController.chatpost',
+  '/userlist': 'RoomController.userlist'
 
 
   /***************************************************************************

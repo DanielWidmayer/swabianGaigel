@@ -1,0 +1,33 @@
+
+<form method="POST">
+    <label for="username"> Join as: <input type="text" id="username" name="username" required></label>
+    <input id="room" type="hidden" name="roomid">
+    <button id="bjoin" type="submit">Join</button>
+</form>
+
+<script>
+    const namefield = $('#username');
+    const bjoin = $('#bjoin');
+    const hash = window.location.href.split('/').pop();
+    $('#room').val(hash);
+    /*bjoin.click(socketjoin);
+
+    /*namefield.keypress(function (e) {
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if (keycode == '13') socketjoin();
+    });
+
+    function socketjoin() {
+        if (namefield.val() == "") {
+            alert("please enter a valid username");
+        } else {
+            io.socket.post('/join', {username: namefield.val(), roomID: hash }, function(res, jres) {
+                if(jres.statusCode != 200) {
+                    console.log(res);
+                } else {
+                    window.location.href = window.location.href.replace('join','room');
+                }
+            })
+        }
+    }*/
+</script>

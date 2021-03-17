@@ -1,0 +1,29 @@
+<div style="border: 2px solid black; border-radius: 3px; background-color: saddlebrown; box-sizing: border-box; height: 150px;">
+    <ul id="userlist">
+
+    </ul>
+</div>
+
+<script>
+    const ul = $('#userlist');
+
+    io.socket.get('/userlist', function(res, jres) {
+        if(jres.statusCode != 200) {
+            console.log(jres);
+        } else {
+            ul.empty();
+            console.log(res);
+            res.forEach(user => {
+                ul.append(`<li>${user.name}</li>`);
+            })
+        }
+    })
+
+    io.socket.on('userevent', function (data) {
+        ul.empty();
+        data.users.forEach(user => {
+            ul.append(`<li>${user.name}</li>`);
+        })
+    })
+
+</script>

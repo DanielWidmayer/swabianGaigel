@@ -1,0 +1,39 @@
+<script type="text/javascript" src="/dependencies/sails.io.js"></script>
+
+<div style="width: 100%; height: 500px; background-color: lightgreen;">
+    <div style="display: flex;">
+        <div id="playfield" style="width: 70%;"><%- include roomparts/playfield.ejs %></div>
+        <div style="width: 30%;">
+            <div><%- include roomparts/userlist.ejs %></div>
+            <div><%- include roomparts/chatfield.ejs %></div>
+        </div>
+    </div>
+</div>
+<button type="button" id="bleave">Leave</button>
+
+<script>
+    const bleave = $('#bleave');
+    const hash = window.location.href.split('/').pop();
+
+    io.socket.post('/socketconnect', function(res, jres) {
+        if(jres.statusCode != 200) {
+            console.log(res);
+        } else {
+            console.log("ok");
+        }
+    })
+
+    bleave.click(socketleave);
+
+    function socketleave() {
+        io.socket.delete('/leave', function(res, jres) {
+            if(jres.statusCode != 200) {
+                console.log(res);
+            } else {
+                window.location.href = '/list';
+            }
+        })
+    }
+
+    // onunload event could be used to make the user leave without button, but would also cause him to leave on refresh
+</script>
