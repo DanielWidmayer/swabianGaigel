@@ -1,0 +1,19 @@
+{
+    "name": "vue-sails-example",
+    "version": "0.0.0",
+    "description": "Vue.js with Sails.js example project",
+    "main": "backend/app.js",
+    "scripts": {
+      "dev": "cd backend && npm run dev & cd frontend2 && npm run dev",
+      "commitmsg": "commitlint -e $GIT_PARAMS",
+      "install": "cd frontend2 && npm i && cd ../backend && npm i && cd ..",
+      "install:dev": "npm run install && npm run dev",
+      "push": "git push && git push heroku `git subtree split --prefix backend master`:master --force"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/ndabAP/Vue.js-with-Sails.js-backend-example-project.git"
+    },
+    "author": "J.B. D.W.",
+    "license": "MIT"
+  }
