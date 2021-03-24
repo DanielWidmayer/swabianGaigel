@@ -19,7 +19,7 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  //'/': { view: 'pages/homepage' },
+  '/': { view: 'pages/homepage' },
   '/list': { view: 'pages/roomlist' },
   '/join/:roomID': 'RoomController.joinUser',
   '/join': 'RoomController.joinUser',

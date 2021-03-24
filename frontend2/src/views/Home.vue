@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import * as io from 'sails.io.js'
 
 export default {
   name: 'Home',
@@ -37,16 +38,24 @@ export default {
     async getAllRooms() {
       let _url = 'http://127.0.0.1:1337/room';
       //console.log(window.location.origin);
-      let res_data = await this.axios.get(_url);
-      res_data.data.forEach(el => {
-        el.users = `${el.players.length}/${el.maxplayers}`;
-        if(el.password.length > 0) el.pw = 'true';
-        else el.pw = 'false';
-      });
-      this.items = res_data.data;
-      this.itemlength = this.items.length;
+      try {
+        let res_data = await this.axios.get(_url);
+        res_data.data.forEach(el => {
+          el.users = `${el.players.length}/${el.maxplayers}`;
+          if(el.password.length > 0) el.pw = 'true';
+          else el.pw = 'false';
+        });
+        this.items = res_data.data;
+        this.itemlength = this.items.length;
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 }
+
+io.socket.on('listevent', function (msg) {
+  console.log(msg.room);
+})
 
 </script>

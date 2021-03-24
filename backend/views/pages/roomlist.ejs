@@ -3,6 +3,9 @@
         border: 1px solid black;
     }
 </style>
+
+<script type="text/javascript" src="/dependencies/sails.io.js"></script>
+
 <div style="width: 100%; background-color: brown; display: flex;">
     <div style="border: 3px solid grey; border-radius: 5px; box-sizing: border-box; width: 40%; margin: 5px;">
         <div style="box-sizing: border-box; margin: 5px 0 5px 0; text-align: center;">
@@ -28,31 +31,46 @@
         </table>
     </div>
 </div>
-<button id="brefresh" type="button">refresh list</button>
 <a class="button" href="/create" id="newroom" style="margin-top: 10px;">Create new Room</a>
 
 <script>
     const rl = $('#roomlist').children('tbody');
-    const br = $('#brefresh');
-    
-    br.click(refreshlist);
-    refreshlist();
+    var rooms = [];
 
-    window.setInterval(refreshlist, 10000);
-
-    function refreshlist() {
-        rl.empty();
+    function getAllRooms() {
+        rooms = [];
         $.get("/room", function(data, status) {
             data.forEach(room => {
-                rl.append(`
-                <tr onclick="window.location.href='/join/${room.hashID}';" onmouseover="over(this)" onmouseout="out(this)">
-                    <td>${room.name}</td>
-                    <td>${room.password.length > 0 ? 'yes':'no'}</td>
-                    <td>${room.players.length}/${room.maxplayers}</td>
-                </tr>`);
+                rooms.push(room);
+                renderRoom(room); 
             })
         })
     }
+
+    function renderRoom(room) {
+        let target = $(`#${room.hashID}`);
+        let players = room.players ? room.players.length : 0;
+        console.log(players);
+        if (target.length) {
+            target.children('.rpl').html(`${players}/${room.maxplayers}`);
+        } else {
+            rl.append(`
+            <tr id="${room.hashID}"" onclick="window.location.href='/join/${room.hashID}';" onmouseover="over(this)" onmouseout="out(this)">
+                <td class="rname">${room.name}</td>
+                <td class="rpw">${room.password ? 'yes':'no'}</td>
+                <td class="rpl">${players}/${room.maxplayers}</td>
+            </tr>`);
+        }
+    }
+
+    window.onload = function() {
+        getAllRooms();
+    }
+
+    io.socket.on('listevent', function(data) {
+        console.log(data);
+        renderRoom(data.room);
+    })
 
     function over(el) {
         el.style.backgroundColor = "green";

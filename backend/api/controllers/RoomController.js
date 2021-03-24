@@ -7,6 +7,7 @@
 
 //const Room = require("../models/Room");
 const crypto = require('crypto');
+const { isObject } = require('util');
 
 
 module.exports = {
@@ -24,7 +25,8 @@ module.exports = {
                 password: req.body.passwd,
                 maxplayers: req.body.maxplayers
             });
-            //room = await Room.findOne({name: req.body.roomname});
+            room = await Room.findOne({name: req.body.roomname});
+            sails.sockets.blast('listevent', { room: room });
             //console.log(room);
             return res.redirect(`/join/${hash}`);
         } catch (err) {
@@ -125,6 +127,9 @@ module.exports = {
             // remove this user object
             await User.destroyOne({id: user.id});
 
+            // update roomlist
+            sails.sockets.blast('listevent', { room: room });
+
             // return status 200, redirect on client side
             return res.ok();
         } catch (err) {
@@ -168,6 +173,10 @@ module.exports = {
             let room = await Room.findOne({id: req.session.roomid}).populate('players');
             sails.sockets.join(req, room.hashID);
             sails.sockets.broadcast(room.hashID, 'userevent', {users: room.players});
+
+            // update roomlist
+            sails.sockets.blast('listevent', { room: room });
+
             return res.ok();
         } catch (err) {
             return res.serverError(err);
