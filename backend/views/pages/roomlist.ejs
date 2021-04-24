@@ -1,22 +1,48 @@
 <style>
-    table, th {
+    table,
+    th {
         border: 1px solid black;
     }
 </style>
 
-<script type="text/javascript" src="/dependencies/sails.io.js"></script>
-
-<div style="width: 100%; background-color: brown; display: flex;">
-    <div style="border: 3px solid grey; border-radius: 5px; box-sizing: border-box; width: 40%; margin: 5px;">
-        <div style="box-sizing: border-box; margin: 5px 0 5px 0; text-align: center;">
-            <div id="username" style="box-sizing: border-box; font-weight: bold; font-size: 40px; margin-top: 80px;">peter</div>
-            <div id="userid" style="color: blue; margin-top: 15px; font-size: 25px; margin-bottom: 70px;">#445</div>
+<div style="width: 100%; background-color: brown; display: flex">
+    <div style="
+      border: 3px solid grey;
+      border-radius: 5px;
+      box-sizing: border-box;
+      width: 40%;
+      margin: 5px;
+    ">
+        <div style="box-sizing: border-box; margin: 5px 0 5px 0; text-align: center">
+            <div id="username" style="
+          box-sizing: border-box;
+          font-weight: bold;
+          font-size: 40px;
+          margin-top: 80px;
+        ">
+                peter
+            </div>
+            <div id="userid" style="
+          color: blue;
+          margin-top: 15px;
+          font-size: 25px;
+          margin-bottom: 70px;
+        ">
+                #445
+            </div>
             <!--Abfrage beim join versuch "join as", userid wird nicht benötigt-->
-            <input type="text" id="newname" placeholder="User445">
+            <input type="text" id="newname" placeholder="User445" />
         </div>
     </div>
-    <div style="border: 3px solid grey; border-radius: 5px; box-sizing: border-box; width: 60%; margin: 5px; overflow: auto;">
-        <table id="roomlist" style="width: 100%;">
+    <div style="
+      border: 3px solid grey;
+      border-radius: 5px;
+      box-sizing: border-box;
+      width: 60%;
+      margin: 5px;
+      overflow: auto;
+    ">
+        <table id="roomlist" style="width: 100%">
             <thead>
                 <tr>
                     <th>Room</th>
@@ -24,27 +50,39 @@
                     <th>players</th>
                 </tr>
             </thead>
-            <tbody>
-
-            </tbody>
-
+            <tbody></tbody>
         </table>
     </div>
 </div>
-<a class="button" href="/create" id="newroom" style="margin-top: 10px;">Create new Room</a>
+<a class="button" href="/create" id="newroom" style="margin-top: 10px">Create new Room</a>
+
+
+<!-- Small modal -->
+<button type="button" class="btn btn-primary" onclick="$('#mymodal').modal('show');">Small
+    modal</button>
+
+<div id="mymodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            ...
+        </div>
+    </div>
+</div>
+
+
 
 <script>
-    const rl = $('#roomlist').children('tbody');
+    const rl = $("#roomlist").children("tbody");
     var rooms = [];
 
     function getAllRooms() {
         rooms = [];
-        $.get("/room", function(data, status) {
-            data.forEach(room => {
+        $.get("/room", function (data, status) {
+            data.forEach((room) => {
                 rooms.push(room);
-                renderRoom(room); 
-            })
-        })
+                renderRoom(room);
+            });
+        });
     }
 
     function renderRoom(room) {
@@ -52,25 +90,26 @@
         let players = room.players ? room.players.length : 0;
         console.log(players);
         if (target.length) {
-            target.children('.rpl').html(`${players}/${room.maxplayers}`);
+            target.children(".rpl").html(`${players}/${room.maxplayers}`);
         } else {
             rl.append(`
-            <tr id="${room.hashID}"" onclick="window.location.href='/join/${room.hashID}';" onmouseover="over(this)" onmouseout="out(this)">
+            <tr id="${room.hashID}"" onclick="window.location.href='/join/${room.hashID
+                }';" onmouseover="over(this)" onmouseout="out(this)">
                 <td class="rname">${room.name}</td>
-                <td class="rpw">${room.password ? 'yes':'no'}</td>
+                <td class="rpw">${room.password ? "yes" : "no"}</td>
                 <td class="rpl">${players}/${room.maxplayers}</td>
             </tr>`);
         }
     }
 
-    window.onload = function() {
+    window.onload = function () {
         getAllRooms();
-    }
+    };
 
-    io.socket.on('listevent', function(data) {
+    io.socket.on("listevent", function (data) {
         console.log(data);
         renderRoom(data.room);
-    })
+    });
 
     function over(el) {
         el.style.backgroundColor = "green";

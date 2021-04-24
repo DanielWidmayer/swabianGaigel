@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Swabian Gaigel</title>
 
-    <!-- Viewport mobile tag for sensible mobile support -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<head>
+  <title>Swabian Gaigel</title>
 
-    <%/* If you want to discourage search engines from indexing this site, uncomment the following line: */%>
-    <%/* <meta name="robots" content="noindex"> */%>
+  <!-- Viewport mobile tag for sensible mobile support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
+  <% /* If you want to discourage search engines from indexing this site, uncomment the following line: */%>
+    <% /* <meta name="robots" content="noindex" />
+    */%>
 
     <!--
         Stylesheets and Preprocessors
@@ -32,12 +33,10 @@
     -->
 
     <!--STYLES-->
+    <link rel="stylesheet" href="/dependencies/bootstrap.min.css">
     <link rel="stylesheet" href="/styles/importer.css">
     <!--STYLES END-->
-  </head>
-
-
-<!--
+    <!--
 
     Client-side Javascript
       ========================
@@ -60,13 +59,16 @@
 
   -->
 
-  <!--SCRIPTS-->
-  <script src="/dependencies/jquery.min.js"></script>
-  <!--SCRIPTS END-->
+    <!--SCRIPTS-->
+    <script src="/dependencies/sails.io.js"></script>
+    <script src="/dependencies/jquery.min.js"></script>
+    <script src="/dependencies/bootstrap.bundle.min.js"></script>
+    <!--SCRIPTS END-->
+</head>
 
+<body>
 
-  <body>
-    <%- body %>
+  <%- body %>
 
     <!--
         Client-side Templates
@@ -92,7 +94,6 @@
     <!--TEMPLATES-->
     <!--TEMPLATES END-->
 
-
     <!--
         Server-side View Locals
         ========================
@@ -107,6 +108,6 @@
         https://sailsjs.com/docs/concepts/views/locals#?escaping-untrusted-data-using-exposelocalstobrowser
 
     -->
+</body>
 
-  </body>
 </html>
