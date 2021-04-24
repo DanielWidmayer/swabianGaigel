@@ -42,7 +42,7 @@ module.exports = {
                 let room = await Room.findOne({hashID: hash}).populate('players');
                 if (!room) return res.badRequest(new Error('The room you tried to join does not exist!'));
                 
-                return res.view('pages/join');
+                return res.view('basic/join');
             } catch (err) {
                 return res.serverError(err);
             }
@@ -150,7 +150,7 @@ module.exports = {
                     let user = await User.findOne({id: userid});
                     if (user) {
                         // check if user is already connected to room
-                        if (user.inroom == room.id) return res.view('pages/gameroom');
+                        if (user.inroom == room.id) return res.view('room/gameroom', {layout: 'room_layout'});
                     }
                 }
                 

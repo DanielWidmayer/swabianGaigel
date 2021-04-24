@@ -36,6 +36,6 @@ module.exports.views = {
   *                                                                          *
   ***************************************************************************/
 
-  layout: 'layouts/layout'
+  layout: 'basic_layout'
 
 };

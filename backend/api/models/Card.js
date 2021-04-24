@@ -5,11 +5,23 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+/* Legende:
+  
+*/
+
 module.exports = {
 
   attributes: {
 
-    
+    value: {
+      type: 'number',
+      required: true
+    },
+
+    symbol: {
+      type: 'number',
+      required: true
+    }
 
   },
 

@@ -19,12 +19,27 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  '/': { view: 'pages/homepage' },
-  '/list': { view: 'pages/roomlist' },
+  '/': { 
+    view: 'basic/index',
+    locals: {
+      layout: 'basic_layout'
+    }
+  },
+  '/list': { 
+    view: 'basic/roomlist',
+    locals: {
+      layout: 'basic_layout'
+    }
+  },
   '/join/:roomID': 'RoomController.joinUser',
   '/join': 'RoomController.joinUser',
   '/leave': 'RoomController.leaveUser',
-  'GET /create': { view: 'pages/create' },
+  'GET /create': { 
+    view: 'basic/create',
+    locals: {
+      layout: 'basic_layout'
+    }
+  },
   'POST /create': 'RoomController.newRoom',
   '/room/:roomID': 'RoomController.access',
   '/socketconnect': 'RoomController.socketconnect',

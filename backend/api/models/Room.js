@@ -36,6 +36,10 @@ module.exports = {
 
     players: {
       collection: 'user'
+    },
+
+    deck: {
+      collection: 'card'
     }
 
   },
