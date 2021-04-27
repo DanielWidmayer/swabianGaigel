@@ -40,6 +40,10 @@ module.exports = {
 
     deck: {
       collection: 'card'
+    },
+
+    trump: {
+      model: 'card'
     }
 
   },

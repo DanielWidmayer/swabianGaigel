@@ -16,6 +16,15 @@ module.exports = {
 
     inroom: {
       model: 'room'
+    },
+
+    hand: {
+      collection: 'card'
+    },
+
+    score: {
+      type: 'number',
+      defaultsTo: 0
     }
     
   },
