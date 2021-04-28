@@ -1,37 +1,17 @@
 html {
-    background-color: #092e20;
+    background-image: url("/images/tabletexture.jpg");
 }
 
-body {
+body{
+    background-color: transparent!important;
 }
 
-.col {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+.fieldcontainer {
     height: 100%;
+    width: 100%;
 }
 
-.container {
-    border-radius: 8px;
-    box-shadow: black 0px 0px 2px;
-    background: #fff;
-    margin: 20px;
-    border: solid 1px black;
-    font-family: arial, sans-serif;
-    padding: 50px;
-    padding-top: 20px;
-    height: 80vh;
-    width: 70%;
-}
-
-a img {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: 0;
-}
-button {
+#deal {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -41,15 +21,9 @@ button {
 img.preload {
     display: none;
 }
-h1 {
-    font-size: 60px;
-    text-align: center;
-    padding: 0px;
-    margin: 5px;
-}
 
 #card-table {
-    background-color: green;
+    background-image: url("/images/tabletexture.jpg");
     height: 90%;
     width: 100%;
     border: solid 6px brown;
@@ -62,38 +36,15 @@ h1 {
 }
 
 #game-history {
-    border-radius: 8px;
-    box-shadow: black 0px 0px 2px;
-    background: #fff;
-    margin: 20px;
-    border: solid 1px black;
-    font-family: arial, sans-serif;
-    padding: 50px;
-    padding-top: 20px;
     height: 30vh;
     width: 100%;
 }
 
 #chat {
-    border-radius: 8px;
-    box-shadow: black 0px 0px 2px;
-    background: #fff;
-    margin: 20px;
-    border: solid 1px black;
-    font-family: arial, sans-serif;
-    padding: 50px;
-    padding-top: 20px;
     height: 40.5vh;
     width: 100%;
 }
 
-a:visited {
-    color: blue;
-}
-
-#deal {
-    align-content: center;
-}
 
 footer {
     font-size: 12px;
@@ -101,11 +52,4 @@ footer {
     margin: 10px;
 }
 
-footer a,
-footer a:visited {
-    color: grey;
-}
 
-footer a:hover {
-    color: black;
-}

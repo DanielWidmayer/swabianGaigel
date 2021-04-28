@@ -1,70 +1,61 @@
-<style>
-    table,
-    th {
-        border: 1px solid black;
-    }
-</style>
-
-<div style="width: 100%; background-color: brown; display: flex">
-    <div style="
-      border: 3px solid grey;
-      border-radius: 5px;
-      box-sizing: border-box;
-      width: 40%;
-      margin: 5px;
-    ">
-        <div style="box-sizing: border-box; margin: 5px 0 5px 0; text-align: center">
-            <div id="username" style="
-          box-sizing: border-box;
-          font-weight: bold;
-          font-size: 40px;
-          margin-top: 80px;
-        ">
-                peter
+<div class="container p-4">
+    <div class="container text-center p-3">
+        <img src="/images/headLogo.png" height="180" class="img">
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="card card-transparent text-white shadow text-center roomlist">
+                <h2>Roomlist</h2>
+                <table id="roomlist" class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Room</th>
+                            <th scope="col">password</th>
+                            <th scope="col">players</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-            <div id="userid" style="
-          color: blue;
-          margin-top: 15px;
-          font-size: 25px;
-          margin-bottom: 70px;
-        ">
-                #445
+        </div>
+        <div class="col-4">
+            <div class="card card-transparent text-white shadow">
+                <div id="username" class="text-center">
+                    <h1><i class="bi bi-person"></i></h1>
+                    <h3>
+                        <p>Username</p>
+                        <div id="userid">
+                            <p>#445</p>
+                        </div>
+                    </h3>
+                </div>
             </div>
-            <!--Abfrage beim join versuch "join as", userid wird nicht benötigt-->
-            <input type="text" id="newname" placeholder="User445" />
+            <div class="card card-transparent mt-3 p-3">
+                <button type="button" class="btn btn-primary m-2" onclick="$('#mymodal').modal('show');">Create new
+                    Room</button>
+            </div>
         </div>
     </div>
-    <div style="
-      border: 3px solid grey;
-      border-radius: 5px;
-      box-sizing: border-box;
-      width: 60%;
-      margin: 5px;
-      overflow: auto;
-    ">
-        <table id="roomlist" style="width: 100%">
-            <thead>
-                <tr>
-                    <th>Room</th>
-                    <th>password</th>
-                    <th>players</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
 </div>
-<a class="button" href="/create" id="newroom" style="margin-top: 10px">Create new Room</a>
 
 
-<!-- Small modal -->
-<button type="button" class="btn btn-primary" onclick="$('#mymodal').modal('show');">Small
-    modal</button>
-
-<div id="mymodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
+<!-- Create New Room modal -->
+<div class="modal fade" id="mymodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            ...
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create New Room</h5>
+                <button type="button" class="btn btn-secondary close" onclick="$('#mymodal').modal('hide')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <%- include create.ejs %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create
+                    Room</button>
+            </div>
         </div>
     </div>
 </div>
@@ -72,17 +63,14 @@
 
 
 <script>
-    const rl = $("#roomlist").children("tbody");
-    var rooms = [];
-
-    function getAllRooms() {
-        rooms = [];
-        $.get("/room", function (data, status) {
-            data.forEach((room) => {
-                rooms.push(room);
-                renderRoom(room);
+    const rl = $(" #roomlist").children("tbody"); var rooms = []; function getAllRooms() {
+        rooms = []; $.get("/room",
+            function (data, status) {
+                data.forEach((room) => {
+                    rooms.push(room);
+                    renderRoom(room);
+                });
             });
-        });
     }
 
     function renderRoom(room) {
@@ -93,12 +81,12 @@
             target.children(".rpl").html(`${players}/${room.maxplayers}`);
         } else {
             rl.append(`
-            <tr id="${room.hashID}"" onclick="window.location.href='/join/${room.hashID
-                }';" onmouseover="over(this)" onmouseout="out(this)">
-                <td class="rname">${room.name}</td>
-                <td class="rpw">${room.password ? "yes" : "no"}</td>
-                <td class="rpl">${players}/${room.maxplayers}</td>
-            </tr>`);
+                    <tr id="${room.hashID}"" onclick=" window.location.href='/join/${room.hashID
+                }' ;">
+                        <td class="rname">${room.name}</td>
+                        <td class="rpw">${room.password ? "yes" : "no"}</td>
+                        <td class="rpl">${players}/${room.maxplayers}</td>
+                    </tr>`);
         }
     }
 
@@ -110,12 +98,5 @@
         console.log(data);
         renderRoom(data.room);
     });
-
-    function over(el) {
-        el.style.backgroundColor = "green";
-    }
-    function out(el) {
-        el.style.backgroundColor = "brown";
-    }
 
 </script>

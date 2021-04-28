@@ -1,8 +1,27 @@
-<form method="POST">
-    <label for="roomname">
-        room name: <input type="text" name="roomname" required /></label>
-    <label for="players">players <input type="number" min="2" max="4" name="maxplayers" required /></label>
-    <label for="passwd">
-        password (optional) <input type="password" name="passwd" /></label>
-    <button type="submit">Create</button>
+<form method="POST" id="createRoomForm" action="/create">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">Room Name</span>
+        </div>
+        <input type="text" name="roomname" class="form-control" placeholder="Room Name" required aria-label="Room Name"
+            aria-describedby="basic-addon1">
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <label class="input-group-text" for="playerSelect">Players</label>
+        </div>
+        <select class="custom-select" name="maxplayers" id="playerSelect">
+            <option selected>Choose...</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+            <option value="4">Four</option>
+        </select>
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">Password (optional)</span>
+        </div>
+        <input type="password" class="form-control" name="passwd" placeholder="password" aria-label="Room Name"
+            aria-describedby="basic-addon1">
+    </div>
 </form>
