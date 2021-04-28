@@ -19,10 +19,12 @@
     })
 
     io.socket.on('controllermsg', function(data) {
+        console.log(data.msg);
         chf.append(`<p>${data.msg}</p>`);
     })
 
     io.socket.on('chatmsg', function(data) {
+        console.log(data.text);
         chf.append(`<p>${data.user}: ${data.text}</p>`);
     })
 

@@ -22,10 +22,11 @@
             <div class="card card-transparent text-white shadow">
                 <div id="username" class="text-center">
                     <h1><i class="bi bi-person"></i></h1>
+                    <!-- Eine Funktion zum Ändern des Usernames hab ich schon im backend implementiert, man braucht hier nur noch ein textinput mit name="uname" in ner Form mit method="POST" action="/username" -->
                     <h3>
-                        <p>Username</p>
+                        <p><%= username %></p>
                         <div id="userid">
-                            <p>#445</p>
+                            <p>#<%= userhash %></p>
                         </div>
                     </h3>
                 </div>

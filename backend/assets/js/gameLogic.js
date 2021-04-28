@@ -1,17 +1,16 @@
 //const cards = require('./cards');
 
-var containerHeight, containerWidth, cards, deck, upperhand, lowerhand, trumpCard, upperTrickDeck, lowerTrickDeck, upperPlayingPile, lowerPlayingPile, lastTrick;
+var containerHeight, containerWidth, deck, upperhand, lowerhand, trumpCard, upperTrickDeck, lowerTrickDeck, lowerPlayingPile, upperPlayingPile, lastTrick;
 
-$( document ).ready(function() {
-
+$(document).ready(function() {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
-
+    
     lastTrick = 1;
-
-
+    
+    //Tell the library which element to use for the table
     cards.init({ table: '#card-table', type: PINOCHLE });
-
+    
     //Create a new deck of cards
     deck = new cards.Deck();
     //By default it's in the middle of the container, put it to the side
@@ -30,7 +29,6 @@ $( document ).ready(function() {
     trumpCard = new cards.Deck({ faceUp: true });
     trumpCard.x -= containerWidth/5 - 50;
     
-    
     // Create Trick Decks
     upperTrickDeck = new cards.Deck({ faceUp: false, y: containerHeight / 5, x: containerWidth / 3 });
     lowerTrickDeck = new cards.Deck({ faceUp: false, y: containerHeight * 4/5, x: containerWidth / 3 });
@@ -40,21 +38,19 @@ $( document ).ready(function() {
     lowerPlayingPile.x += 50;
     upperPlayingPile = new cards.Deck({ faceUp: true });
     upperPlayingPile.x += 90;
-    
-    //Let's deal when the Deal button is pressed:
-    $('#deal').click(function () {
-        //Deck has a built in method to deal to hands.
-        $('#deal').hide();
-    
-        deck.deal(5, [upperhand, lowerhand], 50, function () {
-            //This is a callback function, called when the dealing
-            //is done.
-            trumpCard.addCard(deck.topCard());
-            trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
-            trumpCard.topCard().moveToBack();
-            lowerhand.sortHand();
-            lowerhand.render();
-        });
+})
+
+//Let's deal when the game has been started
+io.socket.on('start', function () {
+
+    deck.deal(5, [upperhand, lowerhand], 50, function () {
+        //This is a callback function, called when the dealing
+        //is done.
+        trumpCard.addCard(deck.topCard());
+        trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+        trumpCard.topCard().moveToBack();
+        //lowerhand.sortHand();
+        lowerhand.render();
     });
     
     function getRandomArbitrary(min, max) {

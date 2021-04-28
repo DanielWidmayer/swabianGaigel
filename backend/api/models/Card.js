@@ -52,7 +52,7 @@ module.exports = {
     let carddeck = await Room.findOne({id: roomID}).populate('deck');
     carddeck = carddeck.deck;
     for (x = 0; x < ammount; x++) {
-        cards.push(carddeck[Math.floor(Math.random() * carddeck.length)].id);
+        cards.push(carddeck.pop().id);
     }
     await User.addToCollection(userID, 'hand', cards);
     await Room.removeFromCollection(roomID, 'deck', cards);

@@ -80,7 +80,7 @@ var cards = (function () {
     }
 
     $(".card").click(mouseEvent);
-    shuffle(all);
+    //shuffle(all);
   }
 
   function shuffle(deck) {

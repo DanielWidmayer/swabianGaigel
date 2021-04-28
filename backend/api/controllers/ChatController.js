@@ -9,10 +9,12 @@ module.exports = {
   
     joinmsg: (username, roomhash) => {
         sails.sockets.broadcast(roomhash, 'joinmsg', {user: username, text: 'has joined the game!'});
+        sails.log(`${username} joined room ${roomhash}`);
     },
 
     leavemsg: (username, roomhash) => {
         sails.sockets.broadcast(roomhash, 'leavemsg', {user: username, text: 'has left the game!'});
+        sails.log(`${username} left room ${roomhash}`);
     },
 
     controllermsg: (roomhash, msg) => {

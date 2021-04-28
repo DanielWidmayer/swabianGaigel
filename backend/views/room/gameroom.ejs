@@ -14,11 +14,11 @@
             <div class="card fieldcontainer p-3">
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
-                    <button class="btn btn-secondary" id="deal">DEAL</button>
+      
                 </div>
 
                 <footer>
-                    <p>room#18648</p> <button class="btn btn-secondary" type="button" id="bleave">Leave</button>
+                    <p>room#<%= hash %>></p> <button class="btn btn-secondary" type="button" id="bleave">Leave</button>
                     <button class="btn btn-secondary" type="button" id="bstart">Start</button>
 
                 </footer>
@@ -28,12 +28,14 @@
             <div class="card">
                 <div id="game-history">
                     <h3>Spielverlauf</h3>
+                    <%- include roomparts/userlist.ejs %>
                 </div>
             </div>
 
             <div class="card">
                 <div id="chat">
                     <h3>Chat</h3>
+                    <%- include roomparts/chatfield.ejs %>
                 </div>
             </div>
         </div>
@@ -77,5 +79,6 @@
             }
         })
     }
+    
     // onunload event could be used to make the user leave without button, but would also cause him to leave on refresh
 </script>
