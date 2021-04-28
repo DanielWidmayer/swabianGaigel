@@ -15,6 +15,10 @@ module.exports = {
         sails.sockets.broadcast(roomhash, 'leavemsg', {user: username, text: 'has left the game!'});
     },
 
+    controllermsg: (roomhash, msg) => {
+        sails.sockets.broadcast(roomhash, 'controllermsg', {text: msg});
+    },
+
     chatpost: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error('no socket request'));

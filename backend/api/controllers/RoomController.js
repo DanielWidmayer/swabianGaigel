@@ -35,12 +35,13 @@ module.exports = {
     },
 
     joinUser: async (req, res) => {
+        let hash = req.param('roomID') || req.body.roomid;
+
         if (req.method == 'GET') {
             try {
-                let hash = req.param('roomID');
-                // check if room exists
-                let room = await Room.findOne({hashID: hash}).populate('players');
-                if (!room) return res.badRequest(new Error('The room you tried to join does not exist!'));
+                // check if room exists and joinable
+                let room = await Room.findOne({hashID: hash});
+                if (!room || room.status == 'game') return res.badRequest(new Error('The room you tried to join does not exist!'));
                 
                 return res.view('basic/join');
             } catch (err) {
@@ -54,10 +55,9 @@ module.exports = {
                 //perform some username checks
                 if (username.length == 0) return res.redirect(req.url);
     
-                // check if room exists
-                let hash = req.body.roomid;
+                // check if room exists and joinable
                 let room = await Room.findOne({hashID: hash}).populate('players');
-                if(!room) {
+                if(!room || room.status == 'game') {
                     return res.badRequest(new Error('The room you tried to join does not exist!'));
                 }
     
@@ -153,8 +153,9 @@ module.exports = {
                         if (user.inroom == room.id) return res.view('room/gameroom', {layout: 'room_layout'});
                     }
                 }
-                
-                return res.redirect(`/join/${hash}`);
+                // redirect to join, but only if the game is currently not running and room is in 'lobby' status
+                if (room.status == 'lobby') return res.redirect(`/join/${hash}`);
+                else return res.redirect('/list');
             } else {
                 return res.badRequest(new Error('This room could not be found.'));
             }

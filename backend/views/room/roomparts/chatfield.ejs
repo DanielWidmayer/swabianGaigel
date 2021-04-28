@@ -18,6 +18,10 @@
         chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
     })
 
+    io.socket.on('controllermsg', function(data) {
+        chf.append(`<p>${data.msg}</p>`);
+    })
+
     io.socket.on('chatmsg', function(data) {
         chf.append(`<p>${data.user}: ${data.text}</p>`);
     })
