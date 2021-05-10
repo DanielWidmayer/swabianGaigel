@@ -1,6 +1,11 @@
-
 <form method="POST">
-    <label for="username"> Join as: <input type="text" id="username" name="username" required></label>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">Join as:</span>
+        </div>
+        <input type="text" name="username" class="form-control" placeholder="Name" required aria-label="Username"
+            aria-describedby="basic-addon1">
+    </div>
     <input id="room" type="hidden" name="roomid">
     <button id="bjoin" type="submit">Join</button>
 </form>

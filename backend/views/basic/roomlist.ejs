@@ -31,7 +31,7 @@
                 </div>
             </div>
             <div class="card card-transparent mt-3 p-3">
-                <button type="button" class="btn btn-primary m-2" onclick="$('#mymodal').modal('show');">Create new
+                <button type="button" class="btn btn-primary m-2" onclick="$('#newRoomModal').modal('show');">Create new
                     Room</button>
             </div>
         </div>
@@ -40,12 +40,13 @@
 
 
 <!-- Create New Room modal -->
-<div class="modal fade" id="mymodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="newRoomModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Create New Room</h5>
-                <button type="button" class="btn btn-secondary close" onclick="$('#mymodal').modal('hide')">
+                <button type="button" class="btn btn-secondary close" onclick="$('#newRoomModal').modal('hide')">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -55,6 +56,27 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create
                     Room</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Join Room as modal -->
+<div class="modal fade" id="joinRoomModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Join Room</h5>
+                <button type="button" class="btn btn-secondary close" onclick="$('#joinRoomModal').modal('hide')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <%- include join.ejs %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="$('#joinRoomForm').submit();">Join</button>
             </div>
         </div>
     </div>
