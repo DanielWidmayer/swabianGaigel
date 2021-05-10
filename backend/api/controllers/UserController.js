@@ -15,7 +15,7 @@ module.exports = {
             if (req.session.userid) user = await User.findOne({id: req.session.userid});
             // else create User and validate
             else {
-                user = await User.newUser(req.cookies.username);
+                user = await User.newUser(req.cookies.username, res);
                 req.session.userid = user.id;
             }
     
@@ -36,6 +36,7 @@ module.exports = {
 
             // update User
             await User.updateOne({id: req.session.userid}).set({name: uname});
+            req.cookies.username = uname;
         
             return res.redirect('/list');
         } catch (err) {
