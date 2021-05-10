@@ -4,108 +4,55 @@
     </div>
     <div class="row">
         <div class="col-8">
-            <div class="card card-transparent text-white shadow text-center roomlist">
-                <h2>Roomlist</h2>
-                <div class="scrollbar scrollbar-primary">
-                    <table class="table" id="roomlist">
-                        <thead class="thead-light">
-                            <tr>
-                                <th scope="col">Room</th>
-                                <th scope="col">Password</th>
-                                <th scope="col">Players</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+            <%- include ../list/roomtable.ejs %>
         </div>
         <div class="col-4">
-            <div class="card card-transparent text-white shadow">
-                <div id="username" class="text-center">
-                    <h1><i class="bi bi-person"></i></h1>
-                    <!-- Eine Funktion zum Ändern des Usernames hab ich schon im backend implementiert, man braucht hier nur noch ein textinput mit name="uname" in ner Form mit method="POST" action="/username" -->
-                    <h3>
-                        <p>
-                            <%= username %>
-                        </p>
-                        <div id="userid">
-                            <p>#<%= userhash %>
-                            </p>
-                        </div>
-                    </h3>
+            <% include ../list/user.ejs %>
+                <div class="card card-transparent mt-3 p-3">
+                    <a type="button" class="btn btn-primary m-2" href="/create">Create new Room</a>
                 </div>
-            </div>
-            <div class="card card-transparent mt-3 p-3">
-                <button type="button" class="btn btn-primary m-2" onclick="$('#newRoomModal').modal('show');">Create new
-                    Room</button>
-            </div>
         </div>
     </div>
 </div>
 
+<%- include ../list/modal_change_username.ejs %>
 
-<!-- Create New Room modal -->
-<div class="modal fade" id="newRoomModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Create New Room</h5>
-                <button type="button" class="btn btn-secondary close" onclick="$('#newRoomModal').modal('hide')">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <%- include create.ejs %>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create
-                    Room</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-<script>
-    const rl = $("#roomlist").children("tbody"); var rooms = []; function getAllRooms() {
-        rooms = []; $.get("/room",
-            function (data, status) {
-                data.forEach((room) => {
-                    rooms.push(room);
-                    renderRoom(room);
+    <script>
+        const rl = $("#roomlist").children("tbody"); var rooms = []; function getAllRooms() {
+            rooms = []; $.get("/room",
+                function (data, status) {
+                    data.forEach((room) => {
+                        rooms.push(room);
+                        renderRoom(room);
+                    });
                 });
-            });
-    }
+        }
 
 
-    function renderRoom(room) {
-        let target = $(`#${room.hashID}`);
-        let players = room.players ? room.players.length : 0;
-        console.log(players);
-        if (target.length) {
-            target.children(".rpl").html(`${players}/${room.maxplayers}`);
-        } else {
-            rl.append(`
+        function renderRoom(room) {
+            let target = $(`#${room.hashID}`);
+            let players = room.players ? room.players.length : 0;
+            console.log(players);
+            if (target.length) {
+                target.children(".rpl").html(`${players}/${room.maxplayers}`);
+            } else {
+                rl.append(`
                     <tr id="${room.hashID}"" onclick=" window.location.href='/join/${room.hashID
-                }' ;">
+                    }' ;">
                         <td class="rname">${room.name}</td>
                         <td class="rpw">${room.password ? "yes" : "no"}</td>
                         <td class="rpl">${players}/${room.maxplayers}</td>
                     </tr>`);
+            }
         }
-    }
 
-    window.onload = function () {
-        getAllRooms();
-    };
+        window.onload = function () {
+            getAllRooms();
+        };
 
-    io.socket.on("listevent", function (data) {
-        console.log(data);
-        renderRoom(data.room);
-    });
+        io.socket.on("listevent", function (data) {
+            console.log(data);
+            renderRoom(data.room);
+        });
 
-</script>
+    </script>

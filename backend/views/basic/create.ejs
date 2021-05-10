@@ -1,27 +1,21 @@
-<form method="POST" id="createRoomForm" action="/create">
-    <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon1">Room Name</span>
-        </div>
-        <input type="text" name="roomname" class="form-control" placeholder="Room Name" required aria-label="Room Name"
-            aria-describedby="basic-addon1">
+<div class="container p-4">
+    <div class="container text-center p-3">
+        <img src="/images/headLogo.png" height="180" class="img">
     </div>
-    <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <label class="input-group-text" for="playerSelect">Players</label>
+    <div class="row">
+        <div class="col-8">
+            <div class="card card-transparent text-white shadow text-center maincard">
+                <%- include ../list/room_settings.ejs %>
+            </div>
         </div>
-        <select class="custom-select" name="maxplayers" id="playerSelect">
-            <option selected>Choose...</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
-            <option value="4">Four</option>
-        </select>
-    </div>
-    <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon1">Password (optional)</span>
+        <div class="col-4">
+            <!-- < include ../list/user.ejs %> -->
+
+            <div class="card card-transparent mt-3 p-3">
+                <a type="button" class="btn btn-primary m-2" href="/list">Back To Room List</a>
+            </div>
         </div>
-        <input type="password" class="form-control" name="passwd" placeholder="password" aria-label="Room Name"
-            aria-describedby="basic-addon1">
     </div>
-</form>
+</div>
+
+<%- include ../list/modal_change_username.ejs %>
