@@ -19,6 +19,7 @@ module.exports = {
       type: 'string',
       required: true
     },
+
     // status: game, lobby
     status: {
       type: 'string',
@@ -37,6 +38,10 @@ module.exports = {
 
     players: {
       collection: 'user'
+    },
+
+    scores: {
+      type: 'json'
     },
 
     deck: {

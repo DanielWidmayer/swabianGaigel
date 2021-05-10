@@ -52,11 +52,9 @@ module.exports = {
             // get authenticated user, create new one if not authenticated
             if (req.session.userid) user = await User.findOne({id: req.session.userid})
             else {
-                user = await User.newUser(req.cookies.username);
+                user = await User.newUser(req.cookies.username, res);
                 req.session.userid = user.id;
             }
-            // update inroom
-            await User.updateOne({id: user.id}).set({inroom: room.id});
 
             // add user to player list
             await Room.addToCollection(room.id, 'players').members(user.id);
@@ -81,13 +79,17 @@ module.exports = {
 
         try {
             // check for connected user
-            let user = await User.findOne({id: req.session.userid}).populate('inroom');
+            let user = await User.findOne({id: req.session.userid});
             if (!user) return res.badRequest(new Error('User was not connected to any room!'));
-            let hash = user.inroom.hashID;
+            
+            // check for room
+            let room = await Room.findOne({id: req.session.roomid});
+            if (!room) return res.badRequest(new Error('Room does not exist!'));
+            let hash = room.hashID;
 
             // remove user from player list of connected room
-            await Room.removeFromCollection(user.inroom.id, 'players').members(user.id);
-            let room = await Room.findOne({hashID: hash}).populate('players');
+            await Room.removeFromCollection(room.id, 'players').members(user.id);
+            room = await Room.findOne({hashID: hash}).populate('players');
 
             // disconnect from socket room and remove session room variable
             sails.sockets.leave(req, hash);
@@ -100,7 +102,7 @@ module.exports = {
 
             // reset user score, hand and room credentials
             await User.replaceCollection(user.id, 'hand').members([]);
-            await User.updateOne({id: user.id}).set({inroom: null, score: 0});
+            await User.updateOne({id: user.id}).set({socket: null});
 
             // update roomlist
             sails.sockets.blast('listevent', { room: room });
@@ -125,7 +127,11 @@ module.exports = {
                     let user = await User.findOne({id: userid});
                     if (user) {
                         // check if user is already connected to room
-                        if (user.inroom == room.id) return res.view('room/gameroom', {layout: 'room_layout', hash: room.hashID});
+                        let pass = false;
+                        room.players.forEach((el) => {
+                            if (el.id == userid) pass = true;
+                        });
+                        if (pass) return res.view('room/gameroom', {layout: 'room_layout', hash: room.hashID});
                     }
                 }
 
@@ -150,6 +156,9 @@ module.exports = {
             let room = await Room.findOne({id: req.session.roomid}).populate('players');
             sails.sockets.join(req, room.hashID);
             sails.sockets.broadcast(room.hashID, 'userevent', {users: room.players});
+
+            // save socket ID in user obj
+            await User.updateOne({id: req.session.userid}).set({socket: sails.sockets.getId(req)});
 
             return res.ok();
         } catch (err) {

@@ -21,22 +21,17 @@ module.exports = {
       required: true
     },
 
-    inroom: {
-      model: 'room'
+    socket: {
+      type: 'string'
     },
 
     hand: {
       collection: 'card'
-    },
-
-    score: {
-      type: 'number',
-      defaultsTo: 0
     }
     
   },
 
-  newUser: async (c_username) => {
+  newUser: async (c_username, res) => {
     let hash = 0;
     let name = "";
     // generate unique hash
@@ -46,7 +41,10 @@ module.exports = {
 
     // check for username cookie
     if (c_username) name = c_username
-    else name = "User"
+    else {
+      name = "User";
+      res.cookie('username', name);
+    }
 
     // create User
     await User.create({
