@@ -49,7 +49,7 @@ io.socket.on('start', function () {
         trumpCard.addCard(deck.topCard());
         trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
         trumpCard.topCard().moveToBack();
-        //lowerhand.sortHand();
+        lowerhand.sortHand();
         lowerhand.render();
     });
     

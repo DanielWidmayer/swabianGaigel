@@ -6,16 +6,18 @@
         <div class="col-8">
             <div class="card card-transparent text-white shadow text-center roomlist">
                 <h2>Roomlist</h2>
-                <table id="roomlist" class="table">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="col">Room</th>
-                            <th scope="col">password</th>
-                            <th scope="col">players</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="scrollbar scrollbar-primary">
+                    <table class="table" id="roomlist">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Room</th>
+                                <th scope="col">Password</th>
+                                <th scope="col">Players</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="col-4">
@@ -24,9 +26,12 @@
                     <h1><i class="bi bi-person"></i></h1>
                     <!-- Eine Funktion zum Ändern des Usernames hab ich schon im backend implementiert, man braucht hier nur noch ein textinput mit name="uname" in ner Form mit method="POST" action="/username" -->
                     <h3>
-                        <p><%= username %></p>
+                        <p>
+                            <%= username %>
+                        </p>
                         <div id="userid">
-                            <p>#<%= userhash %></p>
+                            <p>#<%= userhash %>
+                            </p>
                         </div>
                     </h3>
                 </div>
@@ -62,31 +67,11 @@
     </div>
 </div>
 
-<!-- Join Room as modal -->
-<div class="modal fade" id="joinRoomModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Join Room</h5>
-                <button type="button" class="btn btn-secondary close" onclick="$('#joinRoomModal').modal('hide')">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <%- include join.ejs %>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="$('#joinRoomForm').submit();">Join</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
 <script>
-    const rl = $(" #roomlist").children("tbody"); var rooms = []; function getAllRooms() {
+    const rl = $("#roomlist").children("tbody"); var rooms = []; function getAllRooms() {
         rooms = []; $.get("/room",
             function (data, status) {
                 data.forEach((room) => {
@@ -95,6 +80,7 @@
                 });
             });
     }
+
 
     function renderRoom(room) {
         let target = $(`#${room.hashID}`);
