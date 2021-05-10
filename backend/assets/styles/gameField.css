@@ -17,14 +17,14 @@ body{
     left: 50%;
     height: 70px;
     width: 130px;
-}
+}   
 img.preload {
     display: none;
 }
 
 #card-table {
     background-image: url("/images/tabletexture.jpg");
-    height: 90%;
+    height: 100%;
     width: 100%;
     border: solid 6px brown;
     border-radius: 8px;
@@ -43,8 +43,18 @@ img.preload {
 #chat {
     height: 40.5vh;
     width: 100%;
+    position: relative;
 }
 
+#chatfield{
+    height: 30vh;
+    overflow-y: scroll;
+}
+
+.chatmsg{
+    position: absolute !important;
+    bottom: 0;
+}
 
 footer {
     font-size: 12px;

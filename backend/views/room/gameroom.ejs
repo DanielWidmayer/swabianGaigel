@@ -8,13 +8,13 @@
     </div>
     
 </div> -->
-<div class="gamecontainer m-5">
+<div class="m-5">
     <div class="row">
         <div class="col-8">
             <div class="card fieldcontainer p-3">
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
-      
+
                 </div>
 
                 <footer>
@@ -25,16 +25,16 @@
             </div>
         </div>
         <div class="col-4">
-            <div class="card">
+            <div class="card mb-3">
                 <div id="game-history">
-                    <h3>Spielverlauf</h3>
+                    <h3 class="p-2">Spielverlauf</h3>
                     <%- include roomparts/userlist.ejs %>
                 </div>
             </div>
 
             <div class="card">
                 <div id="chat">
-                    <h3>Chat</h3>
+                    <h3 class="p-2">Chat</h3>
                     <%- include roomparts/chatfield.ejs %>
                 </div>
             </div>
@@ -79,6 +79,6 @@
             }
         })
     }
-    
+
     // onunload event could be used to make the user leave without button, but would also cause him to leave on refresh
 </script>

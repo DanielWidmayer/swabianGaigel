@@ -1,29 +1,36 @@
-<div id="chatfield" style="border: 2px solid black; border-radius: 3px; background-color: royalblue; box-sizing: border-box; height: 330px; overflow: auto;">
-    
+<div id="chatfield" class="card">
+
 </div>
-<input type="text" id="fpost" style="width: 90%; height: 20px;"></input><button type="button" id="bpost">></button>
+<div class="input-group chatmsg">
+    <input type="text" id="fpost" class="form-control rounded-0 border-0 bg-light"></input>
+    <div class="input-group-append">
+        <button id="bpost" type="button" class="btn btn-link"> <i class="fa fa-paper-plane">></i></button>
+    </div>
+</div>
+
+
 
 <script>
     const chf = $('#chatfield');
     const fpost = $('#fpost');
     const bpost = $('#bpost');
 
-    io.socket.on('joinmsg', function(data) {
+    io.socket.on('joinmsg', function (data) {
         console.log("joined");
         chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
     })
 
-    io.socket.on('leavemsg', function(data) {
+    io.socket.on('leavemsg', function (data) {
         console.log("left");
         chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
     })
 
-    io.socket.on('controllermsg', function(data) {
+    io.socket.on('controllermsg', function (data) {
         console.log(data.msg);
         chf.append(`<p>${data.msg}</p>`);
     })
 
-    io.socket.on('chatmsg', function(data) {
+    io.socket.on('chatmsg', function (data) {
         console.log(data.text);
         chf.append(`<p>${data.user}: ${data.text}</p>`);
     })
@@ -38,8 +45,8 @@
     function postmsg() {
         if (fpost.val().length > 0) {
             console.log("posting");
-            io.socket.post('/chatpost', {text: fpost.val()}, function(res, jres) {
-                if(jres.statusCode != 200) {
+            io.socket.post('/chatpost', { text: fpost.val() }, function (res, jres) {
+                if (jres.statusCode != 200) {
                     console.log(jres);
                     console.log(res);
                 } else {

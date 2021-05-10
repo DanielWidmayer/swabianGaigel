@@ -1,4 +1,4 @@
-<div style="border: 2px solid black; border-radius: 3px; background-color: saddlebrown; box-sizing: border-box; height: 150px;">
+<div class="card">
     <ul id="userlist">
 
     </ul>
@@ -7,8 +7,8 @@
 <script>
     const ul = $('#userlist');
 
-    io.socket.get('/userlist', function(res, jres) {
-        if(jres.statusCode != 200) {
+    io.socket.get('/userlist', function (res, jres) {
+        if (jres.statusCode != 200) {
             console.log(jres);
         } else {
             ul.empty();
