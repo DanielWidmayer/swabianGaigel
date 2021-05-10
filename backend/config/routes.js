@@ -26,23 +26,13 @@ module.exports.routes = {
     }
   },
 
-  '/list': { 
-    view: 'basic/roomlist',
-    locals: {
-      layout: 'basic_layout'
-    }
-  },
+  '/list': 'UserController.accessList',
+
+  'POST /username': 'UserController.changeName',
 
   '/join/:roomID': 'RoomController.joinUser',
 
   '/leave': 'RoomController.leaveUser',
-
-  'GET /create': { 
-    view: 'basic/create',
-    locals: {
-      layout: 'basic_layout'
-    }
-  },
 
   'POST /create': 'RoomController.newRoom',
 
