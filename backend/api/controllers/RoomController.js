@@ -114,7 +114,7 @@ module.exports = {
 
             // reset user score, hand and room credentials
             await User.replaceCollection(user.id, 'hand').members([]);
-            await User.updateOne({id: user.id}).set({socket: null});
+            await User.updateOne({id: user.id}).set({socket: ''});
 
             // update roomlist
             sails.sockets.blast('listevent', { room: room });
