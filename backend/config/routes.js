@@ -46,7 +46,9 @@ module.exports.routes = {
 
   '/userlist': 'RoomController.userlist',
 
-  '/startGame': 'GameController.startGame'
+  '/startGame': 'GameController.startGame',
+
+  '/playCard': 'GameController.playCard'
 
 
   /***************************************************************************

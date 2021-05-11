@@ -34,11 +34,13 @@ module.exports = {
             if (!userid || !roomid) return res.badRequest(new Error('session failure'));
 
             // get user and room
-            let room = await Room.findOne({id: roomid}).populate('players');
+            //let room = await Room.findOne({id: roomid}).populate('players');
+            let room = await Room.findOne({id: roomid});
             let user = await User.findOne({id: userid});
 
             // check if user in room
-            if (room.players.find(player => player.id == user.id)) {
+            //if (room.players.find(player => player.id == user.id)) {
+            if (room.jsonplayers.find(player => player.playerID == user.id)) {
                 // broadcast message
                 sails.sockets.broadcast(room.hashID, 'chatmsg', {user: user.name, text: req.body.text});
                 return res.ok();

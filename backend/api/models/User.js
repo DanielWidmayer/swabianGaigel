@@ -25,10 +25,6 @@ module.exports = {
 
     socket: {
       type: 'string'
-    },
-
-    hand: {
-      collection: 'card'
     }
     
   },

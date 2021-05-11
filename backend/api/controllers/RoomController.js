@@ -19,13 +19,20 @@ module.exports = {
                 sails.log("hashID already in use, creating new one ...");
                 hash = crypto.randomBytes(10).toString('hex');
             }
-            let room = await Room.create({
+            await Room.create({
                 hashID: hash,
                 name: req.body.roomname,
                 password: req.body.passwd,
-                maxplayers: req.body.maxplayers
+                maxplayers: parseInt(req.body.maxplayers),
+                jsonplayers: []
             });
-            room = await Room.findOne({name: req.body.roomname});
+            let room = { 
+                hashID: hash, 
+                name: req.body.roomname, 
+                password:  req.body.passwd ? true : false,
+                maxplayers: req.body.maxplayers,
+                players: 0
+            };
             sails.sockets.blast('listevent', { room: room });
             //console.log(room);
             return res.redirect(`/join/${hash}`);
@@ -49,13 +56,16 @@ module.exports = {
 
         try {
             let user;
+            let players = [];
             // check if room exists
-            let room = await Room.findOne({hashID: hash}).populate('players');
+            //let room = await Room.findOne({hashID: hash}).populate('players');
+            let room = await Room.findOne({hashID: hash});
             if (!room) {
                 return res.badRequest(new Error('The room you tried to join does not exist!'));
             }
             // check if room is joinable
-            if (room.status == 'game' || room.players.length >= room.maxplayers) {
+            //if (room.status == 'game' || room.players.length >= room.maxplayers) {
+            if (room.status == 'game' || room.jsonplayers.length >= room.maxplayers) {
                 return res.redirect('/list');
             }
     
@@ -67,10 +77,25 @@ module.exports = {
             }
 
             // add user to player list
-            await Room.addToCollection(room.id, 'players').members(user.id);
+            //await Room.addToCollection(room.id, 'players').members(user.id);
+            players = room.jsonplayers;
+            players.push({playerID: user.id, hand: [], score: 0});
+            await Room.updateOne({id: room.id}).set({jsonplayers: players});
+
+            // make user admin if he is the first one to join
+            await Room.updateOne({id: room.id}).set({admin: user.id});
+
             //console.log(await Room.findOne({hashID: req.param('roomID')}).populate('players'));
-            room = await Room.findOne({id: room.id}).populate('players');
-            sails.sockets.blast('listevent', { room: room });
+            //room = await Room.findOne({id: room.id}).populate('players');
+            room = await Room.findOne({id: room.id});
+            let temp_room = { 
+                hashID: room.hashID, 
+                name: room.name, 
+                password:  room.password ? true : false,
+                maxplayers: room.maxplayers,
+                players: room.jsonplayers.length
+            };
+            sails.sockets.blast('listevent', { room: temp_room });
 
             // validate session roomid
             req.session.roomid = room.id;
@@ -90,6 +115,8 @@ module.exports = {
         }
 
         try {
+            let players = [];
+            let front_p = [];
             // check for connected user
             let user = await User.findOne({id: req.session.userid});
             if (!user) return res.badRequest(new Error('User was not connected to any room!'));
@@ -100,8 +127,12 @@ module.exports = {
             let hash = room.hashID;
 
             // remove user from player list of connected room
-            await Room.removeFromCollection(room.id, 'players').members(user.id);
-            room = await Room.findOne({hashID: hash}).populate('players');
+            //await Room.removeFromCollection(room.id, 'players').members(user.id);
+            //room = await Room.findOne({hashID: hash}).populate('players');
+            players = room.jsonplayers;
+            let pin = players.find(el => el.playerID == user.id); 
+            players.splice(pin, 1);
+            await Room.updateOne({id: room.id}).set({jsonplayers: players});
 
             // disconnect from socket room and remove session room variable
             sails.sockets.leave(req, hash);
@@ -109,15 +140,24 @@ module.exports = {
 
             // leave message
             ChatController.leavemsg(user.name, hash);
-            sails.sockets.broadcast(hash, 'userevent', {users: room.players});
+            for (el of players) front_p.push(el.playerID);
+            players = await User.find().where({id: front_p});
+            sails.sockets.broadcast(hash, 'userevent', {users: players});
             console.log(`${user.name} left room ${hash}`);
 
             // reset user score, hand and room credentials
-            await User.replaceCollection(user.id, 'hand').members([]);
+            //await User.replaceCollection(user.id, 'hand').members([]);
             await User.updateOne({id: user.id}).set({socket: ''});
 
             // update roomlist
-            sails.sockets.blast('listevent', { room: room });
+            let temp_room = { 
+                hashID: room.hashID, 
+                name: room.name, 
+                password:  room.password ? true : false,
+                maxplayers: room.maxplayers,
+                players: players.length
+            };
+            sails.sockets.blast('listevent', { room: temp_room });
 
             // return status 200, redirect on client side
             return res.ok();
@@ -132,23 +172,22 @@ module.exports = {
             let userid = req.session.userid;
 
             // check if room exists
-            let room = await Room.findOne({hashID: hash}).populate('players');
+            //let room = await Room.findOne({hashID: hash}).populate('players');
+            let room = await Room.findOne({hashID: hash});
             if (room) {
                 // check if user exists
                 if (userid) {
                     let user = await User.findOne({id: userid});
                     if (user) {
                         // check if user is already connected to room
-                        let pass = false;
-                        room.players.forEach((el) => {
-                            if (el.id == userid) pass = true;
-                        });
-                        if (pass) return res.view('room/gameroom', {layout: 'room_layout', hash: room.hashID});
+                        if (room.jsonplayers.find(el => el.playerID == userid)) {
+                            return res.view('room/gameroom', {layout: 'room_layout', hash: room.hashID});
+                        }
                     }
                 }
 
                 // redirect to join, but only if the game is currently not running and room is not full
-                if (room.status == 'lobby' && room.players.length < room.maxplayers) return res.redirect(`/join/${hash}`);
+                if (room.status == 'lobby' && room.jsonplayers.length < room.maxplayers) return res.redirect(`/join/${hash}`);
                 else return res.redirect('/list');
             } else {
                 return res.badRequest(new Error('This room could not be found.'));
@@ -165,9 +204,15 @@ module.exports = {
         }
 
         try {
-            let room = await Room.findOne({id: req.session.roomid}).populate('players');
+            //let room = await Room.findOne({id: req.session.roomid}).populate('players');
+            let room = await Room.findOne({id: req.session.roomid});
+            let p_ids = [];
+            for (el of room.jsonplayers) {
+                p_ids.push(el.playerID);
+            }
+            let players = await User.find().where({id: p_ids});
             sails.sockets.join(req, room.hashID);
-            sails.sockets.broadcast(room.hashID, 'userevent', {users: room.players});
+            sails.sockets.broadcast(room.hashID, 'userevent', {users: players});
 
             // save socket ID in user obj
             await User.updateOne({id: req.session.userid}).set({socket: sails.sockets.getId(req)});
@@ -188,10 +233,14 @@ module.exports = {
             let roomid = req.session.roomid;
             if (!roomid || !userid) return res.badRequest(new Error('invalid session'));
 
-            let room = await Room.findOne({id: roomid}).populate('players');
+            //let room = await Room.findOne({id: roomid}).populate('players');
+            let room = await Room.findOne({id: roomid});
             if (!room) return res.badRequest(new Error('room does not exist'));
             else {
-                return res.json(room.players);
+                let p_ids = [];
+                for (el of room.jsonplayers) p_ids.push(el.playerID);
+                let players = await User.find().where({id: p_ids});
+                return res.json(players);
             }
         } catch (err) {
             return res.serverError(err);

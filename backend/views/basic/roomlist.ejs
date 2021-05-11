@@ -18,30 +18,31 @@
 <%- include ../list/modal_change_username.ejs %>
 
     <script>
-        const rl = $("#roomlist").children("tbody"); var rooms = []; function getAllRooms() {
-            rooms = []; $.get("/room",
-                function (data, status) {
-                    data.forEach((room) => {
-                        rooms.push(room);
-                        renderRoom(room);
-                    });
+        const rl = $("#roomlist").children("tbody"); 
+        var rooms = []; 
+        
+        function getAllRooms() {
+            rooms = []; 
+            $.get("/room", function (data, status) {
+                data.forEach((room) => {
+                    room.players = room.jsonplayers.length;
+                    rooms.push(room);
+                    renderRoom(room);
                 });
+            });
         }
 
 
         function renderRoom(room) {
             let target = $(`#${room.hashID}`);
-            let players = room.players ? room.players.length : 0;
-            console.log(players);
             if (target.length) {
-                target.children(".rpl").html(`${players}/${room.maxplayers}`);
+                target.children(".rpl").html(`${room.players}/${room.maxplayers}`);
             } else {
                 rl.append(`
-                    <tr id="${room.hashID}"" onclick=" window.location.href='/join/${room.hashID
-                    }' ;">
+                    <tr id="${room.hashID}" onclick=" window.location.href='/join/${room.hashID}';">
                         <td class="rname">${room.name}</td>
                         <td class="rpw">${room.password ? "yes" : "no"}</td>
-                        <td class="rpl">${players}/${room.maxplayers}</td>
+                        <td class="rpl">${room.players}/${room.maxplayers}</td>
                     </tr>`);
             }
         }
