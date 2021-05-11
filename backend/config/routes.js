@@ -34,12 +34,7 @@ module.exports.routes = {
 
   '/leave': 'RoomController.leaveUser',
 
-  'GET /create': {
-    view: 'basic/create',
-    locals: {
-      layout: 'basic_layout'
-    }
-  },
+  'GET /create': 'RoomController.createPage',
 
   'POST /create': 'RoomController.newRoom',
 

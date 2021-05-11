@@ -36,7 +36,7 @@ module.exports = {
 
             // update User
             await User.updateOne({id: req.session.userid}).set({name: uname});
-            req.cookies.username = uname;
+            res.cookie('username', uname);
         
             return res.redirect('/list');
         } catch (err) {

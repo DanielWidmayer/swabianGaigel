@@ -34,6 +34,16 @@ module.exports = {
         }
     },
 
+    createPage: async (req, res) => {
+        try {
+            let user = await User.findOne({id: req.session.userid});
+            if (!user) throw("Authentication Error!");
+            return res.view('basic/create', {layout: 'basic_layout', username: user.name, userhash: user.hashID});
+        } catch (err) {
+            return res.serverError(err);
+        }
+    },
+
     joinUser: async (req, res) => {
         let hash = req.param('roomID');
 
