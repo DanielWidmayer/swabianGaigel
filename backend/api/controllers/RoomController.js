@@ -69,6 +69,8 @@ module.exports = {
             // add user to player list
             await Room.addToCollection(room.id, 'players').members(user.id);
             //console.log(await Room.findOne({hashID: req.param('roomID')}).populate('players'));
+            room = await Room.findOne({id: room.id}).populate('players');
+            sails.sockets.blast('listevent', { room: room });
 
             // validate session roomid
             req.session.roomid = room.id;

@@ -23,11 +23,14 @@ module.exports = {
 
                 // create carddeck and choose trump
                 let carddeck = await Card.find();
-                carddeck = Room.shuffleDeck(carddeck);
-                carddeck.forEach(async (el) => {
-                    await Room.addToCollection(room.id, 'deck').members(el.id);
-                })
-                let trump_card = await Card.getRandomCard(carddeck);
+                let cards = [];
+    
+                carddeck.forEach((el) => {
+                    cards.push(el.id);
+                });
+                await Room.addToCollection(room.id, 'deck', cards);
+
+                let trump_card = Card.getRandomCard(carddeck);
                 await Room.removeFromCollection(room.id, 'deck').members(trump_card.id);
                 await Room.updateOne({id: room.id}).set({trump: trump_card.id});
 
@@ -35,6 +38,7 @@ module.exports = {
                 room.players.forEach(async (el) => {
                     await Card.dealCard(5, el.id, room.id);
                     let p_temp = await User.findOne({id: el.id}).populate('hand');
+                    sails.log(p_temp);
                     // socket start event
                     sails.sockets.broadcast(el.socket, 'start', {hand: p_temp.hand, trump: trump_card});
                 })

@@ -51,15 +51,17 @@ module.exports = {
     let cards = [];
     let carddeck = await Room.findOne({id: roomID}).populate('deck');
     carddeck = carddeck.deck;
+    
     for (x = 0; x < ammount; x++) {
-        cards.push(carddeck.pop().id);
+        cards.push(sails.models.card.getRandomCard(carddeck).id);
     }
+    sails.log(cards);
     await User.addToCollection(userID, 'hand', cards);
     await Room.removeFromCollection(roomID, 'deck', cards);
     return 1;
   },
 
-  getRandomCard: async (carddeck) => {
+  getRandomCard: (carddeck) => {
     return carddeck[Math.floor(Math.random() * carddeck.length)];
   }
 

@@ -42,8 +42,7 @@ $(document).ready(function() {
 
 //Let's deal when the game has been started
 io.socket.on('start', function (data) {
-    console.log(data.hand);
-    console.log(data.trump);
+    
     deck.deal(5, [upperhand, lowerhand], 50, function () {
         //This is a callback function, called when the dealing
         //is done.
