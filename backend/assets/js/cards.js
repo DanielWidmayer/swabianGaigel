@@ -23,7 +23,7 @@ var cards = (function () {
   var end = start + 12;
 
   function mouseEvent(ev) {
-    var card = $(this).data("card");
+    var card = $(this).data("gamecard");
     if (card.container) {
       var handler = card.container._click;
       if (handler) {
@@ -46,15 +46,15 @@ var cards = (function () {
         start = opt.acesHigh ? 2 : 1;
         end = start + 12;
         break;
-      case EUCHRE:
-        start = 9;
-        end = start + 5;
+      case PROTO:
+        start = 0;
+        end = 15;
         break;
       case PINOCHLE:
-        all.push(new Card("h", 7, opt.table));
-        all.push(new Card("s", 7, opt.table));
-        all.push(new Card("d", 7, opt.table));
-        all.push(new Card("c", 7, opt.table));
+        all.push(new Card(0, 7, opt.table));
+        all.push(new Card(1, 7, opt.table));
+        all.push(new Card(2, 7, opt.table));
+        all.push(new Card(3, 7, opt.table));
         start = 10;
         end = start + 4;
         opt.loop = 2;
@@ -67,10 +67,9 @@ var cards = (function () {
     }
     for (let l = 0; l < opt.loop; l++)
       for (var i = start; i <= end; i++) {
-        all.push(new Card("h", i, opt.table));
-        all.push(new Card("s", i, opt.table));
-        all.push(new Card("d", i, opt.table));
-        all.push(new Card("c", i, opt.table));
+        for (let j = 0; j < 4; j++) {
+          all.push(new Card(j, i, opt.table));          
+        }
       }
     if (opt.blackJoker) {
       all.push(new Card("bj", 0, opt.table));
@@ -79,7 +78,7 @@ var cards = (function () {
       all.push(new Card("rj", 0, opt.table));
     }
 
-    $(".card").click(mouseEvent);
+    $(".gamecard").click(mouseEvent);
     //shuffle(all);
   }
 
@@ -102,13 +101,8 @@ var cards = (function () {
 
   Card.prototype = {
     init: function (suit, rank, table) {
-      if (rank == 7) this.shortName = suit + "0" + rank;
-      else if (rank == 10) this.shortName = suit + "14";
-      else if (rank == 14) this.shortName = suit + rank + 1;
-      else this.shortName = suit + rank;
       this.suit = suit;
       this.rank = rank;
-      this.name = suit.toUpperCase() + rank;
       this.faceUp = false;
       this.el = $("<div/>")
         .css({
@@ -118,8 +112,8 @@ var cards = (function () {
           position: "absolute",
           cursor: "pointer",
         })
-        .addClass("card")
-        .data("card", this)
+        .addClass("gamecard")
+        .data("gamecard", this)
         .appendTo($(table));
       // define card values for gaigel
       switch (rank) {
@@ -150,9 +144,9 @@ var cards = (function () {
       this.moveToBack();
     },
 
-    toString: function () {
-      return this.name;
-    },
+    // toString: function () {
+    //   return this.name;
+    // },
 
     moveTo: function (x, y, speed, callback) {
       var props = {
@@ -186,7 +180,7 @@ var cards = (function () {
         rank = 1; //Aces high must work as well.
       }
       xpos = -rank * opt.cardSize.width;
-      ypos = -offsets[this.suit] * opt.cardSize.height;
+      ypos = -this.suit * opt.cardSize.height;
       //this.rotate(0);
       $(this.el).css("background-position", xpos + "px " + ypos + "px");
     },
@@ -324,6 +318,16 @@ var cards = (function () {
       return this[0];
     },
 
+    findCard: function (value, suit) {
+      for (let i = 0; i < this.length; i++) {
+        let card = this[i];
+        if(value == card.value && suit == card.suit){
+          return card;
+        }
+      }
+      return null;
+    },
+
     toString: function () {
       return "Container";
     },
@@ -397,10 +401,10 @@ var cards = (function () {
       return this[Math.floor(Math.random() * this.length)];
     },
 
-    sortHand: function () {
+    sortHand: function () { // TODO: rework
       return this.sort((a, b) => {
-        if (a.shortName < b.shortName) return -1;
-        if (a.shortName > b.shortName) return 1;
+        if (a.value < b.value) return -1;
+        if (a.value > b.value) return 1;
         return 0;
       });
     },
