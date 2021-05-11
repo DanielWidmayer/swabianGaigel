@@ -8,10 +8,10 @@
 
 /* Legende:
   Symbol:
-    [0] - Pik / Blatt
+    [0] - Kreuz / Eichel
     [1] - Karo / Schellen
     [2] - Herz / Herz
-    [3] - Kreuz / Eichel
+    [3] - Pik / Blatt
   Value:
     [0]  - 7
     [2]  - Bube / J
