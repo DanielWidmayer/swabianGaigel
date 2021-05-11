@@ -38,7 +38,6 @@ module.exports = {
                 room.players.forEach(async (el) => {
                     await Card.dealCard(5, el.id, room.id);
                     let p_temp = await User.findOne({id: el.id}).populate('hand');
-                    sails.log(p_temp);
                     // socket start event
                     sails.sockets.broadcast(el.socket, 'start', {hand: p_temp.hand, trump: trump_card});
                 })

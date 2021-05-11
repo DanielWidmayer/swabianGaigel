@@ -5,6 +5,8 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+const { uniqueNamesGenerator, adjectives, names, animals } = require('unique-names-generator');
+
 
 module.exports = {
 
@@ -42,9 +44,15 @@ module.exports = {
     // check for username cookie
     if (c_username) name = c_username
     else {
-      name = "User";
-      res.cookie('username', name);
+      name = uniqueNamesGenerator({
+        dictionaries: [adjectives, animals, names],
+        separator: '',
+        length: 2,
+        style: 'capital'
+      });
     }
+
+    res.cookie('username', name);
 
     // create User
     await User.create({

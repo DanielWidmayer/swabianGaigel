@@ -55,7 +55,7 @@ module.exports = {
     for (x = 0; x < ammount; x++) {
         cards.push(sails.models.card.getRandomCard(carddeck).id);
     }
-    sails.log(cards);
+
     await User.addToCollection(userID, 'hand', cards);
     await Room.removeFromCollection(roomID, 'deck', cards);
     return 1;
