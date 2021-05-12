@@ -33,7 +33,6 @@ module.exports = {
 
                 let trump_card = Card.getRandomCard(carddeck);
                 await Room.removeFromCollection(room.id, 'deck').members(trump_card.id);
-                await Room.updateOne({id: room.id}).set({trump: trump_card.id});
 
                 /* create order-object
                 let order = [];
@@ -56,6 +55,7 @@ module.exports = {
                     players[i] = players[j];
                     players[j] = m;
                 }
+                await Room.updateOne({id: room.id}).set({trump: trump_card.id, jsonplayers: players});
 
                 // deal cards to players, start game
                 /*for (el of room.players) {
@@ -64,15 +64,17 @@ module.exports = {
                     // socket start event
                     sails.sockets.broadcast(el.socket, 'start', {hand: p_temp.hand, trump: trump_card, order: order, active: room.activePlayer});
                 }*/
-                for (el of room.jsonplayers) {
+                for (el of players) {
+                    sails.log("deal 5 cards to player " + el.playerID);
                     let hand = await Card.dealCard(5, el.playerID, room.id);
-                    sails.log(hand);
                     let pl = await User.findOne({id: el.playerID});
-                    sails.sockets.broadcast(pl.socket, 'start', {hand: hand, trump: trump_card, active: 0});
+                    sails.sockets.broadcast(pl.socket, 'start', {hand: hand, trump: trump_card});
                 }
                 
                 // broadcast turn event
-                //sails.sockets.broadcast(room.hashID, 'turn', {uNAME: order[0].uNAME, uHASH: order[0].uHASH});
+                let user = await User.findOne({id: players[0].playerID});
+                sails.log("its " + user.name + " turn");
+                sails.sockets.broadcast(room.hashID, 'turn', { user: user });
 
                 return res.ok();
             } catch (err) {
@@ -87,14 +89,15 @@ module.exports = {
         }
 
         try {
-            let room, user, card, players_c;
-            let pass = false;
+            let room, user, card, c_index, acPl;
 
+            sails.log("sanity checking ...");
             // check if room exists
             //if (req.session.roomid) room = await Room.findOne({id: req.session.roomid}).populate('players');
             if (req.session.roomid) room = await Room.findOne({id: req.session.roomid});
             else throw(new Error('Authentication Error!'));
             if (!room) throw(new Error('This room could not be found.'));
+            acPl = room.activePlayer;
 
             // check if user exists
             //if (req.session.userid) user = await User.findOne({id: req.session.userid}).populate('hand');
@@ -111,31 +114,82 @@ module.exports = {
             if (!room.jsonplayers.find(el => el.playerID == userid)) throw(new Error('User is not in this room.'));
 
             // check if user is active player
-            if (user.hashID != room.order[room.activePlayer].uHASH) throw(new Error('This is not your turn, cheater!'));
+            //if (user.hashID != room.order[room.activePlayer].uHASH) throw(new Error('This is not your turn, cheater!'));
+            if (jsonplayers[acPl].playerID != user.id) throw(new Error('This is not your turn, cheater!'));
 
             // check if user owns card
             card = req.body.card;
-            user.hand.forEach((el) => {
-                if (el.id == card.id) pass = true;
-            });
-            if (!pass) throw(new Error('You do not own this card, cheater!'));
-            pass = false;
+            c_index = jsonplayers[acPl].hand.findIndex(el => el == card.id);
+            if (c_index < 0) throw(new Error('You do not own this card, cheater!'));
+
+            sails.log("all good!");
 
             // add card to stack and remove from hand
-            await Room.addToCollection(room.id, 'stack').members(card.id);
-            await User.removeFromCollection(user.id, 'hand').members(card.id);
-
-            // check for full stack
-            players_c = room.players.length;
-            room = await Room.findOne({id: room.id}).populate('stack');
-            if (room.stack.length >= players_c) {
-                // eval win
-            }
-
-
+            let temp_stack = room.stack;
+            let temp_players = room.jsonplayers;
+            temp_players[acPl].hand.splice(c_index, 1);
+            temp_stack.push({playerID: user.id, card: card});
 
             // socket event cardplayed
-            sails.sockets.broadcast(room.hashID, 'cardplayed', { data: pass }, req);
+            sails.log("cardplayed event triggered");
+            sails.sockets.broadcast(room.hashID, 'cardplayed', { user: user.id, card: card }, req);
+
+            // check for full stack
+            if (temp_stack.length >= temp_players.length) {
+                // eval win and deal
+                sails.log("Full stack, trigger roundwin event");
+                let winner = this.evalStack(temp_stack, room.trump.symbol);
+
+                if (temp_players.length <= 3) {
+                    temp_players[winner].score += 1;
+                    user = await User.findOne({id: temp_players[winner].playerID});
+                    user.score = temp_players[winner].score;
+                    sails.sockets.broadcast(room.hashID, 'solowin', { user: user });
+                    acPl = winner;
+                }
+                else {
+                    let p_win = [];
+                    if (winner == 0 || winner == 2) p_win = [0,2];          
+                    else p_win = [1,3];
+                    
+                    for (el of p_win) {
+                        temp_players[el].score += 1;
+                    }
+
+                    user = await User.find().where({id: [temp_players[p_win[0]].playerID, temp_players[p_win[0]].playerID]});
+                    user[0].score = temp_players[p_win[0]].score;
+                    user[1].score = user[0].score;
+                    sails.sockets.broadcast(room.hashID, 'teamwin', { users: user });
+
+                    if (p_win[0] == acPl) acPl = p_win[1];
+                    else acPl = p_win[0];
+                }    
+
+                for (el of temp_players) {
+                    user = await User.findOne({id: el.playerID});
+                    let card = await Card.dealCard(1, el.playerID, room.id);
+                    if (card) {
+                        sails.log("deal card to " + user.name);
+                        sails.sockets.broadcast(user.socket, 'dealcard', { card: card });
+                    } else {
+                        sails.log("cannot deal card to " + user.name + ". Empty Deck!");
+                    }
+                    
+                }
+            } else {
+                // next player turn
+                if (acPl < room.jsonplayers.length - 1) acPl += 1;
+                else acPl = 0;
+            }
+
+            // update activePlayer and broadcast next turn
+            user = await User.findOne({id: temp_players[acPl].playerID});
+            sails.log("next player: " + user.name);
+            sails.sockets.broadcast(room.hashID, 'turn', { user: user });
+
+            // save changes
+            sails.log("save changes!");
+            await Room.updateOne({id: room.id}).set({jsonplayers: temp_players, stack: temp_stack, activePlayer: acPl});
 
             return res.ok();
         } catch (err) {
@@ -147,6 +201,30 @@ module.exports = {
 
     },
 
+    evalStack: (stack, trump) => {
+        let occ = [];
+        let v_h = -1;
+        let i_t = 0;
+
+        // get occurrences of trump symbol
+        for (i = 0; i < stack.length; i++) {
+            if (stack[i].card.symbol == trump) occ.push(i);
+        }
+
+        // all trump symbol or no trump symbol
+        if (occ.length == stack.length || occ.length == 0) {
+            for (i = 0; i < stack.length; i++) {
+                if (stack[i].card.value > v_h) { i_t = i; v_h = stack[i].card.value }
+            }
+            return i_t;
+        }
+        else {
+            for (el of occ) {
+                if (stack[el].card.value > v_h) { i_t = el; v_h = stack[el].card.value }
+            }
+            return i_t;
+        }
+    }
 
 };
 

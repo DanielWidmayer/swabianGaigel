@@ -73,7 +73,7 @@ module.exports = {
 
     /*
       stack: [
-        { playerID: Integer, card: Card.id }
+        { playerID: Integer, card: Card }
       ]
     */
     stack: {
