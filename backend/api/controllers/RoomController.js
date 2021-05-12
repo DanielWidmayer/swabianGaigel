@@ -141,7 +141,7 @@ module.exports = {
             // leave message
             ChatController.leavemsg(user.name, hash);
             for (el of players) front_p.push(el.playerID);
-            players = await User.find().where({id: front_p});
+            players = await User.getNameAndHash(front_p);
             sails.sockets.broadcast(hash, 'userevent', {users: players});
             console.log(`${user.name} left room ${hash}`);
 
@@ -210,7 +210,7 @@ module.exports = {
             for (el of room.jsonplayers) {
                 p_ids.push(el.playerID);
             }
-            let players = await User.find().where({id: p_ids});
+            let players = await User.getNameAndHash(p_ids);
             sails.sockets.join(req, room.hashID);
             sails.sockets.broadcast(room.hashID, 'userevent', {users: players});
 
@@ -239,7 +239,7 @@ module.exports = {
             else {
                 let p_ids = [];
                 for (el of room.jsonplayers) p_ids.push(el.playerID);
-                let players = await User.find().where({id: p_ids});
+                let players = await User.getNameAndHash(p_ids);
                 return res.json(players);
             }
         } catch (err) {

@@ -19,7 +19,8 @@ module.exports = {
                 let room = await Room.findOne({id: req.session.roomid});
                 if (!room) return res.badRequest(new Error('This room could not be found.'));
                 
-                // update room status
+                // update room status, reject if already ingame
+                if (room.status == 'game') throw (new Error('Game is already running!'));
                 await Room.updateOne({id: room.id}).set({status: 'game'});
 
                 // create carddeck and choose trump
