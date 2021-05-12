@@ -49,16 +49,22 @@ module.exports = {
   dealCard: async (ammount, userID, roomID) => {
     // TO DO - perform some sanity checks like if room and user exist, max and min ammount of cards
     let cards = [];
-    let carddeck = await Room.findOne({id: roomID}).populate('deck');
-    carddeck = carddeck.deck;
-    
+
+    let room = await Room.findOne({id: roomID}).populate('deck');
+    let carddeck = room.deck;
+
     for (x = 0; x < ammount; x++) {
         cards.push(sails.models.card.getRandomCard(carddeck).id);
     }
 
-    await User.addToCollection(userID, 'hand', cards);
     await Room.removeFromCollection(roomID, 'deck', cards);
-    return 1;
+
+    let players = room.jsonplayers;
+    let p_index = players.findIndex(el => el.playerID == userID);
+    players[p_index].hand = cards;
+    await Room.updateOne({id: roomID}).set({jsonplayers: players});
+
+    return await Card.find().where({id: cards});
   },
 
   getRandomCard: (carddeck) => {

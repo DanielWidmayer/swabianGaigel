@@ -6,6 +6,7 @@
  */
 
 
+
 module.exports = {
 
   attributes: {
@@ -36,12 +37,30 @@ module.exports = {
       defaultsTo: 4
     },
 
+    admin: {
+      model: 'user'
+    },
+
     players: {
       collection: 'user'
     },
 
-    scores: {
+    /*
+      jsonplayers: [
+        { 
+          playerID: User.id ,
+          hand: [ Card.id ],
+          score: Integer
+        }
+      ]
+    */
+    jsonplayers: {
       type: 'json'
+    },
+
+    activePlayer: {
+      type: 'number',
+      defaultsTo: 0
     },
 
     deck: {
@@ -50,6 +69,15 @@ module.exports = {
 
     trump: {
       model: 'card'
+    },
+
+    /*
+      stack: [
+        { playerID: Integer, card: Card.id }
+      ]
+    */
+    stack: {
+      type: 'json'
     }
 
   }

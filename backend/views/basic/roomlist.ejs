@@ -18,14 +18,18 @@
 <%- include ../list/modal_change_username.ejs %>
 
     <script>
-        const rl = $("#roomlist").children("tbody"); var rooms = []; function getAllRooms() {
-            rooms = []; $.get("/room",
-                function (data, status) {
-                    data.forEach((room) => {
-                        rooms.push(room);
-                        renderRoom(room);
-                    });
+        const rl = $("#roomlist").children("tbody");
+        var rooms = [];
+
+        function getAllRooms() {
+            rooms = [];
+            $.get("/room", function (data, status) {
+                data.forEach((room) => {
+                    room.players = room.jsonplayers.length;
+                    rooms.push(room);
+                    renderRoom(room);
                 });
+            });
         }
 
 
@@ -44,8 +48,7 @@
             } else {
 
                 rl.append(`
-                    <tr id="${room.hashID}"" onclick=" window.location.href='/join/${room.hashID
-                    }' ;">
+                    <tr id="${room.hashID}" onclick=" window.location.href='/join/${room.hashID}';">
                         <td class="rname">${room.name}</td>
                         <td class="rpl">` + playerIcons + `</td>
                         <td class="rpw">${room.password ? "<i class='bi bi-x-square-fill'></i>" : "<i class='bi bi-check-square-fill'></i>"}</td>
