@@ -9,7 +9,7 @@
         <div class="col-4">
             <% include ../list/user.ejs %>
                 <div class="card card-transparent mt-3 p-3">
-                    <a type="button" class="btn btn-primary m-2" href="/create">Create new Room</a>
+                    <a type="button" class="btn btn-primary m-2" href="/create"><i class="bi bi-plus-lg text-white"></i>Create new Room</a>
                 </div>
         </div>
     </div>
@@ -32,16 +32,23 @@
         function renderRoom(room) {
             let target = $(`#${room.hashID}`);
             let players = room.players ? room.players.length : 0;
-            console.log(players);
+            let playerIcons = '';
+            for (let i = 0; i < players; i++) {
+                playerIcons += '<i class="bi bi-person-fill"></i>';
+            }
+            for (let i = 0; i < room.maxplayers - players; i++) {
+                playerIcons += '<i class="bi bi-person"></i>';
+            }
             if (target.length) {
-                target.children(".rpl").html(`${players}/${room.maxplayers}`);
+                target.children(".rpl").html(playerIcons);
             } else {
+
                 rl.append(`
                     <tr id="${room.hashID}"" onclick=" window.location.href='/join/${room.hashID
                     }' ;">
                         <td class="rname">${room.name}</td>
-                        <td class="rpw">${room.password ? "yes" : "no"}</td>
-                        <td class="rpl">${players}/${room.maxplayers}</td>
+                        <td class="rpl">` + playerIcons + `</td>
+                        <td class="rpw">${room.password ? "<i class='bi bi-x-square-fill'></i>" : "<i class='bi bi-check-square-fill'></i>"}</td>
                     </tr>`);
             }
         }

@@ -2,9 +2,9 @@
 
 </div>
 <div class="input-group chatmsg">
-    <input type="text" id="fpost" class="form-control rounded-0 border-0 bg-light"></input>
+    <input type="text" id="fpost" class="form-control bg-light"></input>
     <div class="input-group-append">
-        <button id="bpost" type="button" class="btn btn-link"> <i class="fa fa-paper-plane">></i></button>
+        <button id="bpost" type="button" class="btn btn-primary"><i class="bi bi-arrow-left"></i></button>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
 
     io.socket.on('chatmsg', function (data) {
         console.log(data.text);
-        chf.append(`<p>${data.user}: ${data.text}</p>`);
+        chf.append(`<p class="mb-0">${data.user}: ${data.text}</p>`);
     })
 
     bpost.click(postmsg);
@@ -52,7 +52,8 @@
                 } else {
                     console.log(res);
                 }
-            })
+                fpost.val('');
+            });
         }
     }
 
