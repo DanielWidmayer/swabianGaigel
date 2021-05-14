@@ -13,17 +13,25 @@
         } else {
             ul.empty();
             console.log(res);
-            res.forEach(user => {
-                ul.append(`<li>${user.name}</li>`);
-            })
+            if (Array.isArray(res)) {
+                res.forEach(user => {
+                    ul.append(`<li>${user.name}</li>`);
+                });
+            } else {
+                ul.append(`<li>${res.name}</li>`);
+            }
         }
     })
 
     io.socket.on('userevent', function (data) {
         ul.empty();
-        data.users.forEach(user => {
-            ul.append(`<li>${user.name}</li>`);
-        })
+        console.log(data);
+        if (Array.isArray(data.users)) {
+            data.users.forEach(user => {
+                ul.append(`<li>${user.name}</li>`);
+            })
+        } else ul.append(`<li>${data.users.name}</li>`);
+
     })
 
 </script>

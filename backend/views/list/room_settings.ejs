@@ -2,55 +2,82 @@
 <hr class="mt-0">
 <div class="m-3">
     <form method="POST" id="createRoomForm" action="/create">
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">Room Name</span>
+        <div class="card card-light-transparent mb-3">
+            <div class="input-group m-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Room Name</span>
+                </div>
+                <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="basic-addon1">
             </div>
-            <input type="text" name="roomname" class="form-control" placeholder="Room Name" required aria-label="Room Name" aria-describedby="basic-addon1">
         </div>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <label class="input-group-text" for="playerSelect">Players</label>
+        <div class="row">
+            <div class="col">
+                <div class="card card-light-transparent mb-3">
+                    <div class="input-group m-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="playerSelect">Players</label>
+                        </div>
+                        <select class="custom-select" name="maxplayers" id="playerSelect">
+                            <option selected>Choose...</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                            <option value="4">Four</option>
+                            <option value="6">Six</option>
+                        </select>
+                    </div>
+
+                </div>
             </div>
-            <select class="custom-select" name="maxplayers" id="playerSelect">
-                <option selected>Choose...</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-                <option value="4">Four</option>
-                <option value="6">Six</option>
-            </select>
+            <div class="col">
+                <div class="card card-light-transparent mb-3">
+                    <div class="form-check m-2">
+                        Game Mode:
+                        <div id="carouselGamevariants" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner mb-1">
+                                <div class="carousel-item active">
+                                    Classic
+                                </div>
+                                <div class="carousel-item">
+                                    Allow Variations
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">Password (optional)</span>
+        <div class="card card-light-transparent mb-3">
+            <div class="form-check m-3">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                <label class="form-check-label" style="float: left;" for="flexCheckDefault">
+                    Private Game
+                </label>
             </div>
-            <input type="password" class="form-control" name="passwd" placeholder="password" aria-label="Room Name" aria-describedby="basic-addon1">
+
+            <div class="input-group m-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Password</span>
+                </div>
+                <input type="password" class="input-transparent" name="passwd" placeholder="password" aria-label="Room Name" aria-describedby="basic-addon1">
+            </div>
         </div>
         <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create Room</button>
     </form>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-        <label class="form-check-label" for="flexCheckDefault">
-            Private Game
-        </label>
-        <p>Game Mode:</p>
-        <div id="carouselGamevariants" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    Classic
-                </div>
-                <div class="carousel-item">
-                    Allow Variations
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-        </div>
-    </div>
+
 </div>
+
+<script type="module">
+    $(document).ready(function () {
+        let name = "Room#" + Math.round(Math.random() * 10000) + " of Gaigel";
+        $('#roomName').val(name);
+    });
+
+</script>

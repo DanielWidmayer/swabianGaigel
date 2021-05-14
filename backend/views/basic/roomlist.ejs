@@ -40,7 +40,7 @@
             for (let i = 0; i < room.players; i++) {
                 playerIcons += '<i class="bi bi-person-fill"></i>';
             }
-            for (let i = 0; i < room.maxplayers - players; i++) {
+            for (let i = 0; i < room.maxplayers - room.players; i++) {
                 playerIcons += '<i class="bi bi-person"></i>';
             }
             if (target.length) {

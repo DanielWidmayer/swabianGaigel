@@ -5,6 +5,29 @@ body {
     background-color: rgba(0, 0, 0, 0.5)!important;
 }
 
+.card-light-transparent{
+    background-color: rgba(255, 255, 255, 0.281)!important;
+}
+
+.input-transparent
+{
+    background: transparent!important;
+    border: none!important;
+    color: white!important;
+    flex: 1 1 auto;
+    padding: .375rem .75rem;
+}
+
+.input-transparent:focus
+{
+    outline: none!important;
+}
+
+/* .input-transparent:
+{
+    outline: none!important;
+} */
+
 .table{
     color: #fff!important; 
 }
