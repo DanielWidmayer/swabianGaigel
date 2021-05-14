@@ -80,5 +80,16 @@
         })
     }
 
-    // onunload event could be used to make the user leave without button, but would also cause him to leave on refresh
+    window.onbeforeunload = userUnloaded;
+
+    function userUnloaded() {
+        io.socket.post('/userUnload', function (res, jres) {
+            if (jres.statusCode != 200) {
+                console.log(res);
+            } else {
+                console.log("User Unloaded");
+            }
+        });
+    }
+
 </script>

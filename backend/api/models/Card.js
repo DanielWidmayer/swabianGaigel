@@ -5,6 +5,7 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+const crypto = require("crypto");
 
 /* Legende:
   Symbol:
@@ -21,61 +22,63 @@
     [11] - Ass
 */
 
-primaryKey: 'id';
+primaryKey: "id";
 
 module.exports = {
+    attributes: {
+        id: {
+            type: "number",
+            autoIncrement: false,
+            unique: true,
+            required: true,
+        },
 
-  attributes: {
+        value: {
+            type: "number",
+            required: true,
+        },
 
-    id: {
-      type: 'number',
-      autoIncrement: false,
-      unique: true,
-      required: true
-    }, 
-
-    value: {
-      type: 'number',
-      required: true
+        symbol: {
+            type: "number",
+            required: true,
+        },
     },
 
-    symbol: {
-      type: 'number',
-      required: true
-    }
+    dealCard: async (ammount, userID, roomID) => {
+        // TO DO - perform some sanity checks like if room and user exist, max and min ammount of cards
+        let cards = [];
 
-  },
+        let room = await Room.findOne({ id: roomID }).populate("deck");
+        let carddeck = room.deck;
 
-  dealCard: async (ammount, userID, roomID) => {
-    // TO DO - perform some sanity checks like if room and user exist, max and min ammount of cards
-    let cards = [];
+        let c_temp;
+        for (x = 0; x < ammount; x++) {
+            c_temp = sails.models.card.getRandomCard(carddeck);
+            if (c_temp) {
+                cards.push(c_temp.id);
+                carddeck.splice(
+                    carddeck.findIndex((el) => el.id == c_temp.id),
+                    1
+                );
+            } else break;
+        }
 
-    let room = await Room.findOne({id: roomID}).populate('deck');
-    let carddeck = room.deck;
+        await Room.removeFromCollection(roomID, "deck", cards);
 
-    let c_temp;
-    for (x = 0; x < ammount; x++) {
-        c_temp = sails.models.card.getRandomCard(carddeck);
-        if (c_temp) {
-          cards.push(c_temp.id);
-          carddeck.splice(carddeck.findIndex(el => el.id == c_temp.id), 1);
-        } else break;
-    }
+        let players = room.jsonplayers;
+        let p_index = players.findIndex((el) => el.playerID == userID);
+        players[p_index].hand = players[p_index].hand.concat(cards);
+        await Room.updateOne({ id: roomID }).set({ jsonplayers: players });
 
-    await Room.removeFromCollection(roomID, 'deck', cards);
+        sails.log("deal " + cards + " to " + players[p_index].playerID);
 
-    let players = room.jsonplayers;
-    let p_index = players.findIndex(el => el.playerID == userID);
-    players[p_index].hand = cards;
-    await Room.updateOne({id: roomID}).set({jsonplayers: players});
+        return await Card.find().where({ id: cards });
+    },
 
-    return await Card.find().where({id: cards});
-  },
-
-  getRandomCard: (carddeck) => {
-    if (carddeck.length > 0) return carddeck[Math.floor(Math.random() * carddeck.length)];
-    else return null;
-  }
-
+    getRandomCard: (carddeck) => {
+        let rand = crypto.randomBytes(5);
+        rand = Math.abs(rand.readInt16LE());
+        if (carddeck.length > 0) return carddeck[rand % carddeck.length];
+        else return null;
+    },
 };
-

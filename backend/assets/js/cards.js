@@ -51,6 +51,10 @@ var cards = (function () {
                 all.push(new Card(1, 7, opt.table));
                 all.push(new Card(2, 7, opt.table));
                 all.push(new Card(3, 7, opt.table));
+                all.push(new Card(0, 7, opt.table));
+                all.push(new Card(1, 7, opt.table));
+                all.push(new Card(2, 7, opt.table));
+                all.push(new Card(3, 7, opt.table));
                 start = 10;
                 end = start + 4;
                 opt.loop = 2;
@@ -100,6 +104,7 @@ var cards = (function () {
             this.suit = suit;
             this.rank = rank;
             this.faceUp = false;
+            this.id = 0;
             this.el = $("<div/>")
                 .css({
                     width: opt.cardSize.width,
@@ -205,13 +210,14 @@ var cards = (function () {
         }
     };
     Container.prototype.extend({
-        addCard: function (card) {
-            this.addCards([card]);
+        addCard: function (card, id) {
+            this.addCards([card], id);
         },
 
-        addCards: function (cards) {
+        addCards: function (cards, id) {
             for (var i = 0; i < cards.length; i++) {
                 var card = cards[i];
+                card.id = id;
                 if (card.container) {
                     card.container.removeCard(card);
                 }
@@ -315,6 +321,7 @@ var cards = (function () {
             for (let i = 0; i < this.length; i++) {
                 let card = this[i];
                 if (value == card.value && suit == card.suit) {
+                    console.log(card);
                     return card;
                 }
             }
@@ -397,8 +404,10 @@ var cards = (function () {
         sortHand: function () {
             // TODO: rework
             return this.sort((a, b) => {
-                if (a.value < b.value) return -1;
-                if (a.value > b.value) return 1;
+                let a_rank = a.value + a.suit * 12;
+                let b_rank = b.value + b.suit * 12;
+                if (a_rank < b_rank) return -1;
+                if (a_rank > b_rank) return 1;
                 return 0;
             });
         },
