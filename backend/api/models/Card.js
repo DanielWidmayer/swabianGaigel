@@ -53,8 +53,13 @@ module.exports = {
     let room = await Room.findOne({id: roomID}).populate('deck');
     let carddeck = room.deck;
 
+    let c_temp;
     for (x = 0; x < ammount; x++) {
-        cards.push(sails.models.card.getRandomCard(carddeck).id);
+        c_temp = sails.models.card.getRandomCard(carddeck);
+        if (c_temp) {
+          cards.push(c_temp.id);
+          carddeck.splice(carddeck.findIndex(el => el.id == c_temp.id), 1);
+        } else break;
     }
 
     await Room.removeFromCollection(roomID, 'deck', cards);
@@ -68,7 +73,8 @@ module.exports = {
   },
 
   getRandomCard: (carddeck) => {
-    return carddeck[Math.floor(Math.random() * carddeck.length)];
+    if (carddeck.length > 0) return carddeck[Math.floor(Math.random() * carddeck.length)];
+    else return null;
   }
 
 };

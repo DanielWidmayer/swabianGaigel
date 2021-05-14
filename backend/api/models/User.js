@@ -59,6 +59,18 @@ module.exports = {
     let user = await User.findOne({hashID: hash});
 
     return user;
+  },
+
+  getNameAndHash: async (pids) => {
+    let players = await User.find().where({id: pids});
+    let res = [];
+    
+    for (el of players) {
+      res.push({hashID: el.hashID, name: el.name});
+    }
+
+    return res;
   }
+
 };
 

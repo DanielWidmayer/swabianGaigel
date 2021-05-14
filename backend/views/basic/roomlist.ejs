@@ -23,6 +23,7 @@
 
         function getAllRooms() {
             rooms = [];
+            // TODO - This should be replaced with a custom route call to ensure password safety
             $.get("/room", function (data, status) {
                 data.forEach((room) => {
                     room.players = room.jsonplayers.length;
@@ -35,9 +36,8 @@
 
         function renderRoom(room) {
             let target = $(`#${room.hashID}`);
-            let players = room.players ? room.players.length : 0;
             let playerIcons = '';
-            for (let i = 0; i < players; i++) {
+            for (let i = 0; i < room.players; i++) {
                 playerIcons += '<i class="bi bi-person-fill"></i>';
             }
             for (let i = 0; i < room.maxplayers - players; i++) {
