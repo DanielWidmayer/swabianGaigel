@@ -103,6 +103,7 @@ module.exports = {
             req.session.roomid = room.id;
 
             // join message
+            ChatController.joinmsg(user.name, hash);
             return res.redirect(`/room/${hash}`);
         } catch (err) {
             return res.serverError(err);

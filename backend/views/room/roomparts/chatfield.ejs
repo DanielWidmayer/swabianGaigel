@@ -35,6 +35,11 @@
         chf.append(`<p class="mb-0">${data.user}: ${data.text}</p>`);
     })
 
+    io.socket.on('turnmsg', function (data) {
+        console.log(data.text);
+        chf.append(`<p>${data.text}</p>`);
+    })
+
     bpost.click(postmsg);
 
     fpost.keypress(function (e) {

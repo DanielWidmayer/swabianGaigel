@@ -28,9 +28,9 @@
         console.log(data);
         if (Array.isArray(data.users)) {
             data.users.forEach(user => {
-                ul.append(`<li>${user.name}</li>`);
+                ul.append(`<i class="bi bi-person-fill"></i>${user.name}<br>`);
             })
-        } else ul.append(`<li>${data.users.name}</li>`);
+        } else ul.append(`<i class="bi bi-person-fill"></i>${data.users.name}<br>`);
 
     })
 

@@ -21,7 +21,7 @@ module.exports = {
     },
 
     turnmsg: (username, roomhash) => {
-        sails.sockets.broadcast(roomhash, "turnmsg", { text: "It`s" + username + "turn!" });
+        sails.sockets.broadcast(roomhash, "turnmsg", { text: "It`s " + username + "'s turn!" });
     },
 
     chatpost: async (req, res) => {

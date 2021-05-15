@@ -73,6 +73,7 @@ module.exports = {
 
                 // broadcast turn event
                 user = await User.getNameAndHash(players[0].playerID);
+                ChatController.turnmsg(user.name, room.hashID);
                 sails.log("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "turn", { user: user });
 
