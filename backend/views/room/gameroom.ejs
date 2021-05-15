@@ -14,13 +14,16 @@
             <div class="card fieldcontainer p-3">
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
-
+                    <div class="game-utils">
+                        <button class="btn btn-game btn-secondary"><i class="bi bi-people-fill"></i></button>
+                        <button class="btn btn-game btn-secondary"><i class="bi bi-file-arrow-down"></i></button>
+                        <button id="bstart" class="btn btn-game btn-secondary"><i class="bi bi-check"></i></button>
+                        <button id="bleave" class="btn btn-game btn-secondary"><i class="bi bi-power"></i></button>
+                    </div>
                 </div>
 
                 <footer>
-                    <p>room#<%= hash %>></p> <button class="btn btn-secondary" type="button" id="bleave">Leave</button>
-                    <button class="btn btn-secondary" type="button" id="bstart">Start</button>
-
+                    <p>room#<%= hash %>></p>
                 </footer>
             </div>
         </div>
@@ -70,6 +73,9 @@
     }
 
     function startGame() {
+        // ready animation
+        //bstart.children().removeClass('bi-check');
+        //bstart.children().addClass('bi-check-square-fill');
         io.socket.post('/startGame', function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(res);

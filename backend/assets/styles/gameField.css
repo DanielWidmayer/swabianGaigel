@@ -62,4 +62,14 @@ footer {
     margin: 10px;
 }
 
+.game-utils{
+    position: absolute; 
+    bottom: 0; 
+    right: 0;
+}
+
+.btn-game{
+    font-size: 2rem!important;
+}
+
 
