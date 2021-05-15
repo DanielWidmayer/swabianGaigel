@@ -15,8 +15,8 @@
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
                     <div class="game-utils">
-                        <button class="btn btn-game btn-secondary"><i class="bi bi-people-fill"></i></button>
-                        <button class="btn btn-game btn-secondary"><i class="bi bi-file-arrow-down"></i></button>
+                        <button id="bmeld" class="btn btn-game btn-secondary"><i class="bi bi-people-fill"></i></button>
+                        <button id="bsteal" class="btn btn-game btn-secondary"><i class="bi bi-file-arrow-down"></i></button>
                         <button id="bstart" class="btn btn-game btn-secondary"><i class="bi bi-check"></i></button>
                         <button id="bleave" class="btn btn-game btn-secondary"><i class="bi bi-power"></i></button>
                     </div>
@@ -49,7 +49,10 @@
 <script>
     const bleave = $('#bleave');
     const bstart = $('#bstart');
+    const bmeld = $('#bmeld');
+    const bsteal = $('#bsteal');
     const hash = window.location.href.split('/').pop();
+    var userLeft = false;
 
     io.socket.post('/socketconnect', function (res, jres) {
         if (jres.statusCode != 200) {
@@ -63,6 +66,7 @@
     bstart.click(startGame);
 
     function socketleave() {
+        userLeft = true;
         io.socket.delete('/leave', function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(res);
@@ -89,13 +93,15 @@
     window.onbeforeunload = userUnloaded;
 
     function userUnloaded() {
-        io.socket.post('/userUnload', function (res, jres) {
-            if (jres.statusCode != 200) {
-                console.log(res);
-            } else {
-                console.log("User Unloaded");
-            }
-        });
+        if (!userLeft) {
+            io.socket.post('/userUnload', function (res, jres) {
+                if (jres.statusCode != 200) {
+                    console.log(res);
+                } else {
+                    console.log("User Unloaded");
+                }
+            });
+        }
     }
 
 </script>

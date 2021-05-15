@@ -402,7 +402,6 @@ var cards = (function () {
         },
 
         sortHand: function () {
-            // TODO: rework
             return this.sort((a, b) => {
                 let a_rank = a.value + a.suit * 12;
                 let b_rank = b.value + b.suit * 12;
@@ -410,6 +409,20 @@ var cards = (function () {
                 if (a_rank > b_rank) return 1;
                 return 0;
             });
+        },
+
+        getPair: function () {
+            let meldCards = [];
+            for (var i = 0; i < this.length; i++) {
+                if (this[i].value == 3 || this[i].value == 4) {
+                    meldCards.push(this[i]);
+                }
+            }
+            if (meldCards.length > 1) {
+                meldCards.forEach((el) => {
+                    // TODO
+                });
+            }
         },
 
         toString: function () {

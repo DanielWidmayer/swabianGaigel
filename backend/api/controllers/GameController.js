@@ -95,7 +95,7 @@ module.exports = {
             sails.log("sanity checking ...");
             // check if room exists
             //if (req.session.roomid) room = await Room.findOne({id: req.session.roomid}).populate('players');
-            if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid });
+            if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
             else throw new Error("Authentication Error!");
             if (!room) throw new Error("This room could not be found.");
             acPl = room.activePlayer;
@@ -142,6 +142,7 @@ module.exports = {
                 // eval win and deal
                 sails.log("Full stack, trigger roundwin event");
                 let winner = evalStack(temp_stack, room.trump.symbol);
+                winner = temp_players.findIndex((el) => el.playerID == winner);
 
                 if (temp_players.length <= 3) {
                     temp_players[winner].score += temp_stack[winner].card.value;
@@ -167,6 +168,7 @@ module.exports = {
                     if (p_win[0] == acPl) acPl = p_win[1];
                     else acPl = p_win[0];
                 }
+                sails.log(user.name + " won!");
 
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
                 for (el of temp_players) {
@@ -202,6 +204,16 @@ module.exports = {
         }
     },
 
+    meldPair: async (req, res) => {
+        // check if room exists
+        // check if user exists
+        // DONT check if its users turn
+        // check if user owns both cards
+        // socket event pairmelded
+        // Add Score to player
+        // eval Game Win Condition
+    },
+
     pauseGame: async (req, res) => {},
 };
 
@@ -217,13 +229,17 @@ function evalStack(stack, trump) {
 
     // all trump symbol or no trump symbol
     if (occ.length == stack.length || occ.length == 0) {
+        sails.log(stack);
         for (i = 0; i < stack.length; i++) {
-            if (stack[i].card.value > v_h) {
-                i_t = i;
-                v_h = stack[i].card.value;
+            if (stack[0].card.symbol == stack[i].card.symbol) {
+                if (stack[i].card.value > v_h) {
+                    i_t = i;
+                    v_h = stack[i].card.value;
+                }
             }
         }
-        return i_t;
+        sails.log(i_t);
+        return stack[i_t].playerID;
     } else {
         for (el of occ) {
             if (stack[el].card.value > v_h) {
@@ -231,6 +247,6 @@ function evalStack(stack, trump) {
                 v_h = stack[el].card.value;
             }
         }
-        return i_t;
+        return stack[i_t].playerID;
     }
 }
