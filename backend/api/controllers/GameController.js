@@ -7,46 +7,54 @@
 
 const ChatController = require("./ChatController");
 
+    // TODO - general error handling
+
 module.exports = {
     startGame: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("no socket request"));
-        } else {
+        } 
+        else {
             try {
-                //let room = await Room.findOne({id: req.session.roomid}).populate('players');
-                let room = await Room.findOne({ id: req.session.roomid });
-                if (!room) return res.badRequest(new Error("This room could not be found."));
+                let room, user, players, carddeck, cards = [], trump_card;
+                // check authentication
+                if (req.session.roomid && req.session.userid) {
+                    room = await Room.findOne({ id: req.session.roomid });
+                    user = await User.findOne({ id: req.session.userid });
+                }
+                else throw new Error("Authentication Error!");
+                if (!room) throw new Error("This room could not be found.");
+                if (!user) throw new Error("This User could not be found.");
+
+                // check if user is in room and set ready
+                user = room.jsonplayers.findIndex((pl) => pl.playerID == user.id);
+                if (user < 0) throw new Error("User is not in this room!");
+                if (room.jsonplayers[user].ready == false) room.jsonplayers[user].ready = true;
+                else room.jsonplayers[user].ready = false;
+
+                // wait till all players are ready
+                let rps = room.jsonplayers.reduce((cb, pv) => { if(pv.ready) return cb + 1; else return cb; }, 0);
+                if (rps < room.jsonplayers.length) {
+                    await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers});
+                    return res.ok({ready: rps, needed: room.jsonplayers.length });
+                }
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw new Error("Game is already running!");
                 await Room.updateOne({ id: room.id }).set({ status: "game" });
 
                 // create carddeck and choose trump
-                let carddeck = await Card.find();
-                let cards = [];
+                carddeck = await Card.find();
 
                 carddeck.forEach((el) => {
                     cards.push(el.id);
                 });
                 await Room.addToCollection(room.id, "deck", cards);
 
-                let trump_card = Card.getRandomCard(carddeck);
+                trump_card = Card.getRandomCard(carddeck);
                 await Room.removeFromCollection(room.id, "deck").members(trump_card.id);
 
-                /* create order-object
-                let order = [];
-                for (el of room.players) {
-                    order.push({uHASH: el.hashID, uNAME: el.name, uCARDS: 5, uSCORE: 0});
-                }
-                // shuffle for random order
-                for (let i = order.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [order[i], order[j]] = [order[j], order[i]];
-                }
-                // save order
-                await Room.updateOne({id: room.id}).set({order: order});
-                */
-                let players = room.jsonplayers;
+                players = room.jsonplayers;
                 let j, m;
                 for (i = players.length - 1; i > 0; i--) {
                     j = Math.floor(Math.random() * (i + 1));
@@ -57,17 +65,12 @@ module.exports = {
                 await Room.updateOne({ id: room.id }).set({ trump: trump_card.id, jsonplayers: players, stack: [] });
 
                 // deal cards to players, start game
-                /*for (el of room.players) {
-                    await Card.dealCard(5, el.id, room.id);
-                    let p_temp = await User.findOne({id: el.id}).populate('hand');
-                    // socket start event
-                    sails.sockets.broadcast(el.socket, 'start', {hand: p_temp.hand, trump: trump_card, order: order, active: room.activePlayer});
-                }*/
-                let user = await User.getNameAndHash(players.map((el) => el.id));
+                user = await User.getNameAndHash(players.map((el) => el.id));
+                let hand, pl;
                 for (el of players) {
                     sails.log("deal 5 cards to player " + el.playerID);
-                    let hand = await Card.dealCard(5, el.playerID, room.id);
-                    let pl = await User.findOne({ id: el.playerID });
+                    hand = await Card.dealCard(5, el.playerID, room.id);
+                    pl = await User.findOne({ id: el.playerID });
                     sails.sockets.broadcast(pl.socket, "start", { hand: hand, trump: trump_card, users: user });
                 }
 
@@ -79,7 +82,7 @@ module.exports = {
 
                 return res.ok();
             } catch (err) {
-                return res.serverError(err);
+                return res.badRequest(err);
             }
         }
     },
@@ -94,33 +97,24 @@ module.exports = {
 
             sails.log("sanity checking ...");
             // check if room exists
-            //if (req.session.roomid) room = await Room.findOne({id: req.session.roomid}).populate('players');
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
             else throw new Error("Authentication Error!");
             if (!room) throw new Error("This room could not be found.");
             acPl = room.activePlayer;
 
             // check if user exists
-            //if (req.session.userid) user = await User.findOne({id: req.session.userid}).populate('hand');
             if (req.session.userid) user = await User.findOne({ id: req.session.userid });
             else throw new Error("Authentication Error!");
             if (!user) throw new Error("This user could not be found.");
 
             // check if user is in room
-            /*room.players.forEach((el) => {
-                if (el.id == user.id) pass = true;
-            });
-            if (!pass) throw(new Error('User is not in this room.'));
-            pass = false;*/
             if (!room.jsonplayers.find((el) => el.playerID == user.id)) throw new Error("User is not in this room.");
 
             // check if user is active player
-            //if (user.hashID != room.order[room.activePlayer].uHASH) throw(new Error('This is not your turn, cheater!'));
             if (room.jsonplayers[acPl].playerID != user.id) throw new Error("This is not your turn, cheater!");
 
             // check if user owns card
             card = req.body.card;
-            sails.log(card);
             c_index = room.jsonplayers[acPl].hand.findIndex((el) => el == card.id);
             if (c_index < 0) throw new Error("You do not own this card, cheater!");
 
@@ -174,12 +168,15 @@ module.exports = {
                 for (el of temp_players) {
                     user = await User.findOne({ id: el.playerID });
                     let card = await Card.dealCard(1, el.playerID, room.id);
-                    if (card) {
-                        sails.sockets.broadcast(user.socket, "dealcard", { card: card });
+                    if (card.length) {
+                        sails.sockets.broadcast(user.socket, "dealcard", { card: card });       // willst du nen Array an Karten oder nur eine einzelne? kannst ja im Frontend bei nem Array immer schauen wie lang er is, is glaub besser
                     } else {
+                        // TODO - card deck is empty, special handle?
                         sails.log("cannot deal card to " + user.name + ". Empty Deck!");
                     }
                 }
+
+                // TODO - check for empty carddeck and hands and end game
 
                 // reset stack
                 temp_stack = [];
@@ -204,7 +201,7 @@ module.exports = {
         }
     },
 
-    meldPair: async (req, res) => {
+    meldPair: async (req, res) => {     // jajajajaajajajajaajjajaajjaja, immer diese kack Zusatzfunktionen ...
         // check if room exists
         // check if user exists
         // DONT check if its users turn

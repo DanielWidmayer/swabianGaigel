@@ -77,7 +77,7 @@ module.exports = {
 
     getRandomCard: (carddeck) => {
         let rand = crypto.randomBytes(5);
-        rand = Math.abs(rand.readInt16LE());
+        rand = Math.abs(rand.readInt16LE()) + Math.floor(Math.random() * (carddeck.length / 2));
         if (carddeck.length > 0) return carddeck[rand % carddeck.length];
         else return null;
     },

@@ -56,6 +56,7 @@ $(document).ready(function () {
 io.socket.on("start", function (data) {
     // userHash = data.user[]
     console.log(data);
+    $('#bstart').hide();        //  <--JB- habe ich hinzugefügt, ready button bei gamestart verstecken
     let cardTrump = data.trump;
     trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), data.trump.id);
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });

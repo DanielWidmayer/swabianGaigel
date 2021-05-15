@@ -37,20 +37,13 @@ module.exports = {
       defaultsTo: 4
     },
 
-    admin: {
-      model: 'user'
-    },
-
-    players: {
-      collection: 'user'
-    },
-
     /*
       jsonplayers: [
         { 
           playerID: User.id ,
           hand: [ Card.id ],
-          score: Integer
+          score: Integer,
+          ready: true/false
         }
       ]
     */
@@ -80,6 +73,21 @@ module.exports = {
       type: 'json'
     }
 
+  },
+
+  getListRoom: async (ident) => {
+    let room;
+    try {
+      if (ident.id) room = await Room.findOne({ id: ident.id });
+      else if (ident.hash) room = await Room.findOne({ hashID: ident.hash });
+      if (room) {
+        return { hashID: room.hashID, name: room.name, password: room.password ? true : false, maxplayers: room.maxplayers, players: room.jsonplayers.length };
+      } else {
+        return null;
+      }
+    } catch (err) {
+      sails.log(err);
+    }
   }
 
 };

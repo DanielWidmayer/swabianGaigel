@@ -29,15 +29,13 @@ module.exports.routes = {
 
     "POST /username": "UserController.changeName",
 
-    "/join/:roomID": "RoomController.joinUser",
-
     "/leave": "RoomController.leaveUser",
 
     "GET /create": "RoomController.createPage",
 
     "POST /create": "RoomController.newRoom",
 
-    "/room/:roomID": "RoomController.access",
+    "/room/:roomID": "RoomController.roomAccess",
 
     "/socketconnect": "RoomController.socketconnect",
 

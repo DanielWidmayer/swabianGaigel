@@ -48,7 +48,7 @@
             } else {
 
                 rl.append(`
-                    <tr id="${room.hashID}" onclick=" window.location.href='/join/${room.hashID}';">
+                    <tr id="${room.hashID}" onclick=" window.location.href='/room/${room.hashID}';">
                         <td class="rname">${room.name}</td>
                         <td class="rpl">` + playerIcons + `</td>
                         <td class="rpw">${room.password ? "<i class='bi bi-x-square-fill'></i>" : "<i class='bi bi-check-square-fill'></i>"}</td>
