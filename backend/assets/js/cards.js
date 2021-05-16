@@ -321,7 +321,6 @@ var cards = (function () {
             for (let i = 0; i < this.length; i++) {
                 let card = this[i];
                 if (value == card.value && suit == card.suit) {
-                    console.log(card);
                     return card;
                 }
             }
@@ -413,16 +412,37 @@ var cards = (function () {
 
         getPair: function () {
             let meldCards = [];
+            let pairs = [];
             for (var i = 0; i < this.length; i++) {
                 if (this[i].value == 3 || this[i].value == 4) {
                     meldCards.push(this[i]);
                 }
             }
             if (meldCards.length > 1) {
-                meldCards.forEach((el) => {
-                    // TODO
-                });
+                while (meldCards.length) {
+                    console.log(meldCards[0]);
+                    for (let i = 1; i < meldCards.length; i++) {
+                        if (meldCards[i].suit == meldCards[0].suit && meldCards[i].value != meldCards[0].value) {
+                            pairs.push(meldCards[0]);
+                            pairs.push(meldCards[i]);
+                            meldCards.splice(i, 1);
+                        }
+                    }
+                    meldCards.splice(0, 1);
+                }
+                return pairs;
+            } else {
+                return [];
             }
+        },
+
+        getTrumpSeven: function (trump) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i].value == 0 && this[i].suit == trump) {
+                    return this[i];
+                }
+            }
+            return null;
         },
 
         toString: function () {

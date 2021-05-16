@@ -56,7 +56,7 @@ $(document).ready(function () {
 io.socket.on("start", function (data) {
     // userHash = data.user[]
     console.log(data);
-    $('#bstart').hide();        //  <--JB- habe ich hinzugefügt, ready button bei gamestart verstecken
+    $("#bstart").hide(); //  <--JB- habe ich hinzugefügt, ready button bei gamestart verstecken
     let cardTrump = data.trump;
     trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), data.trump.id);
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
@@ -71,8 +71,6 @@ io.socket.on("start", function (data) {
             fCard = upperhand.findCard(card["value"], card["symbol"]);
             upperhand.addCard(deck.topCard());
         }
-        console.log(card.id);
-        console.log(fCard);
         lowerhand.addCard(fCard, card.id);
         upperhand.addCard(deck.topCard());
     }
@@ -113,12 +111,16 @@ io.socket.on("cardplayed", function (data) {
         if (fCard == null) {
             // search through other hands
             fCard = upperhand.findCard(card["value"], card["symbol"]);
+        } else {
+            deck.addCard(upperhand.topCard());
+            upperhand.addCard(fCard);
+            upperhand.render({ immediate: true });
+            deck.render({ immediate: true });
         }
         upperPlayingPile.addCard(fCard);
         upperPlayingPile.render({
             callback: upperPlayingPile.topCard().rotate(getRandomArbitrary(-200, -160)),
         });
-        upperhand.render();
     }
 });
 
@@ -151,6 +153,13 @@ io.socket.on("dealcard", function (data) {
         lowerhand.addCard(fCard, card.id);
         lowerhand.sortHand();
         lowerhand.render();
+        upperhand.addCard(deck.topCard());
+        upperhand.render();
+        if (lowerhand.getPair().length > 0) {
+            console.log("Has Pair!");
+        } else {
+            console.log("No Pair!");
+        }
     }, 2500);
 });
 
