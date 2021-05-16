@@ -15,8 +15,8 @@
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
                     <div class="game-utils">
-                        <button id="bmeld" class="btn btn-game btn-secondary"><i class="bi bi-people-fill"></i></button>
-                        <button id="bsteal" class="btn btn-game btn-secondary"><i class="bi bi-file-arrow-down"></i></button>
+                        <button id="bmeld" class="btn btn-game btn-secondary" disabled><i class="bi bi-people-fill"></i></button>
+                        <button id="bsteal" class="btn btn-game btn-secondary" disabled><i class="bi bi-file-arrow-down"></i></button>
                         <button id="bstart" class="btn btn-game btn-secondary"><i class="bi bi-check"></i></button>
                         <button id="bleave" class="btn btn-game btn-secondary"><i class="bi bi-power"></i></button>
                     </div>
@@ -46,6 +46,26 @@
     </div>
 </div>
 
+<div class="modal fade" id="quitPageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Quit Game</h5>
+                <button type="button" class="btn close" data-dismiss="modal" aria-label="Close" onclick="$('#quitPageModal').modal('hide')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to quit?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#quitPageModal').modal('hide')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="socketleave()">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const bleave = $('#bleave');
     const bstart = $('#bstart');
@@ -63,15 +83,19 @@
         }
     })
 
-    bleave.click(socketleave);
+    bleave.click(quitPage);
     bstart.click(startGame);
 
+    function quitPage() {
+        $('#quitPageModal').modal('show');
+    }
+
     function socketleave() {
-        userLeft = true;
         io.socket.delete('/leave', function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(res);
             } else {
+                userLeft = true;
                 window.location.href = '/list';
             }
         })
@@ -82,7 +106,7 @@
         io.socket.post('/startGame', function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(res);
-            } else {                            // <--JB- habe ich angepasst, gebe bswp. 2/4 ready mit. Ready-State kann durch button gewechselt werden
+            } else {
                 console.log(res.ready);
                 console.log(res.needed);
                 if (!ready) {
