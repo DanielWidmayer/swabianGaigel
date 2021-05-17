@@ -80,6 +80,12 @@ io.socket.on("start", function (data) {
 
 io.socket.on("ready", function (data) {
     console.log(data);
+    let users = data.users;
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].ready) {
+            // TODO
+        }
+    }
 });
 
 io.socket.on("turn", function (data) {
@@ -177,12 +183,40 @@ io.socket.on("dealcard", function (data) {
     }, 2500);
 });
 
-// TODO: handle
 io.socket.on("pairmelded", function (data) {
     console.log(data);
+    let cards = data.cards;
+    let fCards = [];
+    cards.forEach((card) => {
+        fCards.push(lowerhand.findCard(card.value, card.symbol));
+    });
+    upperPlayingPile.addCard(fCards[0]);
+    upperPlayingPile.render();
+    lowerPlayingPile.addCard(fCards[1]);
+    lowerPlayingPile.render();
+    setTimeout(() => {
+        lowerhand.addCards(fCards);
+        lowerhand.render();
+    }, 2000);
 });
+
 io.socket.on("cardrob", function (data) {
     console.log(data);
+    let card = data.card;
+    let fCard = deck.findCard(card.value, card.symbol);
+    if (fCard == null) {
+        fCard = upperhand.findCard(card.value, card.symbol);
+    } else {
+        deck.addCard(upperhand.bottomCard());
+        upperhand.addCard(fCard);
+        deck.render({ immediate: true });
+        upperhand.render({ immediate: true });
+    }
+    upperhand.addCard(trumpCard.bottomCard());
+    trumpCard.addCard(fCard);
+    upperhand.render();
+    trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+    trumpCard.topCard().moveToBack();
 });
 
 function getRandomArbitrary(min, max) {

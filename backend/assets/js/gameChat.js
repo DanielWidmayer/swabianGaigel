@@ -15,7 +15,7 @@ io.socket.on("leavemsg", function (data) {
 
 io.socket.on("controllermsg", function (data) {
     console.log(data.msg);
-    chf.append(`<p>${data.msg}</p>`);
+    gamef.append(`<p>${data.msg}</p>`);
 });
 
 io.socket.on("chatmsg", function (data) {
@@ -31,7 +31,7 @@ io.socket.on("turnmsg", function (data) {
     } else {
         text = "It's " + data.user.name + "'s turn.";
     }
-    chf.append(`<p>${text}</p>`);
+    gamef.append(`<p>${text}</p>`);
 });
 
 bpost.click(postmsg);

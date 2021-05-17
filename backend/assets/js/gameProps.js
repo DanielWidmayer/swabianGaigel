@@ -77,7 +77,7 @@ function meldOnePair() {
 }
 
 function stealTrumpCard() {
-    let trumpSeven = lowerhand.getTrumpSeven(trumpCard.bottomCard());
+    let trumpSeven = lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol);
     if (trumpSeven != null) {
         let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
         io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
@@ -85,6 +85,12 @@ function stealTrumpCard() {
                 console.log(jres);
             } else {
                 console.log(res);
+                lowerhand.addCard(trumpCard.bottomCard());
+                trumpCard.addCard(trumpSeven);
+                lowerhand.render({ callback: lowerhand.topCard().rotate(270) });
+                lowerhand.sortHand();
+                trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+                trumpCard.topCard().moveToBack();
             }
         });
     } else {

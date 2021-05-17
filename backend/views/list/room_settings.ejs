@@ -32,7 +32,7 @@
                 <div class="card card-light-transparent mb-3">
                     <div class="form-check m-2">
                         Game Mode:
-                        <div id="carouselGamevariants" class="carousel slide" data-bs-ride="carousel">
+                        <div id="carouselGamevariants" class="carousel slide" data-interval="false" data-bs-ride="carousel">
                             <div class="carousel-inner mb-1">
                                 <div class="carousel-item active">
                                     Classic
@@ -41,11 +41,11 @@
                                     Allow Variations
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselGamevariants" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselGamevariants" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
@@ -55,19 +55,22 @@
             </div>
         </div>
         <div class="card card-light-transparent mb-3">
-            <div class="form-check m-3">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                <label class="form-check-label" style="float: left;" for="flexCheckDefault">
-                    Private Game
-                </label>
+            <div class="row m-3">
+                <div class="col form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" onclick="$('#pwfield').toggle('hidden');">
+                    <label class="form-check-label" style="float: left;" for="flexCheckDefault">
+                        Private Game
+                    </label>
+                </div>
+
+                <div id="pwfield" class="col input-group" hidden>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Password</span>
+                    </div>
+                    <input type="password" class="input-transparent" name="passwd" placeholder="password" aria-label="Room Name" aria-describedby="basic-addon1">
+                </div>
             </div>
 
-            <div class="input-group m-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">Password</span>
-                </div>
-                <input type="password" class="input-transparent" name="passwd" placeholder="password" aria-label="Room Name" aria-describedby="basic-addon1">
-            </div>
         </div>
         <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create Room</button>
     </form>

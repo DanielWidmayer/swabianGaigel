@@ -99,7 +99,7 @@ module.exports = {
 
             // add user to player list
             players = room.jsonplayers;
-            players.push({ playerID: user.id, hand: [], score: 0, ready: false });
+            players.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0 });
             await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
 
             // make user admin if he is the first one to join

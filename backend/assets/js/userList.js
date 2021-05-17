@@ -8,10 +8,10 @@ io.socket.get("/userlist", function (res, jres) {
         console.log(res);
         if (Array.isArray(res)) {
             res.forEach((user) => {
-                ul.append(`<li>${user.name}</li>`);
+                ul.append(`<i class="bi bi-person-fill"></i>${user.name}${user.ready}<br>`);
             });
         } else {
-            ul.append(`<li>${res.name}</li>`);
+            ul.append(`<i class="bi bi-person-fill"></i>${res.name}${res.ready}<br>`);
         }
     }
 });
@@ -21,7 +21,7 @@ io.socket.on("userevent", function (data) {
     console.log(data);
     if (Array.isArray(data.users)) {
         data.users.forEach((user) => {
-            ul.append(`<i class="bi bi-person-fill"></i>${user.name}<br>`);
+            ul.append(`<i class="bi bi-person-fill"></i>${user.name}${user.ready}<br>`);
         });
-    } else ul.append(`<i class="bi bi-person-fill"></i>${data.users.name}<br>`);
+    } else ul.append(`<i class="bi bi-person-fill"></i>${data.users.name}${data.users.ready}<br>`);
 });

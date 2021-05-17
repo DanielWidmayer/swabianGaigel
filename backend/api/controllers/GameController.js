@@ -17,10 +17,11 @@ module.exports = {
             try {
                 let room,
                     user,
-                    players,
+                    players = [],
                     carddeck,
                     cards = [],
                     trump_card;
+                let el, pl;
                 // check authentication
                 if (req.session.roomid && req.session.userid) {
                     room = await Room.findOne({ id: req.session.roomid });
@@ -42,12 +43,11 @@ module.exports = {
                 }, 0);
                 if (rps < room.jsonplayers.length) {
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
-                    let pids = [];
-                    for (pl of room.jsonplayers) pids.push(el.playerID);
-                    players = await User.getNameAndHash(pids);
-                    for (pl of players) {
-                        pl.ready = room.jsonplayers[room.jsonplayers.findIndex((i) => i.playerID == pl.id)].ready;
+                    for (pl of room.jsonplayers) {
+                        players.push(await User.getNameAndHash(pl.playerID));
+                        players[players.length - 1].ready = pl.ready;
                     }
+
                     sails.sockets.broadcast(room.hashID, "ready", { users: players }, req);
                     return res.ok({ ready: room.jsonplayers[user].ready });
                 }
@@ -79,7 +79,7 @@ module.exports = {
 
                 // deal cards to players, start game
                 user = await User.getNameAndHash(players.map((el) => el.id));
-                let hand, pl;
+                let hand;
                 for (el of players) {
                     sails.log("deal 5 cards to player " + el.playerID);
                     hand = await Card.dealCard(5, el.playerID, room.id);
@@ -108,7 +108,7 @@ module.exports = {
 
         try {
             let room, user, card, c_index, acPl;
-
+            let el;
             sails.log("sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
@@ -158,9 +158,11 @@ module.exports = {
                     for (let i = 0; i < temp_stack.length; i++) {
                         // DWM - gesamten Stich als Score hochzählen
                         temp_players[winner].score += temp_stack[i].card.value;
+                        temp_players[winner].wins += 1;
                     }
                     user = await User.getNameAndHash(temp_players[winner].playerID);
                     user.score = temp_players[winner].score;
+                    user.wins = temp_players[winner].wins;
                     sails.sockets.broadcast(room.hashID, "solowin", { user: user });
                     ChatController.turnmsg(user, room.hashID);
                     acPl = winner;
@@ -173,12 +175,15 @@ module.exports = {
                         for (let i = 0; i < temp_stack.length; i++) {
                             // DWM - gesamten Stich als Score hochzählen
                             temp_players[el].score += temp_stack[i].card.value;
+                            temp_players[el].wins += 1;
                         }
                     }
 
                     user = await User.getNameAndHash([temp_players[p_win[0]].playerID, temp_players[p_win[0]].playerID]);
                     user[0].score = temp_players[p_win[0]].score;
+                    user[0].wins = temp_players[p_win[0]].wins;
                     user[1].score = user[0].score;
+                    user[1].wins = user[0].wins;
                     sails.sockets.broadcast(room.hashID, "teamwin", { users: user });
 
                     if (p_win[0] == acPl) acPl = p_win[1];
@@ -224,6 +229,7 @@ module.exports = {
         }
     },
 
+    // TODO rework
     meldPair: async (req, res) => {
         // jajajajaajajajajaajjajaajjaja, immer diese kack Zusatzfunktionen ...
         // TODO:
@@ -260,14 +266,18 @@ module.exports = {
                 if (c_index < 0) throw error(104, "You do not own this card, cheater!");
             });
 
-            // TODO: check if cards are a meldable pair
-
             sails.log("all good!");
 
-            sails.sockets.broadcast(user.socket, "pairmelded", { user: user, cards: cards });
+            if (room.jsonplayers[acPl].wins >= 1) {
+                // TODO: check if cards are a meldable pair and player made a trick already
 
-            // TODO: Add Score to player (20 for normal pair 40 for trump pair)
-            // TODO: eval Game Win Condition
+                sails.sockets.broadcast(user.socket, "pairmelded", { user: user, cards: cards });
+
+                // TODO: Add Score to player (20 for normal pair 40 for trump pair)
+                // TODO: eval Game Win Condition
+            } else throw error(104, "You are not allowed to do that yet!");
+
+            return res.ok();
         } catch (err) {
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
@@ -275,40 +285,54 @@ module.exports = {
     },
 
     robTrump: async (req, res) => {
-        // noch ne Zusatzfunktion, immerhin mit geilem Namen :D - evtl müssen wir hier schauen, dass die nicht zweimal parallel in einem Raum aufgerufen werden kann
-        // TODO:
-        // check if card is trump seven
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
-            let room, user, card, c_index, acPl;
+            let room, user, card, c_index, p_index;
+            let players = [];
 
             sails.log("sanity checking ...");
 
             // check if room exists
-            if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid });
+            if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
             else throw error(101, "Invalid Session!");
             if (!room) throw error(102, "This room could not be found!");
-            acPl = room.activePlayer;
+
+            // block robbery just to be safe
+            await Room.updateOne({ id: room.id }).set({ robbed: true });
+
             // check if user exists
             if (req.session.userid) user = await User.findOne({ id: req.session.userid });
             else throw error(101, "Invalid Session!");
             if (!user) throw error(101, "This user could not be found!");
 
             // check if user is in room
-            if (!room.jsonplayers.find((el) => el.playerID == user.id)) throw error(101, "User is not in this room!");
+            p_index = room.jsonplayers.findIndex((el) => el.playerID == user.id);
+            if (p_index < 0) throw error(101, "User is not in this room!");
 
-            // check if user owns card
             card = req.body.card;
-            c_index = room.jsonplayers[acPl].hand.findIndex((el) => el == card.id);
+            // check if played card is trump 7
+            if (card.value != 0 || card.symbol != room.trump.symbol) throw error(104, "This is not the right card!");
+            // check if user owns card
+            c_index = room.jsonplayers[p_index].hand.findIndex((el) => el == card.id);
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
 
-            // TODO: check if card is trump seven
+            // check if user has enough wins
+            if (room.jsonplayers[p_index].wins >= 1) {
+                // switch trump card with player card
+                let temp = room.jsonplayers[p_index].hand[c_index];
+                room.jsonplayers[p_index].hand[c_index] = room.trump.id;
+                user = await User.getNameAndHash(user.id);
+                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
+            } else throw error(104, "You are not allowed to do that yet!");
 
-            sails.sockets.broadcast(user.socket, "cardrob", { user: user, card: card });
+            return res.ok();
         } catch (err) {
+            // reset robbery
+            await Room.updateOne({ id: req.session.roomid }).set({ robbed: false });
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -321,6 +345,7 @@ function evalStack(stack, trump) {
     let occ = [];
     let v_h = -1;
     let i_t = 0;
+    let el;
 
     // get occurrences of trump symbol
     for (i = 0; i < stack.length; i++) {

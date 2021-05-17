@@ -7,6 +7,7 @@ body{
 }
 
 .fieldcontainer {
+    min-height: 80vh;
     height: 100%;
     width: 100%;
 }
@@ -35,32 +36,31 @@ img.preload {
     box-shadow: #111 1px 1px 2px;
 }
 
-#game-history {
-    height: 30vh;
-    width: 100%;
-}
 
 #chat {
-    height: 40.5vh;
-    width: 100%;
     position: relative;
-    font-size: 2vh;
 }
 
 #chatfield{
-    height: 30vh;
+    min-height: 30vh;
     overflow-y: scroll;
-    font-size: 2vh;
 }
 
 #gamehistoryfield{
+    min-height: 30vh;
     overflow-y: scroll;
 }
 
+#userlist{
+    height: 30%;
+    padding-left: 0px!important;
+}
+
 .chatmsg{
-    position: absolute !important;
+    position: relative !important;
     bottom: 0;
 }
+
 
 footer {
     font-size: 12px;

@@ -49,6 +49,8 @@ module.exports.routes = {
 
     "/meldPair": "GameController.meldPair",
 
+    "/robTrump": "GameController.robTrump",
+
     "/unloadUser": "RoomController.unloadUser",
 
     /***************************************************************************
