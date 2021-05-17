@@ -7,12 +7,12 @@
 
 const ChatController = require("./ChatController");
 
-    // TODO - general error handling
+const error = sails.helpers.errors;
 
 module.exports = {
     startGame: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         } 
         else {
             try {
@@ -22,13 +22,13 @@ module.exports = {
                     room = await Room.findOne({ id: req.session.roomid });
                     user = await User.findOne({ id: req.session.userid });
                 }
-                else throw new Error("Authentication Error!");
-                if (!room) throw new Error("This room could not be found.");
-                if (!user) throw new Error("This User could not be found.");
+                else throw error(101, "Invalid Session!");
+                if (!room) throw error(102, "This Room could not be found!");
+                if (!user) throw error(101, "This User could not be found!");
 
                 // check if user is in room and set ready
                 user = room.jsonplayers.findIndex((pl) => pl.playerID == user.id);
-                if (user < 0) throw new Error("User is not in this room!");
+                if (user < 0) throw error(101, "User is not in this room!");
                 if (room.jsonplayers[user].ready == false) room.jsonplayers[user].ready = true;
                 else room.jsonplayers[user].ready = false;
 
@@ -36,11 +36,12 @@ module.exports = {
                 let rps = room.jsonplayers.reduce((cb, pv) => { if(pv.ready) return cb + 1; else return cb; }, 0);
                 if (rps < room.jsonplayers.length) {
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers});
+                    sails.sockets.broadcast(room.hashID, "ready", { ready: rps, needed: room.jsonplayers.length }, req);
                     return res.ok({ready: rps, needed: room.jsonplayers.length });
                 }
 
                 // update room status, reject if already ingame
-                if (room.status == "game") throw new Error("Game is already running!");
+                if (room.status == "game") throw error(104, "Game is already running!");
                 await Room.updateOne({ id: room.id }).set({ status: "game" });
 
                 // create carddeck and choose trump
@@ -82,14 +83,15 @@ module.exports = {
 
                 return res.ok();
             } catch (err) {
-                return res.badRequest(err);
+                if (err.code) return res.badRequest(err);
+                else return res.serverError(err);
             }
         }
     },
 
     playCard: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
@@ -98,25 +100,25 @@ module.exports = {
             sails.log("sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
-            else throw new Error("Authentication Error!");
-            if (!room) throw new Error("This room could not be found.");
+            else throw error(101, "Invalid Session!");
+            if (!room) throw error(102, "This room could not be found!");
             acPl = room.activePlayer;
 
             // check if user exists
             if (req.session.userid) user = await User.findOne({ id: req.session.userid });
-            else throw new Error("Authentication Error!");
-            if (!user) throw new Error("This user could not be found.");
+            else throw error(101, "Invalid Session!");
+            if (!user) throw error(101, "This user could not be found!");
 
             // check if user is in room
-            if (!room.jsonplayers.find((el) => el.playerID == user.id)) throw new Error("User is not in this room.");
+            if (!room.jsonplayers.find((el) => el.playerID == user.id)) throw error(101, "User is not in this room!");
 
             // check if user is active player
-            if (room.jsonplayers[acPl].playerID != user.id) throw new Error("This is not your turn, cheater!");
+            if (room.jsonplayers[acPl].playerID != user.id) throw error(104, "This is not your turn, cheater!");
 
             // check if user owns card
             card = req.body.card;
             c_index = room.jsonplayers[acPl].hand.findIndex((el) => el == card.id);
-            if (c_index < 0) throw new Error("You do not own this card, cheater!");
+            if (c_index < 0) throw error(104, "You do not own this card, cheater!");
 
             sails.log("all good!");
 
@@ -197,7 +199,8 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
-            return res.serverError(err);
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
         }
     },
 

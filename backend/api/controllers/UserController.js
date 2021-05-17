@@ -5,42 +5,27 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+const error = sails.helpers.errors;
 
 module.exports = {
 
-    accessList: async (req, res) => {
+    changeName: (req, res) => {
         try {
-            let user;
-            // check if user is authenticated
-            if (req.session.userid) user = await User.findOne({id: req.session.userid});
-            // else create User and validate
-            else {
-                user = await User.newUser(req.cookies.username, res);
-                req.session.userid = user.id;
-            }
-    
-            return res.view('basic/roomlist', {layout: 'basic_layout', username: user.name, userhash: user.hashID});
-        } catch (err) {
-            return res.serverError(err);
-        }
-    },
-
-    changeName: async (req, res) => {
-        let uname = req.body.uname;
-        try {
-            // check if user is authenticated
-            if (!req.session.userid) throw("Authentication Error!");
+            let uname = req.body.uname;
 
             // perform some sanity checks on new user name
-            if (uname.length == 0 || uname.length > 25) throw("Invalid Username!");
+            if (uname.length == 0 || uname.length > 20) throw error(103, "Your new username was invalid, please try again!");
 
-            // update User
-            await User.updateOne({id: req.session.userid}).set({name: uname});
+            // update cookie
             res.cookie('username', uname);
         
             return res.redirect('/list');
         } catch (err) {
-            return res.serverError(err);
+            if (err.code) {
+                res.cookie("errmsg", err.message);
+                return res.redirect("/list");
+            }
+            else return res.serverError(err);
         }
     }
 

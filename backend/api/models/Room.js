@@ -37,6 +37,10 @@ module.exports = {
       defaultsTo: 4
     },
 
+    admin: {
+      model: 'user'
+    },
+
     /*
       jsonplayers: [
         { 
