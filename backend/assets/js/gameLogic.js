@@ -78,8 +78,13 @@ io.socket.on("start", function (data) {
     upperhand.render();
 });
 
+io.socket.on("ready", function (data) {
+    console.log(data);
+});
+
 io.socket.on("turn", function (data) {
     if (userHash == data.user.hashID) {
+        console.log("Its your turn.");
         // Finally, when you click a card in your hand, it is played
         lowerhand.click(function (card) {
             let bCard = { id: card.id, value: card.value, symbol: card.symbol };

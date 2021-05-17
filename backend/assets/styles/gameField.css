@@ -44,10 +44,16 @@ img.preload {
     height: 40.5vh;
     width: 100%;
     position: relative;
+    font-size: 2vh;
 }
 
 #chatfield{
     height: 30vh;
+    overflow-y: scroll;
+    font-size: 2vh;
+}
+
+#gamehistoryfield{
     overflow-y: scroll;
 }
 

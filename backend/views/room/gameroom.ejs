@@ -15,10 +15,10 @@
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
                     <div class="game-utils">
-                        <button id="bmeld" class="btn btn-game btn-secondary" disabled><i class="bi bi-people-fill"></i></button>
-                        <button id="bsteal" class="btn btn-game btn-secondary" disabled><i class="bi bi-file-arrow-down"></i></button>
-                        <button id="bstart" class="btn btn-game btn-secondary"><i class="bi bi-check"></i></button>
-                        <button id="bleave" class="btn btn-game btn-secondary"><i class="bi bi-power"></i></button>
+                        <button id="bmeld" class="btn btn-game btn-secondary" title="Meld a Pair" disabled><i class="bi bi-people-fill"></i></button>
+                        <button id="bsteal" class="btn btn-game btn-secondary" title="Rob the trump with a trump Seven" disabled><i class="bi bi-file-arrow-down"></i></button>
+                        <button id="bstart" class="btn btn-game btn-secondary" title="Ready up"><i class="bi bi-check"></i></button>
+                        <button id="bleave" class="btn btn-game btn-secondary" title="Leave Game"><i class="bi bi-door-open-fill"></i></button>
                     </div>
                 </div>
 
@@ -32,6 +32,7 @@
                 <div id="game-history">
                     <h3 class="p-2">Spielverlauf</h3>
                     <%- include roomparts/userlist.ejs %>
+                        <div id="gamehistoryfield"></div>
                 </div>
             </div>
 

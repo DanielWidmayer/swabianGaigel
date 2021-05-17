@@ -1,4 +1,5 @@
 const chf = $("#chatfield");
+const gamef = $("#gamehistoryfield");
 const fpost = $("#fpost");
 const bpost = $("#bpost");
 
@@ -23,8 +24,14 @@ io.socket.on("chatmsg", function (data) {
 });
 
 io.socket.on("turnmsg", function (data) {
-    console.log(data.text);
-    chf.append(`<p>${data.text}</p>`);
+    console.log(data);
+    let text;
+    if (userHash == data.user.hashID) {
+        text = "It's your turn.";
+    } else {
+        text = "It's " + data.user.name + "'s turn.";
+    }
+    chf.append(`<p>${text}</p>`);
 });
 
 bpost.click(postmsg);

@@ -96,6 +96,7 @@ module.exports = {
         try {
             let uhash;
             if (c_hash) uhash = c_hash;
+            else uhash = Math.floor(Math.random() * (999 - 100) + 100);
             // unique hash
             while (await User.findOne({ hashID: uhash })) {
                 uhash = Math.floor(Math.random() * (999 - 100) + 100);

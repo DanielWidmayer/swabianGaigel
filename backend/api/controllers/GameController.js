@@ -83,7 +83,7 @@ module.exports = {
 
                 // broadcast turn event
                 user = await User.getNameAndHash(players[0].playerID);
-                ChatController.turnmsg(user.name, room.hashID);
+                ChatController.turnmsg(user, room.hashID);
                 sails.log("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "turn", { user: user });
 
@@ -156,7 +156,7 @@ module.exports = {
                     user = await User.getNameAndHash(temp_players[winner].playerID);
                     user.score = temp_players[winner].score;
                     sails.sockets.broadcast(room.hashID, "solowin", { user: user });
-                    ChatController.turnmsg(user.name, room.hashID);
+                    ChatController.turnmsg(user, room.hashID);
                     acPl = winner;
                 } else {
                     let p_win = [];

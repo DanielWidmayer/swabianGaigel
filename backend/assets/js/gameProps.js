@@ -41,8 +41,6 @@ function startGame() {
         if (jres.statusCode != 200) {
             console.log(res);
         } else {
-            console.log(res.ready);
-            console.log(res.needed);
             if (!ready) {
                 console.log("ready");
                 ready = true;
