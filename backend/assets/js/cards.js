@@ -11,14 +11,14 @@ var cards = (function () {
         cardback: "red",
         acesHigh: false,
         cardsUrl: "/images/cards.png",
-        type: STANDARD,
-        loop: 1,
+        type: GAIGEL,
+        loop: 2,
     };
     var zIndexCounter = 50;
     var zIndexNegCounter = 50;
     var all = []; //All the cards created.
-    var start = 1;
-    var end = start + 12;
+    var start = 10;
+    var end = start + 4;
 
     function mouseEvent(ev) {
         var card = $(this).data("gamecard");
@@ -39,23 +39,15 @@ var cards = (function () {
             }
         }
         switch (opt.type) {
-            case STANDARD:
-                opt.acesHigh = false;
-                start = opt.acesHigh ? 2 : 1;
-                end = start + 12;
-                break;
-            case PINOCHLE:
-                all.push(new Card(0, 7, opt.table));
-                all.push(new Card(1, 7, opt.table));
-                all.push(new Card(2, 7, opt.table));
-                all.push(new Card(3, 7, opt.table));
-                all.push(new Card(0, 7, opt.table));
-                all.push(new Card(1, 7, opt.table));
-                all.push(new Card(2, 7, opt.table));
-                all.push(new Card(3, 7, opt.table));
+            case GAIGEL:
                 start = 10;
                 end = start + 4;
                 opt.loop = 2;
+                for (let l = 0; l < opt.loop; l++) {
+                    for (let j = 0; j < 4; j++) {
+                        all.push(new Card(j, 7, opt.table));
+                    }
+                }
                 break;
         }
 
@@ -63,15 +55,15 @@ var cards = (function () {
         if ($(opt.table).css("position") == "static") {
             $(opt.table).css("position", "relative");
         }
-        for (let l = 0; l < opt.loop; l++)
+        for (let l = 0; l < opt.loop; l++) {
             for (var i = start; i <= end; i++) {
                 for (let j = 0; j < 4; j++) {
                     all.push(new Card(j, i, opt.table));
                 }
             }
+        }
 
         $(".gamecard").click(mouseEvent);
-        //shuffle(all);
     }
 
     function shuffle(deck) {
@@ -87,13 +79,13 @@ var cards = (function () {
         }
     }
 
-    function Card(suit, rank, table) {
-        this.init(suit, rank, table);
+    function Card(symbol, rank, table) {
+        this.init(symbol, rank, table);
     }
 
     Card.prototype = {
-        init: function (suit, rank, table) {
-            this.suit = suit;
+        init: function (symbol, rank, table) {
+            this.symbol = symbol;
             this.rank = rank;
             this.faceUp = false;
             this.id = 0;
@@ -108,7 +100,7 @@ var cards = (function () {
                 .addClass("gamecard")
                 .data("gamecard", this)
                 .appendTo($(table));
-            // define card values for gaigel
+            // define card values
             switch (rank) {
                 case 7:
                     this.value = 0;
@@ -137,9 +129,9 @@ var cards = (function () {
             this.moveToBack();
         },
 
-        // toString: function () {
-        //   return this.name;
-        // },
+        toString: function () {
+            return this.name;
+        },
 
         moveTo: function (x, y, speed, callback) {
             var props = {
@@ -173,7 +165,7 @@ var cards = (function () {
                 rank = 1; //Aces high must work as well.
             }
             xpos = -rank * opt.cardSize.width;
-            ypos = -this.suit * opt.cardSize.height;
+            ypos = -this.symbol * opt.cardSize.height;
             //this.rotate(0);
             $(this.el).css("background-position", xpos + "px " + ypos + "px");
         },
@@ -309,10 +301,10 @@ var cards = (function () {
             return this[0];
         },
 
-        findCard: function (value, suit) {
+        findCard: function (value, symbol) {
             for (let i = 0; i < this.length; i++) {
                 let card = this[i];
-                if (value == card.value && suit == card.suit) {
+                if (value == card.value && symbol == card.symbol) {
                     return card;
                 }
             }
@@ -394,8 +386,8 @@ var cards = (function () {
 
         sortHand: function () {
             return this.sort((a, b) => {
-                let a_rank = a.value + a.suit * 12;
-                let b_rank = b.value + b.suit * 12;
+                let a_rank = a.value + a.symbol * 12;
+                let b_rank = b.value + b.symbol * 12;
                 if (a_rank < b_rank) return -1;
                 if (a_rank > b_rank) return 1;
                 return 0;
@@ -413,7 +405,7 @@ var cards = (function () {
             if (meldCards.length > 1) {
                 while (meldCards.length) {
                     for (let i = 1; i < meldCards.length; i++) {
-                        if (meldCards[i].suit == meldCards[0].suit && meldCards[i].value != meldCards[0].value) {
+                        if (meldCards[i].symbol == meldCards[0].symbol && meldCards[i].value != meldCards[0].value) {
                             pairs.push(meldCards[0]);
                             pairs.push(meldCards[i]);
                             meldCards.splice(i, 1);
@@ -429,7 +421,7 @@ var cards = (function () {
 
         getTrumpSeven: function (trump) {
             for (var i = 0; i < this.length; i++) {
-                if (this[i].value == 0 && this[i].suit == trump) {
+                if (this[i].value == 0 && this[i].symbol == trump) {
                     return this[i];
                 }
             }
