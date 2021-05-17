@@ -42,8 +42,14 @@ module.exports = {
                 }, 0);
                 if (rps < room.jsonplayers.length) {
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
-                    sails.sockets.broadcast(room.hashID, "ready", { ready: rps, needed: room.jsonplayers.length }, req);
-                    return res.ok({ ready: rps, needed: room.jsonplayers.length });
+                    let pids = [];
+                    for (pl of room.jsonplayers) pids.push(el.playerID);
+                    players = await User.getNameAndHash(pids);
+                    for (pl of players) {
+                        pl.ready = room.jsonplayers[room.jsonplayers.findIndex((i) => i.playerID == pl.id)].ready;
+                    }
+                    sails.sockets.broadcast(room.hashID, "ready", { users: players }, req);
+                    return res.ok({ ready: room.jsonplayers[user].ready });
                 }
 
                 // update room status, reject if already ingame

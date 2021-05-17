@@ -66,7 +66,8 @@ module.exports = {
         let res = [];
 
         for (el of players) {
-            res.push({ hashID: el.hashID, name: el.name });
+            if (el.bot) res.push({ hashID: el.hashID, name: el.botname });
+            else res.push({ hashID: el.hashID, name: el.name });
         }
 
         if (res.length == 1) return res.pop();
@@ -116,10 +117,25 @@ module.exports = {
             for (el of room.jsonplayers) {
                 if (el.bot == true) bots.push(el.playerID);
             }
+
+            return bots;
         } catch (err) {
             throw err;
         }
     },
 
-    getPlayers: async (roomID) => {},
+    getPlayers: async (roomID) => {
+        try {
+            let players = [];
+            let room = await Room.findOne({ id: roomID });
+
+            for (el of room.jsonplayers) {
+                if (el.bot == false) players.push(el.playerID);
+            }
+
+            return players;
+        } catch (err) {
+            throw err;
+        }
+    },
 };
