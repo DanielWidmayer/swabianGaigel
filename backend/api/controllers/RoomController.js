@@ -9,10 +9,28 @@
 const crypto = require("crypto");
 const ChatController = require("./ChatController");
 
-    // TODO - general error handling
+const error = sails.helpers.errors;
+
 
 module.exports = {
+
+    accessList: async (req, res) => {
+        try {
+            // get random user values or use cookies
+            let uname = User.getRandomName(req.cookies.username);
+            let uhash = await User.getRandomHash(req.cookies.userhash);
+
+            let errmsg = req.cookies.errmsg;
+            if (errmsg) res.clearCookie("errmsg");
+    
+            return res.view('basic/roomlist', { layout: 'basic_layout', username: uname, userhash: uhash, errmsg: errmsg });
+        } catch (err) {
+            return res.serverError(err);
+        }
+    },
+
     newRoom: async (req, res) => {
+        // TODO - check POST-data
         try {
             let hash = crypto.randomBytes(10).toString("hex");
             while (await Room.findOne({ hashID: hash })) {
@@ -32,15 +50,22 @@ module.exports = {
             //console.log(room);
             return res.redirect(`/room/${hash}`);
         } catch (err) {
+            if (err.code) {
+                res.cookie("errmsg", err.message);
+                return res.redirect("/create");
+            }
             return res.serverError(err);
         }
     },
 
     createPage: async (req, res) => {
         try {
-            let user = await User.findOne({ id: req.session.userid });
-            if (!user) throw "Authentication Error!";
-            return res.view("basic/create", { layout: "basic_layout", username: user.name, userhash: user.hashID });
+            let user = { name: User.getRandomName(req.cookies.username), hash: await User.getRandomHash(req.cookies.userhash) };
+
+            let errmsg = req.cookies.errmsg;
+            if (errmsg) res.clearCookie("errmsg");
+
+            return res.view("basic/create", { layout: "basic_layout", username: user.name, userhash: user.hash , errmsg: errmsg });
         } catch (err) {
             return res.serverError(err);
         }
@@ -49,47 +74,27 @@ module.exports = {
     roomAccess: async (req, res) => {
         try {
             let hash = req.param("roomID");
-            let user, room, players = [], t_p = [];
+            let user = null, room, players = [], t_p = [];
  
             // check if room exists
             room = await Room.findOne({ hashID: hash });
             if (!room) {
-                throw new Error("Sorry, but the room you tried to join does not exist!");
+                throw error(102, "Sorry, but the room you tried to join does not exist!");
             }
 
-            // get authenticated user, create new one if not authenticated
-            if (req.session.userid) user = await User.findOne({ id: req.session.userid });
-            else {
-                user = await User.newUser(req.cookies.username, res);
-                req.session.userid = user.id;
-            }
-
-            // check if User is already connected to a Room
+            // check if user tries to reconnect
             if (req.session.roomid == room.id) {
-                // User is connected to this room, access granted
+                // User is reconnecting to room, change from bot to user again - TODO
+
                 return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
-            } else if (req.session.roomid) {
-                // User is connected to another room
-                let t_room = await Room.findOne({ id: req.session.roomid });
-                // remove user from player list of connected room
-                players = t_room.jsonplayers;
-                let pin = players.find((el) => el.playerID == user.id);
-                players.splice(pin, 1);
-                await Room.updateOne({ id: t_room.id }).set({ jsonplayers: players });
-                // leave message in old room
-                ChatController.leavemsg(user.name, t_room.hashID);
-                for (el of players) t_p.push(el.playerID);
-                players = await User.getNameAndHash(t_p);
-                sails.sockets.broadcast(t_room.hashID, "userevent", { users: players });
-                console.log(`${user.name} left room ${hash}`);
-                // reset user socket
-                await User.updateOne({ id: user.id }).set({ socket: "" });
             }
-
+            // no room connection, carry on
             // check if room is joinable
-            if (room.status == "game") throw new Error("Sorry, but this game is already running!");
-            if (room.jsonplayers.length >= room.maxplayers) throw new Error("Sorry, but this game is already full!");
+            if (room.status == "game") throw error(102, "Sorry, but this game is already running!");
+            if (room.jsonplayers.length >= room.maxplayers) throw error(102, "Sorry, but this game is already full!");
 
+            // create new user
+            user = await User.newUser(req, res);
 
             // add user to player list
             players = room.jsonplayers;
@@ -97,25 +102,30 @@ module.exports = {
             await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
 
             // make user admin if he is the first one to join
-            //await Room.updateOne({ id: room.id }).set({ admin: user.id });
+            await Room.updateOne({ id: room.id }).set({ admin: user.id });
 
             let temp_room = await Room.getListRoom({ id: room.id });
             sails.sockets.blast("listevent", { room: temp_room });
 
-            // validate session roomid
+            // validate session
             req.session.roomid = room.id;
+            req.session.userid = user.id;
 
             // join message
             ChatController.joinmsg(user.name, room.hashID);
             return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
         } catch (err) {
-            return res.redirect("/list");
+            if (err.code) {
+                res.cookie('errmsg', err.message);
+                return res.redirect('/list');
+            }
+            else return res.serverError(err);
         }
     },
 
     leaveUser: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
@@ -123,11 +133,11 @@ module.exports = {
             let front_p = [];
             // check for connected user
             let user = await User.findOne({ id: req.session.userid });
-            if (!user) return res.badRequest(new Error("User was not connected to any room!"));
+            if (!user) throw error(101, "This User was not connected to any room!");
 
             // check for room
             let room = await Room.findOne({ id: req.session.roomid });
-            if (!room) return res.badRequest(new Error("Room does not exist!"));
+            if (!room) throw error(102, "This Room does not exist!");
             let hash = room.hashID;
 
             // remove user from player list of connected room
@@ -136,9 +146,10 @@ module.exports = {
             players.splice(pin, 1);
             await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
 
-            // disconnect from socket room and remove session room variable
+            // disconnect from socket room and remove session variables
             sails.sockets.leave(req, hash);
-            req.session.roomid = null;
+            delete req.session.roomid;
+            delete req.session.userid;
 
             // leave message
             ChatController.leavemsg(user.name, hash);
@@ -147,8 +158,8 @@ module.exports = {
             sails.sockets.broadcast(hash, "userevent", { users: players });
             console.log(`${user.name} left room ${hash}`);
 
-            // reset user socket
-            await User.updateOne({ id: user.id }).set({ socket: "" });
+            // delete user object
+            await User.destroyOne({ id: user.id });
 
             // update roomlist
             let temp_room = await Room.getListRoom({ id: room.id })
@@ -157,17 +168,18 @@ module.exports = {
             // return status 200, redirect on client side
             return res.ok();
         } catch (err) {
-            return res.serverError(err);
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
         }
     },
 
     socketconnect: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
-            if (!req.session.roomid) throw new Error("Authentication Error");
+            if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             let room = await Room.findOne({ id: req.session.roomid });
             let p_ids = [];
             for (el of room.jsonplayers) {
@@ -182,22 +194,23 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            if (err.code) return res.badRequest(err);
             return res.serverError(err);
         }
     },
 
     userlist: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
             let userid = req.session.userid;
             let roomid = req.session.roomid;
-            if (!roomid || !userid) return res.badRequest(new Error("invalid session"));
+            if (!roomid || !userid) throw error(101, "Invalid Session");
 
             let room = await Room.findOne({ id: roomid });
-            if (!room) return res.badRequest(new Error("room does not exist"));
+            if (!room) throw error(102, "Room does not exist");
             else {
                 let p_ids = [];
                 for (el of room.jsonplayers) p_ids.push(el.playerID);
@@ -205,21 +218,22 @@ module.exports = {
                 return res.json(players);
             }
         } catch (err) {
+            if (err.code) return res.badRequest(err);
             return res.serverError(err);
         }
     },
 
     unloadUser: async (req, res) => {
         if (!req.isSocket) {
-            return res.badRequest(new Error("no socket request"));
+            return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
             let userid = req.session.userid;
             // check if room exists
-            if (!req.session.roomid) throw new Error("Authentication Error!");
+            if (!req.session.roomid) throw error(101, "roomid Session missing!");
             let room = await Room.findOne({ id: req.session.roomid });
-            if (!room) throw new Error("Room does not exist!");
+            if (!room) throw error(102, "Room does not exist!");
 
             // disconnect user from socket. independently from room status
             sails.sockets.leave(req, room.hashID);
@@ -236,8 +250,9 @@ module.exports = {
                 players.splice(pin, 1);
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
 
-                // remove session room variable
-                req.session.roomid = null;
+                // remove session variables
+                delete req.session.roomid;
+                delete req.session.userid;
 
                 pin = [];
                 let user = await User.findOne({ id: userid });
@@ -251,11 +266,15 @@ module.exports = {
                 // update roomlist
                 let temp_room = await Room.getNameAndHash({ id: room.id });
                 sails.sockets.blast("listevent", { room: temp_room });
+
+                // destroy user object
+                await User.destroyOne({ id: user.id });
             }
 
             return res.ok();
         } catch (err) {
-            return res.serverError(err);
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
         }
     },
 };

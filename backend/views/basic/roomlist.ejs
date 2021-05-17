@@ -14,6 +14,7 @@
         </div>
     </div>
 </div>
+<% if (errmsg) { %><div id="errmsg" style="color: red;"><%= errmsg %></div><% } %>      <!-- JB - errmsg enthält die Fehlermeldung --> 
 
 <%- include ../list/modal_change_username.ejs %>
 

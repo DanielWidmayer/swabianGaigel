@@ -23,34 +23,37 @@ module.exports = {
         socket: {
             type: "string",
         },
+
+        botname: {
+            type: "string",
+            required: true
+        },
+
+        bot: {
+            type: "boolean",
+            defaultsTo: false
+        }
     },
 
-    newUser: async (c_username, res) => {
-        let hash = 0;
-        let name = "";
-        // generate unique hash
-        do {
-            hash = Math.floor(Math.random() * (999 - 100) + 100);
-        } while (await User.findOne({ hashID: hash }));
+    newUser: async (req, res) => {
+        // get Name and Hash or use stored values
+        let hash = await sails.models.user.getUniqueHash(req.cookies.userhash);
+        let name = sails.models.user.getRandomName(req.cookies.username);
+        let bot = uniqueNamesGenerator({
+            dictionaries: [colors],
+            length: 1,
+            style: "capital",
+        });
 
-        // check for username cookie
-        if (c_username) name = c_username;
-        else {
-            name = uniqueNamesGenerator({
-                dictionaries: [adjectives, animals, names],
-                separator: "",
-                length: 2,
-                style: "capital",
-            });
-        }
-
+        // store values on cookies
         res.cookie("username", name);
         res.cookie("userhash", hash);
 
         // create User
-        await User.create({
+        await User.chreate({
             hashID: hash,
             name: name,
+            botname: bot
         });
 
         let user = await User.findOne({ hashID: hash });
@@ -69,4 +72,37 @@ module.exports = {
         if (res.length == 1) return res.pop();
         else return res;
     },
+
+    getRandomName: (c_name) => {
+        try {
+            let uname;
+            if (c_name) uname = c_name;
+            // generate random name
+            else uname = uniqueNamesGenerator({
+                dictionaries: [adjectives, animals, names],
+                separator: "",
+                length: 2,
+                style: "capital",
+            });
+
+            return uname;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    getUniqueHash: async (c_hash) => {
+        try {
+            let uhash;
+            if (c_hash) uhash = c_hash;
+            // unique hash
+            while (await User.findOne({ hashID: uhash })) {
+                uhash = Math.floor(Math.random() * (999 - 100) + 100);
+            };
+
+            return uhash;
+        } catch (err) {
+            throw err;
+        }
+    }
 };
