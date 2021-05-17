@@ -7,22 +7,25 @@
 
 const ChatController = require("./ChatController");
 
-    // TODO - general error handling
+// TODO - general error handling
 
 module.exports = {
     startGame: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("no socket request"));
-        } 
-        else {
+        } else {
             try {
-                let room, user, players, carddeck, cards = [], trump_card;
+                let room,
+                    user,
+                    players,
+                    carddeck,
+                    cards = [],
+                    trump_card;
                 // check authentication
                 if (req.session.roomid && req.session.userid) {
                     room = await Room.findOne({ id: req.session.roomid });
                     user = await User.findOne({ id: req.session.userid });
-                }
-                else throw new Error("Authentication Error!");
+                } else throw new Error("Authentication Error!");
                 if (!room) throw new Error("This room could not be found.");
                 if (!user) throw new Error("This User could not be found.");
 
@@ -33,10 +36,13 @@ module.exports = {
                 else room.jsonplayers[user].ready = false;
 
                 // wait till all players are ready
-                let rps = room.jsonplayers.reduce((cb, pv) => { if(pv.ready) return cb + 1; else return cb; }, 0);
+                let rps = room.jsonplayers.reduce((cb, pv) => {
+                    if (pv.ready) return cb + 1;
+                    else return cb;
+                }, 0);
                 if (rps < room.jsonplayers.length) {
-                    await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers});
-                    return res.ok({ready: rps, needed: room.jsonplayers.length });
+                    await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+                    return res.ok({ ready: rps, needed: room.jsonplayers.length });
                 }
 
                 // update room status, reject if already ingame
@@ -139,7 +145,10 @@ module.exports = {
                 winner = temp_players.findIndex((el) => el.playerID == winner);
 
                 if (temp_players.length <= 3) {
-                    temp_players[winner].score += temp_stack[winner].card.value;
+                    for (let i = 0; i < temp_stack.length; i++) {
+                        // DWM - gesamten Stich als Score hochzählen
+                        temp_players[winner].score += temp_stack[i].card.value;
+                    }
                     user = await User.getNameAndHash(temp_players[winner].playerID);
                     user.score = temp_players[winner].score;
                     sails.sockets.broadcast(room.hashID, "solowin", { user: user });
@@ -151,7 +160,10 @@ module.exports = {
                     else p_win = [1, 3];
 
                     for (el of p_win) {
-                        temp_players[el].score += temp_stack[winner].card.value;
+                        for (let i = 0; i < temp_stack.length; i++) {
+                            // DWM - gesamten Stich als Score hochzählen
+                            temp_players[el].score += temp_stack[i].card.value;
+                        }
                     }
 
                     user = await User.getNameAndHash([temp_players[p_win[0]].playerID, temp_players[p_win[0]].playerID]);
@@ -169,7 +181,7 @@ module.exports = {
                     user = await User.findOne({ id: el.playerID });
                     let card = await Card.dealCard(1, el.playerID, room.id);
                     if (card.length) {
-                        sails.sockets.broadcast(user.socket, "dealcard", { card: card });       // willst du nen Array an Karten oder nur eine einzelne? kannst ja im Frontend bei nem Array immer schauen wie lang er is, is glaub besser
+                        sails.sockets.broadcast(user.socket, "dealcard", { card: card }); // willst du nen Array an Karten oder nur eine einzelne? kannst ja im Frontend bei nem Array immer schauen wie lang er is, is glaub besser
                     } else {
                         // TODO - card deck is empty, special handle?
                         sails.log("cannot deal card to " + user.name + ". Empty Deck!");
@@ -201,7 +213,8 @@ module.exports = {
         }
     },
 
-    meldPair: async (req, res) => {     // jajajajaajajajajaajjajaajjaja, immer diese kack Zusatzfunktionen ...
+    meldPair: async (req, res) => {
+        // jajajajaajajajajaajjajaajjaja, immer diese kack Zusatzfunktionen ...
         // check if room exists
         // check if user exists
         // DONT check if its users turn
@@ -209,6 +222,15 @@ module.exports = {
         // socket event pairmelded
         // Add Score to player
         // eval Game Win Condition
+    },
+
+    robTrump: async (req, res) => {
+        // noch ne Zusatzfunktion, immerhin mit geilem Namen :D - evtl müssen wir hier schauen, dass die nicht zweimal parallel in einem Raum aufgerufen werden kann
+        // check if room exists
+        // check if user exists
+        // DONT check if its users turn
+        // check if user owns the card
+        // socket event cardrob
     },
 
     pauseGame: async (req, res) => {},
