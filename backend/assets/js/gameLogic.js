@@ -1,12 +1,10 @@
 //const cards = require('./cards');
 
-var containerHeight, containerWidth, deck, upperhand, lowerhand, trumpCard, upperTrickDeck, lowerTrickDeck, lowerPlayingPile, upperPlayingPile, lastTrick, userHash;
+var containerHeight, containerWidth, deck, upperhand, lowerhand, trumpCard, upperTrickDeck, lowerTrickDeck, lowerPlayingPile, upperPlayingPile, userHash, ownScore;
 
 $(document).ready(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
-
-    lastTrick = 1;
 
     //Tell the library which element to use for the table
     cards.init({ table: "#card-table", type: PINOCHLE });
@@ -56,7 +54,8 @@ $(document).ready(function () {
 io.socket.on("start", function (data) {
     // userHash = data.user[]
     console.log(data);
-    $("#bstart").hide(); //  <--JB- habe ich hinzugefügt, ready button bei gamestart verstecken
+    $("#bstart").hide();
+    ownScore = 0;
     let cardTrump = data.trump;
     trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), data.trump.id);
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
@@ -104,7 +103,6 @@ io.socket.on("turn", function (data) {
 });
 
 io.socket.on("cardplayed", function (data) {
-    console.log(data);
     let card = data.card;
     if (userHash != data.user.hashID) {
         let fCard = deck.findCard(card["value"], card["symbol"]);
@@ -128,6 +126,7 @@ io.socket.on("solowin", function (data) {
     let winningTrickDeck;
     if (userHash == data.user.hashID) {
         winningTrickDeck = lowerTrickDeck;
+        ownScore = data.user.score;
     } else if (userHash != data.user.hashID) {
         winningTrickDeck = upperTrickDeck;
     }
@@ -155,10 +154,17 @@ io.socket.on("dealcard", function (data) {
         lowerhand.render();
         upperhand.addCard(deck.topCard());
         upperhand.render();
-        if (lowerhand.getPair().length > 0) {
-            console.log("Has Pair!");
+        if (lowerhand.getPair().length > 0 && ownScore) {
+            console.log("Has Pair & Can Meld!");
+            if (ownScore) $("#bmeld").prop("disabled", false);
         } else {
-            console.log("No Pair!");
+            $("#bmeld").prop("disabled", true);
+        }
+        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().suit) != null) {
+            console.log("Has Seven & Can Rob!");
+            $("#bsteal").prop("disabled", false);
+        } else {
+            $("#bsteal").prop("disabled", true);
         }
     }, 2500);
 });

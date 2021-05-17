@@ -11,8 +11,6 @@ var cards = (function () {
         cardback: "red",
         acesHigh: false,
         cardsUrl: "/images/cards.png",
-        blackJoker: false,
-        redJoker: false,
         type: STANDARD,
         loop: 1,
     };
@@ -71,12 +69,6 @@ var cards = (function () {
                     all.push(new Card(j, i, opt.table));
                 }
             }
-        if (opt.blackJoker) {
-            all.push(new Card("bj", 0, opt.table));
-        }
-        if (opt.redJoker) {
-            all.push(new Card("rj", 0, opt.table));
-        }
 
         $(".gamecard").click(mouseEvent);
         //shuffle(all);
@@ -420,7 +412,6 @@ var cards = (function () {
             }
             if (meldCards.length > 1) {
                 while (meldCards.length) {
-                    console.log(meldCards[0]);
                     for (let i = 1; i < meldCards.length; i++) {
                         if (meldCards[i].suit == meldCards[0].suit && meldCards[i].value != meldCards[0].value) {
                             pairs.push(meldCards[0]);
