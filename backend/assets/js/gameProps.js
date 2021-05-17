@@ -61,7 +61,14 @@ function startGame() {
 function meldOnePair() {
     let meldCards = lowerhand.getPair();
     if (meldCards.length > 0) {
-        io.socket.post("/meldPair", { cards: meldCards }, function (res, jres) {
+        if (meldCards.length > 2) {
+            // TODO: ask user which pair to meld if he has two pairs
+        }
+        let b_meldCards = [];
+        meldCards.forEach((card) => {
+            b_meldCards.push({ id: card.id, symbol: card.symbol, value: card.value });
+        });
+        io.socket.post("/meldPair", { cards: b_meldCards }, function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(jres);
             } else {
@@ -74,13 +81,16 @@ function meldOnePair() {
 function stealTrumpCard() {
     let trumpSeven = lowerhand.getTrumpSeven(trumpCard.bottomCard());
     if (trumpSeven != null) {
-        io.socket.post("/robTrump", { card: trumpSeven }, function (res, jres) {
+        let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
+        io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(jres);
             } else {
                 console.log(res);
             }
         });
+    } else {
+        console.log("Trumpcard could not be found, something has messed up.");
     }
 }
 

@@ -7,7 +7,7 @@ $(document).ready(function () {
     containerWidth = document.getElementById("card-table").offsetWidth;
 
     //Tell the library which element to use for the table
-    cards.init({ table: "#card-table", type: PINOCHLE });
+    cards.init({ table: "#card-table", type: GAIGEL });
 
     //Create a new deck of cards
     deck = new cards.Deck();
@@ -55,7 +55,7 @@ io.socket.on("start", function (data) {
     // userHash = data.user[]
     console.log(data);
     $("#bstart").hide();
-    ownScore = 0;
+    ownScore = -1;
     let cardTrump = data.trump;
     trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), data.trump.id);
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
@@ -82,7 +82,10 @@ io.socket.on("turn", function (data) {
     if (userHash == data.user.hashID) {
         // Finally, when you click a card in your hand, it is played
         lowerhand.click(function (card) {
-            let bCard = { id: card.id, value: card.value, symbol: card.suit };
+            let bCard = { id: card.id, value: card.value, symbol: card.symbol };
+            console.log(card);
+            console.log(bCard);
+
             io.socket.post("/playCard", { card: bCard }, function (res, jres) {
                 if (jres.statusCode != 200) {
                     console.log(jres);
@@ -154,19 +157,27 @@ io.socket.on("dealcard", function (data) {
         lowerhand.render();
         upperhand.addCard(deck.topCard());
         upperhand.render();
-        if (lowerhand.getPair().length > 0 && ownScore) {
+        if (lowerhand.getPair().length > 0 && ownScore != -1) {
             console.log("Has Pair & Can Meld!");
             if (ownScore) $("#bmeld").prop("disabled", false);
         } else {
             $("#bmeld").prop("disabled", true);
         }
-        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().suit) != null) {
+        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol) != null) {
             console.log("Has Seven & Can Rob!");
             $("#bsteal").prop("disabled", false);
         } else {
             $("#bsteal").prop("disabled", true);
         }
     }, 2500);
+});
+
+// TODO: handle
+io.socket.on("pairmelded", function (data) {
+    console.log(data);
+});
+io.socket.on("cardrob", function (data) {
+    console.log(data);
 });
 
 function getRandomArbitrary(min, max) {
