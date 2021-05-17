@@ -14,56 +14,65 @@
         </div>
     </div>
 </div>
-<% if (errmsg) { %><div id="errmsg" style="color: red;"><%= errmsg %></div><% } %>      <!-- JB - errmsg enthält die Fehlermeldung --> 
+<% if (errmsg) { %>
+    <div id="errmsg" style="color: red;">
+        <%= errmsg %>
+    </div>
+    <% } %>
+        <!-- JB - errmsg enthält die Fehlermeldung -->
 
-<%- include ../list/modal_change_username.ejs %>
+        <%- include ../list/modal_change_username.ejs %>
 
-    <script>
-        const rl = $("#roomlist").children("tbody");
-        var rooms = [];
+            <script>
+                const rl = $("#roomlist").children("tbody");
+                var rooms = [];
 
-        function getAllRooms() {
-            rooms = [];
-            // TODO - This should be replaced with a custom route call to ensure password safety
-            $.get("/room", function (data, status) {
-                data.forEach((room) => {
-                    room.players = room.jsonplayers.length;
-                    rooms.push(room);
-                    renderRoom(room);
-                });
-            });
-        }
+                function getAllRooms() {
+                    rooms = [];
+                    // TODO - This should be replaced with a custom route call to ensure password safety
+                    $.get("/room", function (data, status) {
+                        data.forEach((room) => {
+                            room.players = room.jsonplayers.length;
+                            rooms.push(room);
+                            renderRoom(room);
+                        });
+                    });
+                }
 
 
-        function renderRoom(room) {
-            let target = $(`#${room.hashID}`);
-            let playerIcons = '';
-            for (let i = 0; i < room.players; i++) {
-                playerIcons += '<i class="bi bi-person-fill"></i>';
-            }
-            for (let i = 0; i < room.maxplayers - room.players; i++) {
-                playerIcons += '<i class="bi bi-person"></i>';
-            }
-            if (target.length) {
-                target.children(".rpl").html(playerIcons);
-            } else {
+                function renderRoom(room) {
+                    let target = $(`#${room.hashID}`);
+                    if (room.empty) {
+                        target.remove();
+                        return 1;
+                    }
+                    let playerIcons = '';
+                    for (let i = 0; i < room.players; i++) {
+                        playerIcons += '<i class="bi bi-person-fill"></i>';
+                    }
+                    for (let i = 0; i < room.maxplayers - room.players; i++) {
+                        playerIcons += '<i class="bi bi-person"></i>';
+                    }
+                    if (target.length) {
+                        target.children(".rpl").html(playerIcons);
+                    } else {
 
-                rl.append(`
+                        rl.append(`
                     <tr id="${room.hashID}" onclick=" window.location.href='/room/${room.hashID}';">
                         <td class="rname">${room.name}</td>
                         <td class="rpl">` + playerIcons + `</td>
                         <td class="rpw">${room.password ? "<i class='bi bi-x-square-fill'></i>" : "<i class='bi bi-check-square-fill'></i>"}</td>
                     </tr>`);
-            }
-        }
+                    }
+                }
 
-        window.onload = function () {
-            getAllRooms();
-        };
+                window.onload = function () {
+                    getAllRooms();
+                };
 
-        io.socket.on("listevent", function (data) {
-            console.log(data);
-            renderRoom(data.room);
-        });
+                io.socket.on("listevent", function (data) {
+                    console.log(data);
+                    renderRoom(data.room);
+                });
 
-    </script>
+            </script>
