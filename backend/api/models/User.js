@@ -5,7 +5,7 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-const { uniqueNamesGenerator, adjectives, names, animals } = require("unique-names-generator");
+const { uniqueNamesGenerator, adjectives, names, animals, colors } = require("unique-names-generator");
 
 module.exports = {
     attributes: {
@@ -26,13 +26,13 @@ module.exports = {
 
         botname: {
             type: "string",
-            required: true
+            required: true,
         },
 
         bot: {
             type: "boolean",
-            defaultsTo: false
-        }
+            defaultsTo: false,
+        },
     },
 
     newUser: async (req, res) => {
@@ -50,10 +50,10 @@ module.exports = {
         res.cookie("userhash", hash);
 
         // create User
-        await User.chreate({
+        await User.create({
             hashID: hash,
             name: name,
-            botname: bot
+            botname: bot,
         });
 
         let user = await User.findOne({ hashID: hash });
@@ -78,12 +78,13 @@ module.exports = {
             let uname;
             if (c_name) uname = c_name;
             // generate random name
-            else uname = uniqueNamesGenerator({
-                dictionaries: [adjectives, animals, names],
-                separator: "",
-                length: 2,
-                style: "capital",
-            });
+            else
+                uname = uniqueNamesGenerator({
+                    dictionaries: [adjectives, animals, names],
+                    separator: "",
+                    length: 2,
+                    style: "capital",
+                });
 
             return uname;
         } catch (err) {
@@ -98,11 +99,26 @@ module.exports = {
             // unique hash
             while (await User.findOne({ hashID: uhash })) {
                 uhash = Math.floor(Math.random() * (999 - 100) + 100);
-            };
+            }
 
             return uhash;
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+    getBots: async (roomID) => {
+        try {
+            let bots = [];
+            let room = await Room.findOne({ id: roomID });
+
+            for (el of room.jsonplayers) {
+                if (el.bot == true) bots.push(el.playerID);
+            }
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    getPlayers: async (roomID) => {},
 };

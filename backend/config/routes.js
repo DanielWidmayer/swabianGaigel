@@ -25,7 +25,7 @@ module.exports.routes = {
         },
     },
 
-    "/list": "UserController.accessList",
+    "/list": "RoomController.accessList",
 
     "POST /username": "UserController.changeName",
 
