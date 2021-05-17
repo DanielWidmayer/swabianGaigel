@@ -260,7 +260,7 @@ module.exports = {
             // check room status
             if (room.status == "game") {
                 // TODO - replace player with Bot
-                sails.log("in game");
+                sails.log("user disconnected, replace with bot");
             } else {
                 // remove user from player list of connected room
                 players = room.jsonplayers;
@@ -283,7 +283,6 @@ module.exports = {
                         ChatController.leavemsg(user.name, hash);
                         let users = await User.getNameAndHash(pids);
                         sails.sockets.broadcast(hash, "userevent", { users: users });
-                        console.log(`${user.name} left room ${hash}`);
 
                         room = await Room.getListRoom({ id: room.id });
                     } else {
@@ -302,7 +301,7 @@ module.exports = {
                 sails.sockets.blast("listevent", { room: room });
 
                 // destroy user object
-                await User.destroyOne({ id: user.id });
+                await User.destroyOne({ id: userid });
             }
 
             return res.ok();
