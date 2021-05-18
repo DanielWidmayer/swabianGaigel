@@ -78,9 +78,9 @@ io.socket.on("start", function (data) {
     upperhand.render();
 });
 
-io.socket.on("ready", function (data) {
-    console.log(data);
-    let users = data.users;
+io.socket.on("ready", function (data) {             // <--JB- ich hab das "ready" event durch ein "userevent" ersetzt da es basically dasselbe war, bei "userevent" gebe ich jetzt immer mit:
+    console.log(data);                              // [ {hashID: int, name: string, ready: bool, team: int}, ... ]
+    let users = data.users;                         // userevent wird aufgerufen, wenn ein Spieler ready drückt, dem Room beitritt oder den Room verlässt
     for (let i = 0; i < users.length; i++) {
         if (users[i].ready) {
             // TODO
@@ -183,7 +183,7 @@ io.socket.on("dealcard", function (data) {
     }, 2500);
 });
 
-io.socket.on("pairmelded", function (data) {
+io.socket.on("paircalled", function (data) {
     console.log(data);
     let cards = data.cards;
     let fCards = [];

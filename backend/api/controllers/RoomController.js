@@ -41,7 +41,7 @@ module.exports = {
                 password: req.body.passwd,
                 maxplayers: parseInt(req.body.maxplayers),
                 jsonplayers: [],
-                stack: [],
+                stack: []
             });
             let room = await Room.getListRoom({ hash: hash });
             sails.sockets.blast("listevent", { room: room });
@@ -74,8 +74,7 @@ module.exports = {
             let hash = req.param("roomID");
             let user = null,
                 room,
-                players = [],
-                t_p = [];
+                players = [];
 
             // check if room exists
             room = await Room.findOne({ hashID: hash });
@@ -100,7 +99,7 @@ module.exports = {
 
             // add user to player list
             players = room.jsonplayers;
-            players.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0 });
+            players.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0, team: 0 });
             await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
 
             // make user admin if he is the first one to join
@@ -161,7 +160,16 @@ module.exports = {
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
                     // leave message
                     ChatController.leavemsg(user.name, hash);
-                    let users = await User.getNameAndHash(pids);
+                    let users = [], p_temp;
+                    for (pl of players) {
+                        p_temp = await User.getNameAndHash(pl.id);
+                        users.push({
+                            hashID: p_temp.hashID,
+                            name: p_temp.name,
+                            ready: false,
+                            team: pl.team
+                        })
+                    } 
                     sails.sockets.broadcast(hash, "userevent", { users: users });
                     console.log(`${user.name} left room ${hash}`);
 
@@ -203,14 +211,9 @@ module.exports = {
             let room = await Room.findOne({ id: req.session.roomid });
 
             for (let el of room.jsonplayers) {
-                p_temp = await User.getNameAndHash(el.playerID);
-                players.push({
-                    name: p_temp.name,
-                    hashID: p_temp.hashID,
-                    hand: el.hand.length,
-                    score: el.score,
-                    wins: el.wins
-                });
+                players.push(await User.getNameAndHash(el.playerID));
+                players[players.length - 1].ready = el.ready;
+                players[players.length - 1].team = el.team;
             }
             
             sails.sockets.join(req, room.hashID);
@@ -232,6 +235,17 @@ module.exports = {
                         card: room.stack[i].card
                     });
                 } 
+                for (let el of room.jsonplayers) {
+                    p_temp = await User.getNameAndHash(el.playerID);
+                    players.push({
+                        name: p_temp.name,
+                        hashID: p_temp.hashID,
+                        hand: el.hand.length,
+                        score: el.score,
+                        wins: el.wins,
+                        team: el.team
+                    });
+                }
                 let r_temp = {
                     deck: room.deck.length,
                     trump: room.trump,
@@ -262,9 +276,16 @@ module.exports = {
             let room = await Room.findOne({ id: roomid });
             if (!room) throw error(102, "Room does not exist");
             else {
-                let p_ids = [];
-                for (let el of room.jsonplayers) p_ids.push(el.playerID);
-                let players = await User.getNameAndHash(p_ids);
+                let players = [], temp;
+                for (let el of room.jsonplayers) {
+                    temp = await User.getNameAndHash(el.playerID);
+                    players.push({
+                        hashID: temp.hashID,
+                        name: temp.name,
+                        team: el.team,
+                        ready: el.ready
+                    });
+                }
                 return res.json(players);
             }
         } catch (err) {
@@ -313,7 +334,16 @@ module.exports = {
                         await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
                         // leave message
                         ChatController.leavemsg(user.name, hash);
-                        let users = await User.getNameAndHash(pids);
+                        let users = [], p_temp;
+                        for (pl of players) {
+                            p_temp = await User.getNameAndHash(pl.id);
+                            users.push({
+                                hashID: p_temp.hashID,
+                                name: p_temp.name,
+                                ready: false,
+                                team: pl.team
+                            })
+                        } 
                         sails.sockets.broadcast(hash, "userevent", { users: users });
 
                         room = await Room.getListRoom({ id: room.id });

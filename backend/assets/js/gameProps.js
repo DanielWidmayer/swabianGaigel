@@ -69,7 +69,7 @@ function meldOnePair() {
         meldCards.forEach((card) => {
             b_meldCards.push({ id: card.id, symbol: card.symbol, value: card.value });
         });
-        io.socket.post("/meldPair", { cards: b_meldCards }, function (res, jres) {
+        io.socket.post("/callPair", { cards: b_meldCards }, function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(jres);
             } else {
