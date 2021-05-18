@@ -9,9 +9,12 @@ var ready = false;
 
 io.socket.post("/socketconnect", function (res, jres) {
     if (jres.statusCode != 200) {
-        console.log(res);
+        if (jres.statusCode == 400) {
+            window.location.href = "/list";
+        } else console.log(jres);
     } else {
-        console.log("ok");
+        console.log("socketconnect data: ");
+        console.log(res);
     }
 });
 

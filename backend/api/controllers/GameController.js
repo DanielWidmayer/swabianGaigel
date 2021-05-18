@@ -49,7 +49,7 @@ module.exports = {
                     }
 
                     sails.sockets.broadcast(room.hashID, "ready", { users: players }, req);
-                    return res.ok({ ready: room.jsonplayers[user].ready });
+                    return res.status(200).json({ ready: room.jsonplayers[user].ready });
                 }
 
                 // update room status, reject if already ingame
@@ -196,7 +196,7 @@ module.exports = {
                     user = await User.findOne({ id: el.playerID });
                     let card = await Card.dealCard(1, el.playerID, room.id);
                     if (card.length) {
-                        sails.sockets.broadcast(user.socket, "dealcard", { card: card }); // willst du nen Array an Karten oder nur eine einzelne? kannst ja im Frontend bei nem Array immer schauen wie lang er is, is glaub besser
+                        sails.sockets.broadcast(user.socket, "dealcard", { card: card }); 
                     } else {
                         // TODO - card deck is empty, special handle?
                         sails.log("cannot deal card to " + user.name + ". Empty Deck!");

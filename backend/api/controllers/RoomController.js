@@ -85,6 +85,7 @@ module.exports = {
 
             // check if user tries to reconnect
             if (req.session.roomid == room.id) {
+                
                 // User is reconnecting to room, change from bot to user again - TODO
 
                 return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
@@ -167,7 +168,7 @@ module.exports = {
                     room = await Room.getListRoom({ id: room.id });
                 } else {
                     // no human player left, destroy bots and room
-                    await User.desotry({ id: pids });
+                    await User.destroy({ id: pids });
                     await Room.destroyOne({ id: room.id });
                     room.empty = true;
                 }
@@ -197,23 +198,54 @@ module.exports = {
         }
 
         try {
+            let players = [], p_temp;
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             let room = await Room.findOne({ id: req.session.roomid });
-            let p_ids = [];
-            for (el of room.jsonplayers) {
-                p_ids.push(el.playerID);
+
+            for (let el of room.jsonplayers) {
+                p_temp = await User.getNameAndHash(el.playerID);
+                players.push({
+                    name: p_temp.name,
+                    hashID: p_temp.hashID,
+                    hand: el.hand.length,
+                    score: el.score,
+                    wins: el.wins
+                });
             }
-            let players = await User.getNameAndHash(p_ids);
+            
             sails.sockets.join(req, room.hashID);
             sails.sockets.broadcast(room.hashID, "userevent", { users: players });
 
             // save socket ID in user obj
             await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req) });
 
+            // check if game is running, provide necessary data for reconnect-render
+            if (room.status == "game") {
+                room = await Room.findOne({ id: req.session.roomid }).populate('deck').populate('trump');
+                let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == req.session.userid);
+                let hand = await Card.find().where({ id: room.jsonplayers[p_index].hand });
+                let stack = [];
+                for (i = 0; i < room.stack; i++) {
+                    p_temp = await User.getNameAndHash(room.stack[i].playerID);
+                    stack.push({
+                        uhash: p_temp.hashID,
+                        card: room.stack[i].card
+                    });
+                } 
+                let r_temp = {
+                    deck: room.deck.length,
+                    trump: room.trump,
+                    acPl: room.activePlayer,
+                    robbed: room.robbed,
+                    stack: stack
+                };
+                return res.status(200).json({ users: players, room: r_temp, ownHand: hand });
+            }
+
             return res.ok();
         } catch (err) {
             if (err.code) return res.badRequest(err);
-            return res.serverError(err);
+            else return res.serverError(err);
         }
     },
 
@@ -231,7 +263,7 @@ module.exports = {
             if (!room) throw error(102, "Room does not exist");
             else {
                 let p_ids = [];
-                for (el of room.jsonplayers) p_ids.push(el.playerID);
+                for (let el of room.jsonplayers) p_ids.push(el.playerID);
                 let players = await User.getNameAndHash(p_ids);
                 return res.json(players);
             }
@@ -287,12 +319,14 @@ module.exports = {
                         room = await Room.getListRoom({ id: room.id });
                     } else {
                         // no human player left, destroy bots and room
-                        await User.desotry({ id: pids });
+                        sails.log("destroy room " + room.hashID);
+                        await User.destroy({ id: pids });
                         await Room.destroyOne({ id: room.id });
                         room.empty = true;
                     }
                 } else {
                     // noone left, destroy room
+                    sails.log("destroy room " + room.hashID);
                     await Room.destroyOne({ id: room.id });
                     room.empty = true;
                 }
@@ -301,6 +335,7 @@ module.exports = {
                 sails.sockets.blast("listevent", { room: room });
 
                 // destroy user object
+                sails.log("destroy user object");
                 await User.destroyOne({ id: userid });
             }
 
