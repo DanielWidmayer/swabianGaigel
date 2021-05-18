@@ -45,9 +45,13 @@ module.exports.routes = {
 
     "/startGame": "GameController.startGame",
 
+    "/randomOrder": "GameController.randomOrder",
+
+    "/switchTeam": "GameController.switchTeam",
+
     "/playCard": "GameController.playCard",
 
-    "/meldPair": "GameController.meldPair",
+    "/callPair": "GameController.callPair",
 
     "/robTrump": "GameController.robTrump",
 

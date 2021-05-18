@@ -17,7 +17,7 @@ module.exports = {
             required: true,
         },
 
-        // status: game, lobby
+        // status: game, lobby, won
         status: {
             type: "string",
             defaultsTo: "lobby",
@@ -44,7 +44,8 @@ module.exports = {
           hand: [ Card.id ],
           score: Integer,
           ready: true/false,
-          wins: Integer
+          wins: Integer,
+          team: Integer
         }
       ]
     */
@@ -68,6 +69,10 @@ module.exports = {
         robbed: {
             type: "boolean",
             defaultsTo: false,
+        },
+
+        called: {
+            collection: "card"
         },
 
         /*

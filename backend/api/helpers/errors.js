@@ -26,7 +26,7 @@ module.exports = {
 
 
   fn: function (inputs, exits) {
-    let err = new Error(inputs.msg);
+    let err = { msg: inputs.msg };
 
     switch(inputs.code) {
       case 101: 
