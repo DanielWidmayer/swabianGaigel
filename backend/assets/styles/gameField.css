@@ -1,5 +1,8 @@
 html {
-    background-image: url("/images/tabletexture.jpg");
+    background-image: url("/images/Gaigel_Wallpaper.jpg")!important;
+    background-size: cover;    
+    background-repeat: no-repeat;
+    height: 100vh;
 }
 
 body{
