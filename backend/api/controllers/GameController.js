@@ -340,6 +340,7 @@ module.exports = {
                     let uhash;
                     for (el of temp_stack) {
                         uhash = await User.getNameAndHash(el.playerID);
+                        ChatController.cardplayedmsg(uhash.name, el.card, room.hashID);
                         uhash = uhash.hashID.toString();
                         user_stack[uhash] = el.card;
                     }
