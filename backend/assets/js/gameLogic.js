@@ -129,10 +129,7 @@ function findCertainCard(value, symbol) {
             if (key != userHash) {
                 fCard = userhands[key].hand.findCard(value, symbol);
                 if (fCard != null) {
-                    deck.addCard(fCard);
                     userhands[key].hand.addCard(deck.topCard());
-                    userhands[key].hand.render({ immediate: true });
-                    deck.render({ immediate: true });
                     return fCard;
                 }
             }
@@ -141,7 +138,7 @@ function findCertainCard(value, symbol) {
     return fCard;
 }
 
-function findAndChangeCard(value, symbol, hashID, cardToReplace) {
+function findAndChangeCard(value, symbol, id, hashID, cardToReplace) {
     let fCard = deck.findCard(value, symbol);
     if (fCard == null) {
         fCard = userhands[hashID].hand.findCard(value, symbol);
@@ -150,7 +147,7 @@ function findAndChangeCard(value, symbol, hashID, cardToReplace) {
                 fCard = userhands[key].hand.findCard(value, symbol);
                 if (fCard != null) {
                     userhands[key].hand.addCard(cardToReplace);
-                    userhands[hashID].hand.addCard(fCard);
+                    userhands[hashID].hand.addCard(fCard, id);
                     userhands[key].hand.render({ immediate: true });
                     userhands[hashID].hand.render({ immediate: true });
                     return fCard;
@@ -159,7 +156,7 @@ function findAndChangeCard(value, symbol, hashID, cardToReplace) {
         }
     } else {
         deck.addCard(cardToReplace);
-        userhands[hashID].hand.addCard(fCard);
+        userhands[hashID].hand.addCard(fCard, id);
         userhands[hashID].hand.render({ immediate: true });
         deck.render({ immediate: true });
     }
@@ -170,7 +167,7 @@ io.socket.on("cardplayed", function (data) {
     let card = data.card;
     let playerHash = data.user.hashID;
     if (userHash != playerHash) {
-        let fCard = findAndChangeCard(card.value, card.symbol, playerHash, userhands[playerHash].hand.topCard());
+        let fCard = findAndChangeCard(card.value, card.symbol, card.id, playerHash, userhands[playerHash].hand.topCard());
         userhands[playerHash].playingpile.addCard(fCard);
         userhands[playerHash].playingpile.render({
             callback: userhands[playerHash].playingpile.topCard().rotate(getRandomArbitrary(-200, -160)),
@@ -279,28 +276,18 @@ io.socket.on("firstcard", function (data) {
 
 io.socket.on("firstwin", function (data) {
     console.log(data);
-    for (const key in data) {
-        console.log(data[key]);
-        let fCard = findAndChangeCard(data[key].value, data[key].symbol, key, userhands[key].playingpile.bottomCard());
-        userhands[key].playingpile.faceUp = true;
-        userhands[playerHash].playingpile.render({ immediate: true });
-    }
-
-    let winningTrickDeck;
-    if (userHash == data.user.hashID) {
-        winningTrickDeck = userhands[userHash].trickdeck;
-        ownScore = data.user.score;
-    } else if (userHash != data.user.hashID) {
-        winningTrickDeck = userhands[data.user.hashID].trickdeck;
-    }
-
-    setTimeout(() => {
-        for (key in userhands) {
-            winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
+    let udata = data.data;
+    for (const key in udata) {
+        if (userHash != key) {
+            console.log(udata[key]);
+            console.log(key);
+            let playingpile = userhands[key].playingpile;
+            let fCard = findAndChangeCard(udata[key].value, udata[key].symbol, udata[key].id, key, playingpile.bottomCard());
+            playingpile.addCard(fCard, fCard.id);
+            playingpile.faceUp = true;
+            playingpile.render({ immediate: true });
         }
-        winningTrickDeck.render();
-    }, 2500);
-    console.log(data.user.name + " now has a score of: " + data.user.score);
+    }
 });
 
 io.socket.on("paircalled", function (data) {
