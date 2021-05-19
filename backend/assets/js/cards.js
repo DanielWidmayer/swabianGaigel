@@ -195,6 +195,7 @@ var cards = (function () {
     };
     Container.prototype.extend({
         addCard: function (card, id) {
+            if (card.id != undefined) id = card.id;
             this.addCards([card], id);
         },
 

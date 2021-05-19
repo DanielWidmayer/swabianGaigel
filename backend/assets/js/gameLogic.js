@@ -57,7 +57,7 @@ io.socket.on("start", function (data) {
     $("#bstart").hide();
     ownScore = -1;
     let cardTrump = data.trump;
-    trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), data.trump.id);
+    trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), cardTrump.id);
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
     trumpCard.topCard().moveToBack();
 
@@ -78,9 +78,10 @@ io.socket.on("start", function (data) {
     upperhand.render();
 });
 
-io.socket.on("ready", function (data) {             // <--JB- ich hab das "ready" event durch ein "userevent" ersetzt da es basically dasselbe war, bei "userevent" gebe ich jetzt immer mit:
-    console.log(data);                              // [ {hashID: int, name: string, ready: bool, team: int}, ... ]
-    let users = data.users;                         // userevent wird aufgerufen, wenn ein Spieler ready drückt, dem Room beitritt oder den Room verlässt
+io.socket.on("ready", function (data) {
+    // <--JB- ich hab das "ready" event durch ein "userevent" ersetzt da es basically dasselbe war, bei "userevent" gebe ich jetzt immer mit:
+    console.log(data); // [ {hashID: int, name: string, ready: bool, team: int}, ... ]
+    let users = data.users; // userevent wird aufgerufen, wenn ein Spieler ready drückt, dem Room beitritt oder den Room verlässt
     for (let i = 0; i < users.length; i++) {
         if (users[i].ready) {
             // TODO
@@ -174,8 +175,8 @@ io.socket.on("dealcard", function (data) {
         } else {
             $("#bmeld").prop("disabled", true);
         }
-        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol) != null) {
-            console.log("Has Seven & Can Rob!");
+        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && trumpCard.topCard().value != 7) {
+            console.log("Has Seven & Can Rob & Seven hasn't been robbed already!");
             $("#bsteal").prop("disabled", false);
         } else {
             $("#bsteal").prop("disabled", true);
@@ -185,19 +186,6 @@ io.socket.on("dealcard", function (data) {
 
 io.socket.on("paircalled", function (data) {
     console.log(data);
-    let cards = data.cards;
-    let fCards = [];
-    cards.forEach((card) => {
-        fCards.push(lowerhand.findCard(card.value, card.symbol));
-    });
-    upperPlayingPile.addCard(fCards[0]);
-    upperPlayingPile.render();
-    lowerPlayingPile.addCard(fCards[1]);
-    lowerPlayingPile.render();
-    setTimeout(() => {
-        lowerhand.addCards(fCards);
-        lowerhand.render();
-    }, 2000);
 });
 
 io.socket.on("cardrob", function (data) {

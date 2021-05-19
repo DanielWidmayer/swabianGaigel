@@ -73,7 +73,14 @@ function meldOnePair() {
             if (jres.statusCode != 200) {
                 console.log(jres);
             } else {
-                console.log(res);
+                upperPlayingPile.addCard(meldCards[0]);
+                upperPlayingPile.render();
+                lowerPlayingPile.addCard(meldCards[1]);
+                lowerPlayingPile.render();
+                setTimeout(() => {
+                    lowerhand.addCards(meldCards);
+                    lowerhand.render();
+                }, 2000);
             }
         });
     }
@@ -88,10 +95,12 @@ function stealTrumpCard() {
                 console.log(jres);
             } else {
                 console.log(res);
-                lowerhand.addCard(trumpCard.bottomCard());
+                bsteal.prop("disabled", true);
+                trumpCard.bottomCard().rotate(0);
+                lowerhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
                 trumpCard.addCard(trumpSeven);
-                lowerhand.render({ callback: lowerhand.topCard().rotate(270) });
                 lowerhand.sortHand();
+                lowerhand.render();
                 trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
                 trumpCard.topCard().moveToBack();
             }
