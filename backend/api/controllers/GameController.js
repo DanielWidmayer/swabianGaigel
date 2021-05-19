@@ -189,23 +189,36 @@ module.exports = {
                 trump_card = Card.getRandomCard(carddeck);
                 await Room.removeFromCollection(room.id, "deck").members(trump_card.id);
 
-                // player order
+                // player order for teams
                 if (room.jsonplayers.length >= 4) {
+                    let teams = [];
+                    for (i = 0; i <= room.jsonplayers.length / 2; i++) {
+                        teams[i] = room.jsonplayers.filter((el) => el.team == i);
+                    }
+                    // assign free players to team
+                    for (el of teams[0]) {
+                        for (x = 1; x < teams.length; x++) {
+                            if (teams[x].length < 2) {
+                                el.team = x;
+                                teams[x].push(el);
+                                break;
+                            }
+                        }
+                    }
+                    teams.shift();
+                    let ts,
+                        ps = 0;
+                    for (i = 0; i < room.jsonplayers.length; i++) {
+                        ts = i % (room.jsonplayers.length / 2);
+                        room.jsonplayers[i] = teams[ts][ps];
+                        if (i >= room.jsonplayers.length / 2) ps = 1;
+                    }
                 }
-                players = room.jsonplayers;
-                let j, m;
-                for (i = players.length - 1; i > 0; i--) {
-                    j = Math.floor(Math.random() * (i + 1));
-                    m = players[i];
-                    players[i] = players[j];
-                    players[j] = m;
-                }
+
                 await Room.updateOne({ id: room.id }).set({ trump: trump_card.id, jsonplayers: players });
-                room.jsonplayers = players;
 
                 // deal cards to players, start game
                 let hand;
-                players = [];
                 for (pl of room.jsonplayers) {
                     players.push(await User.getNameAndHash(pl.playerID));
                     players[players.length - 1].team = pl.team;
