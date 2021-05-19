@@ -333,7 +333,7 @@ module.exports = {
                         // still at least one human player
                         await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
                         // leave message
-                        ChatController.leavemsg(user.name, hash);
+                        ChatController.leavemsg(user.name, room.hashID);
                         let users = [], p_temp;
                         for (pl of players) {
                             p_temp = await User.getNameAndHash(pl.id);
@@ -344,7 +344,7 @@ module.exports = {
                                 team: pl.team
                             })
                         } 
-                        sails.sockets.broadcast(hash, "userevent", { users: users });
+                        sails.sockets.broadcast(room.hashID, "userevent", { users: users });
 
                         room = await Room.getListRoom({ id: room.id });
                     } else {
