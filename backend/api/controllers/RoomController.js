@@ -263,36 +263,6 @@ module.exports = {
         }
     },
 
-    userlist: async (req, res) => {
-        if (!req.isSocket) {
-            return res.badRequest(new Error("socket request expected, got http instead."));
-        }
-
-        try {
-            let userid = req.session.userid;
-            let roomid = req.session.roomid;
-            if (!roomid || !userid) throw error(101, "Invalid Session");
-
-            let room = await Room.findOne({ id: roomid });
-            if (!room) throw error(102, "Room does not exist");
-            else {
-                let players = [], temp;
-                for (let el of room.jsonplayers) {
-                    temp = await User.getNameAndHash(el.playerID);
-                    players.push({
-                        hashID: temp.hashID,
-                        name: temp.name,
-                        team: el.team,
-                        ready: el.ready
-                    });
-                }
-                return res.json(players);
-            }
-        } catch (err) {
-            if (err.code) return res.badRequest(err);
-            return res.serverError(err);
-        }
-    },
 
     unloadUser: async (req, res) => {
         if (!req.isSocket) {
