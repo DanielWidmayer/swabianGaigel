@@ -298,7 +298,11 @@ module.exports = {
                 let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
                 hand.splice(c_index, 1);
                 // check if user could have played symbol
-                if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same symbol!");
+                if (card.symbol != room.stack[0].symbol) {
+                    if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same symbol!");
+                } else {
+                    if (hand.find((el) => el.value > room.stack[0].card.value)) throw error(104, "You have to play a higher card if you own one!");
+                }
             }
 
             sails.log("all good! " + user.name + " played card " + card);
@@ -315,10 +319,11 @@ module.exports = {
             ChatController.cardplayedmsg(user.name, card, room.hashID);
 
             // check for full stack
+            let winner;
             if (temp_stack.length >= temp_players.length) {
                 // eval win and deal
                 sails.log("Full stack, eval winner");
-                let winner = evalStack(temp_stack, room.trump, first_type);
+                winner = evalStack(temp_stack, room.trump, first_type);
                 winner = temp_players.findIndex((el) => el.playerID == winner);
 
                 if (temp_players.length <= 3) {
@@ -363,6 +368,20 @@ module.exports = {
 
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
 
+                // check if game is finished by point limit
+                if (user.length) {
+                    if (user[0].score >= 101 || user[1].score >= 101) {
+                        sails.sockets.broadcast(room.hashID, "gameover", { user: user });
+                        await Room.updateOne({ id: room.id }).set({ status: "won" });
+                        return res.ok();
+                    }
+                }
+                else if (user.score >= 101) {
+                    sails.sockets.broadcast(room.hashID, "gameover", { user: user });
+                    await Room.updateOne({ id: room.id }).set({ status: "won" });
+                    return res.ok();
+                }
+
                 // only deal cards if deck is not empty
                 if (room.deck.length > 0) {
                     for (el of temp_players) {
@@ -377,8 +396,31 @@ module.exports = {
                         }
                     }
                 } else {
-                    if (!temp_players.find((el) => temp_players.hand.length > 0)) {
+                    // if there are no cards on hand left, game is finished, win by most points
+                    if (!temp_players.find((el) => el.hand.length > 0)) {
+                        let w_score = temp_players[0].score;
+                        let ut;
+                        wuser = [];
                         // Game Finished
+                        for (el of temp_players) {
+                            if (el.score >= w_score) w_score = el.score;
+                        }
+
+                        for (el of temp_players) {
+                            if (el.score == w_score) {
+                                ut = await User.getNameAndHash(el.playerID);
+                                user.push({
+                                    name: ut.name,
+                                    hashID: ut.hashID,
+                                    score: el.score,
+                                    wins: el.wins,
+                                    team: el.team
+                                });
+                            }
+                        }
+                        sails.sockets.broadcast(room.hashID, "gameover", { users: user });
+                        await Room.updateOne({ id: room.id }).set({ status: "won" });
+                        return res.ok();
                     }
                 }
 
@@ -478,6 +520,7 @@ module.exports = {
                 // check for game win
                 if (user.score >= 101) {
                     sails.sockets.broadcast(room.hashID, "gameover", { user: user });
+                    await Room.updateOne({ id: room.id }).set({ status: "won" });
                 }
             } else throw error(104, "You are not allowed to do that yet!");
 
