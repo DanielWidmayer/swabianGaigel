@@ -582,8 +582,8 @@ module.exports = {
                 let temp = room.jsonplayers[p_index].hand[c_index];
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
-                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req); // <--JB- hier solltest du mir mal sagen wie dus gernen hättest? soll jeder das cardrob event bekommen, also auch der der die Karte geraubt hat, oder alle außer ihm?
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp }); // beim melden hab ichs nämlich so gemacht, dass alle benachrichtigt werden, macht vlt mehr sinn
+                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req); 
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp }); 
             } else throw error(104, "You are not allowed to do that yet!");
 
             return res.status(200).json({ trump: room.trump });
@@ -650,4 +650,3 @@ function evalStack(stack, trump, type) {
     }
 }
 
-function evalGame() {}
