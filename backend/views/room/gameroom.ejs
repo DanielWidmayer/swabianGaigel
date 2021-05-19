@@ -11,7 +11,7 @@
 <div class="m-5">
     <div class="row">
         <div class="col-8">
-            <div class="card fieldcontainer p-3">
+            <div class="card card-transparent fieldcontainer p-3">
                 <img class="preload" src="/images/cards.png" />
                 <div id="card-table">
                     <div class="game-utils">
@@ -23,22 +23,24 @@
                 </div>
 
                 <footer>
-                    <p>room#<%= hash %>></p>
+                    <p class="mb-0">room#<%= hash %>
+                    </p>
                 </footer>
             </div>
         </div>
         <div class="col-4">
-            <div class="card mb-3">
+            <div class="card card-transparent mb-3">
                 <div id="game-history">
-                    <h3 class="p-2">Spielverlauf</h3>
+                    <h3 class="p-2 text-white">Spielverlauf</h3>
                     <%- include roomparts/userlist.ejs %>
-                        <div id="gamehistoryfield" class="card"></div>
+                        <hr class="m-0">
+                        <div id="gamehistoryfield"></div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card card-transparent">
                 <div id="chat">
-                    <h3 class="p-2">Chat</h3>
+                    <h3 class="p-2 text-white">Chat</h3>
                     <%- include roomparts/chatfield.ejs %>
                 </div>
             </div>

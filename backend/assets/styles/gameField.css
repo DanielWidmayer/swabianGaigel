@@ -9,6 +9,22 @@ body{
     background-color: transparent!important;
 }
 
+p{
+    color: white;
+}
+
+footer{
+    margin: 0!important;
+}
+
+.card-transparent{
+    background-color: rgba(0, 0, 0, 0.5)!important;
+}
+
+.card-light-transparent{
+    background-color: rgba(255, 255, 255, 0.1)!important;
+}
+
 .fieldcontainer {
     min-height: 80vh;
     height: 100%;
@@ -45,23 +61,37 @@ img.preload {
 }
 
 #chatfield{
-    min-height: 30vh;
+    height: 30vh;
     overflow-y: scroll;
 }
 
 #gamehistoryfield{
-    min-height: 30vh;
+    height: 30vh;
     overflow-y: scroll;
+    color: white;
 }
 
 #userlist{
     height: 30%;
-    padding-left: 0px!important;
+    padding: 7px!important;
+    margin-bottom: 0px!important;
+    color: white;
+}
+
+.chatmsgsend{
+    position: relative !important;
+    bottom: 0;
 }
 
 .chatmsg{
-    position: relative !important;
-    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: .25rem;
+    padding: 0 .5rem;
+    border-radius: 5px;
+    word-break: break-word;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 
@@ -81,4 +111,41 @@ footer {
     font-size: 2rem!important;
 }
 
+
+.icon-eichel:after{
+    content: '';
+    background:url('../images/eichel.png');
+    background-size:cover;
+        position:absolute;
+    width:20px;
+    height:20px;
+    margin-left:5px;
+}
+.icon-schellen:after{
+    content: '';
+    background:url('../images/schellen.png');
+    background-size:cover;
+        position:absolute;
+    width:20px;
+    height:20px;
+    margin-left:5px;
+}
+.icon-herz:after{
+    content: '';
+    background:url('../images/herz.png');
+    background-size:cover;
+        position:absolute;
+    width:20px;
+    height:20px;
+    margin-left:5px;
+}
+.icon-blatt:after{
+    content: '';
+    background:url('../images/blatt.png');
+    background-size:cover;
+        position:absolute;
+    width:20px;
+    height:20px;
+    margin-left:5px;
+}
 

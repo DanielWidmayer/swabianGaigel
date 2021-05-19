@@ -24,6 +24,10 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "turnmsg", { user: user });
     },
 
+    cardplayedmsg: (username, card, roomhash) => {
+        sails.sockets.broadcast(roomhash, "cardplayedmsg", { username: username, card: card });
+    },
+
     chatpost: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("no socket request"));

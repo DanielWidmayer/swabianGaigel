@@ -41,7 +41,7 @@ module.exports = {
                 password: req.body.passwd,
                 maxplayers: parseInt(req.body.maxplayers),
                 jsonplayers: [],
-                stack: []
+                stack: [],
             });
             let room = await Room.getListRoom({ hash: hash });
             sails.sockets.blast("listevent", { room: room });
@@ -84,7 +84,6 @@ module.exports = {
 
             // check if user tries to reconnect
             if (req.session.roomid == room.id) {
-                
                 // User is reconnecting to room, change from bot to user again - TODO
 
                 return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
@@ -160,16 +159,17 @@ module.exports = {
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
                     // leave message
                     ChatController.leavemsg(user.name, hash);
-                    let users = [], p_temp;
+                    let users = [],
+                        p_temp;
                     for (pl of players) {
                         p_temp = await User.getNameAndHash(pl.id);
                         users.push({
                             hashID: p_temp.hashID,
                             name: p_temp.name,
                             ready: false,
-                            team: pl.team
-                        })
-                    } 
+                            team: pl.team,
+                        });
+                    }
                     sails.sockets.broadcast(hash, "userevent", { users: users });
                     console.log(`${user.name} left room ${hash}`);
 
@@ -206,7 +206,8 @@ module.exports = {
         }
 
         try {
-            let players = [], p_temp;
+            let players = [],
+                p_temp;
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             let room = await Room.findOne({ id: req.session.roomid });
 
@@ -215,7 +216,7 @@ module.exports = {
                 players[players.length - 1].ready = el.ready;
                 players[players.length - 1].team = el.team;
             }
-            
+
             sails.sockets.join(req, room.hashID);
             sails.sockets.broadcast(room.hashID, "userevent", { users: players });
 
@@ -224,7 +225,7 @@ module.exports = {
 
             // check if game is running, provide necessary data for reconnect-render
             if (room.status == "game") {
-                room = await Room.findOne({ id: req.session.roomid }).populate('deck').populate('trump');
+                room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump");
                 let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == req.session.userid);
                 let hand = await Card.find().where({ id: room.jsonplayers[p_index].hand });
                 let stack = [];
@@ -232,9 +233,9 @@ module.exports = {
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
                     stack.push({
                         uhash: p_temp.hashID,
-                        card: room.stack[i].card
+                        card: room.stack[i].card,
                     });
-                } 
+                }
                 for (let el of room.jsonplayers) {
                     p_temp = await User.getNameAndHash(el.playerID);
                     players.push({
@@ -243,7 +244,7 @@ module.exports = {
                         hand: el.hand.length,
                         score: el.score,
                         wins: el.wins,
-                        team: el.team
+                        team: el.team,
                     });
                 }
                 let r_temp = {
@@ -251,7 +252,7 @@ module.exports = {
                     trump: room.trump,
                     acPl: room.activePlayer,
                     robbed: room.robbed,
-                    stack: stack
+                    stack: stack,
                 };
                 return res.status(200).json({ users: players, room: r_temp, ownHand: hand });
             }
@@ -276,14 +277,15 @@ module.exports = {
             let room = await Room.findOne({ id: roomid });
             if (!room) throw error(102, "Room does not exist");
             else {
-                let players = [], temp;
+                let players = [],
+                    temp;
                 for (let el of room.jsonplayers) {
                     temp = await User.getNameAndHash(el.playerID);
                     players.push({
                         hashID: temp.hashID,
                         name: temp.name,
                         team: el.team,
-                        ready: el.ready
+                        ready: el.ready,
                     });
                 }
                 return res.json(players);
@@ -324,7 +326,7 @@ module.exports = {
                 delete req.session.roomid;
                 delete req.session.userid;
 
-                pin = [];
+                let pids = [];
                 // check if room is empty
                 if (players.length > 0) {
                     for (pl of players) pids.push(pl.playerID);
@@ -334,16 +336,17 @@ module.exports = {
                         await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
                         // leave message
                         ChatController.leavemsg(user.name, room.hashID);
-                        let users = [], p_temp;
+                        let users = [],
+                            p_temp;
                         for (pl of players) {
                             p_temp = await User.getNameAndHash(pl.id);
                             users.push({
                                 hashID: p_temp.hashID,
                                 name: p_temp.name,
                                 ready: false,
-                                team: pl.team
-                            })
-                        } 
+                                team: pl.team,
+                            });
+                        }
                         sails.sockets.broadcast(room.hashID, "userevent", { users: users });
 
                         room = await Room.getListRoom({ id: room.id });

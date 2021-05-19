@@ -169,9 +169,18 @@ io.socket.on("dealcard", function (data) {
         lowerhand.render();
         upperhand.addCard(deck.topCard());
         upperhand.render();
-        if (lowerhand.getPair().length > 0 && ownScore != -1) {
-            console.log("Has Pair & Can Meld!");
-            if (ownScore) $("#bmeld").prop("disabled", false);
+        let pair = lowerhand.getPair();
+        if (pair.length > 0 && ownScore > -1) {
+            let melded = false;
+            pair.forEach((card) => {
+                if (card.melded) melded = true;
+            });
+            if (!melded) {
+                console.log("Has Pair & Can Meld & Neither one of the cards was melded already!");
+                $("#bmeld").prop("disabled", false);
+            } else {
+                $("#bmeld").prop("disabled", true);
+            }
         } else {
             $("#bmeld").prop("disabled", true);
         }
@@ -186,6 +195,27 @@ io.socket.on("dealcard", function (data) {
 
 io.socket.on("paircalled", function (data) {
     console.log(data);
+    let cards = data.cards;
+    let fCards = [];
+    cards.forEach((card) => {
+        let searchCard = upperhand.findCard(card.value, card.symbol);
+        if (searchCard == null) {
+            searchCard = deck.findCard(card.value, card.symbol);
+            deck.addCard(upperhand.topCard());
+            upperhand.addCard(searchCard);
+            deck.render({ immediate: true });
+            lowerhand.render({ immediate: true });
+        }
+        fCards.push(searchCard);
+    });
+    upperPlayingPile.addCard(fCards[0]);
+    upperPlayingPile.render();
+    lowerPlayingPile.addCard(fCards[1]);
+    lowerPlayingPile.render();
+    setTimeout(() => {
+        upperhand.addCards(fCards);
+        upperhand.render();
+    }, 2000);
 });
 
 io.socket.on("cardrob", function (data) {

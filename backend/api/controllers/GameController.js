@@ -16,7 +16,10 @@ module.exports = {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let room, user, players = [], temp = [];
+            let room,
+                user,
+                players = [],
+                temp = [];
 
             // check authentication
             if (req.session.roomid && req.session.userid) {
@@ -45,13 +48,12 @@ module.exports = {
             if (temp.length == 4) {
                 for (i = 0; i < temp.length; i++) {
                     temp[i].ready = false;
-                    temp[i].team = i % 2 + 1;
+                    temp[i].team = (i % 2) + 1;
                 }
-            }
-            else if (temp.length == 6) {
+            } else if (temp.length == 6) {
                 for (i = 0; i < temp.length; i++) {
                     temp[i].ready = false;
-                    temp[i].team = i % 3 + 1;
+                    temp[i].team = (i % 3) + 1;
                 }
             }
 
@@ -62,12 +64,12 @@ module.exports = {
                 players[players.length - 1].ready = false;
                 players[players.length - 1].team = pl.team;
             }
-            
+
             // save changes
             await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
 
             // userevent
-            sails.sockets.broadcast(room.hashID, "userevent", { users: b_users });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players });
 
             return res.ok();
         } catch (err) {
@@ -84,7 +86,7 @@ module.exports = {
         }
         try {
             let user, room;
-            let teams = [0,0,0,0];
+            let teams = [0, 0, 0, 0];
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
@@ -99,10 +101,10 @@ module.exports = {
 
             // check team parameter
             let t_team = req.body.team;
-            if (t_team < 0 || t_team > 3) throw error(104, "This Team does not exist!"); 
+            if (t_team < 0 || t_team > 3) throw error(104, "This Team does not exist!");
 
             if (room.jsonplayers.length < 4) throw error(104, "No Teams allowed for less than 4 players!");
-            
+
             for (pl of room.jsonplayers) {
                 teams[pl.team] += 1;
             }
@@ -129,7 +131,6 @@ module.exports = {
             else return res.serverError(err);
         }
     },
-
 
     startGame: async (req, res) => {
         if (!req.isSocket) {
@@ -173,7 +174,7 @@ module.exports = {
                     sails.sockets.broadcast(room.hashID, "userevent", { users: players }, req);
                     return res.status(200).json({ ready: room.jsonplayers[user].ready });
                 }
-                if (room.jsonplayers.length == 5 || room.jsonplayers.length) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
+                if (room.jsonplayers.length == 5 || room.jsonplayers.length > 6) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw error(104, "Game is already running!");
@@ -190,7 +191,6 @@ module.exports = {
 
                 // player order
                 if (room.jsonplayers.length >= 4) {
-
                 }
                 players = room.jsonplayers;
                 let j, m;
@@ -279,6 +279,7 @@ module.exports = {
             // socket event cardplayed
             user = await User.getNameAndHash(user.id);
             sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
+            ChatController.cardplayedmsg(user.name, card, room.hashID);
 
             // check for full stack
             if (temp_stack.length >= temp_players.length) {
@@ -303,7 +304,7 @@ module.exports = {
                     let p_win = [];
                     let p_team = temp_players[winner].team;
                     // get winner team
-                    for (pl of temp_players){
+                    for (pl of temp_players) {
                         if (pl.team == p_team) p_win.push(pl.playerID);
                     }
 
@@ -332,7 +333,7 @@ module.exports = {
                     user = await User.findOne({ id: el.playerID });
                     let card = await Card.dealCard(1, el.playerID, room.id);
                     if (card.length) {
-                        sails.sockets.broadcast(user.socket, "dealcard", { card: card }); 
+                        sails.sockets.broadcast(user.socket, "dealcard", { card: card });
                     } else {
                         // TODO - card deck is empty, special handle?
                         sails.log("cannot deal card to " + user.name + ". Empty Deck!");
@@ -366,7 +367,6 @@ module.exports = {
         }
     },
 
-
     callPair: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
@@ -398,7 +398,7 @@ module.exports = {
             sails.log.info(cards);
             if (cards[0].symbol != cards[1].symbol) throw error(104, "These cards are not callable!");
             else if (cards[0].value == cards[1].value) throw error(104, "These cards are not callable!");
-            else if ([3,4].includes(cards[0].value) == false || [3,4].includes(cards[1].value) == false) throw error(104, "These cards are not callable!");
+            else if ([3, 4].includes(cards[0].value) == false || [3, 4].includes(cards[1].value) == false) throw error(104, "These cards are not callable!");
 
             if (room.called) {
                 if (room.called.find((el) => el.id == cards[0].id) || room.called.find((el) => el.id == cards[1].id)) throw error(104, "These cards have already been called!");
@@ -426,18 +426,17 @@ module.exports = {
                     let t_win = room.jsonplayers.findIndex((el) => el.team == user.team && el.playerID != room.jsonplayers[p_index].playerID);
                     room.jsonplayers[t_win].score = user.score;
                 }
-                
+
                 // socket call event
                 sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: cards }, req);
 
                 // save changes
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
-                
+
                 // check for game win
                 if (user.score >= 101) {
                     sails.sockets.broadcast(room.hashID, "gameover", { user: user });
                 }
-
             } else throw error(104, "You are not allowed to do that yet!");
 
             return res.ok();
@@ -495,8 +494,8 @@ module.exports = {
                 let temp = room.jsonplayers[p_index].hand[c_index];
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
-                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);           // <--JB- hier solltest du mir mal sagen wie dus gernen hättest? soll jeder das cardrob event bekommen, also auch der der die Karte geraubt hat, oder alle außer ihm?
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });  // beim melden hab ichs nämlich so gemacht, dass alle benachrichtigt werden, macht vlt mehr sinn
+                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req); // <--JB- hier solltest du mir mal sagen wie dus gernen hättest? soll jeder das cardrob event bekommen, also auch der der die Karte geraubt hat, oder alle außer ihm?
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp }); // beim melden hab ichs nämlich so gemacht, dass alle benachrichtigt werden, macht vlt mehr sinn
             } else throw error(104, "You are not allowed to do that yet!");
 
             return res.status(200).json({ trump: room.trump });
@@ -545,7 +544,4 @@ function evalStack(stack, trump) {
     }
 }
 
-
-function evalGame() {
-
-}
+function evalGame() {}

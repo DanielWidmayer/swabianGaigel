@@ -73,12 +73,17 @@ function meldOnePair() {
             if (jres.statusCode != 200) {
                 console.log(jres);
             } else {
-                upperPlayingPile.addCard(meldCards[0]);
+                meldCards.forEach((card) => {
+                    card.melded = true;
+                });
+                upperPlayingPile.addCard(meldCards[0], meldCards[0].id);
                 upperPlayingPile.render();
-                lowerPlayingPile.addCard(meldCards[1]);
+                lowerPlayingPile.addCard(meldCards[1], meldCards[1].id);
                 lowerPlayingPile.render();
                 setTimeout(() => {
-                    lowerhand.addCards(meldCards);
+                    meldCards.forEach((card) => {
+                        lowerhand.addCard(card, card.id);
+                    });
                     lowerhand.render();
                 }, 2000);
             }

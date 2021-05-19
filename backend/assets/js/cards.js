@@ -113,9 +113,11 @@ var cards = (function () {
                     break;
                 case 12:
                     this.value = 3;
+                    this.melded = false;
                     break;
                 case 13:
                     this.value = 4;
+                    this.melded = false;
                     break;
                 case 14:
                     this.value = 11;
@@ -195,7 +197,6 @@ var cards = (function () {
     };
     Container.prototype.extend({
         addCard: function (card, id) {
-            if (card.id != undefined) id = card.id;
             this.addCards([card], id);
         },
 
