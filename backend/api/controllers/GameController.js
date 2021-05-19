@@ -71,6 +71,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -119,10 +120,11 @@ module.exports = {
                 players[players.length - 1].team = el.team;
             }
 
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players }, req);
 
-            return res.ok();
+            return res.status(200).json({ team: room.jsonplayers[p_index].team });
         } catch (err) {
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -171,6 +173,7 @@ module.exports = {
                     sails.sockets.broadcast(room.hashID, "userevent", { users: players }, req);
                     return res.status(200).json({ ready: room.jsonplayers[user].ready });
                 }
+                if (room.jsonplayers.length == 5 || room.jsonplayers.length) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw error(104, "Game is already running!");
@@ -186,6 +189,9 @@ module.exports = {
                 await Room.removeFromCollection(room.id, "deck").members(trump_card.id);
 
                 // player order
+                if (room.jsonplayers.length >= 4) {
+
+                }
                 players = room.jsonplayers;
                 let j, m;
                 for (i = players.length - 1; i > 0; i--) {
@@ -219,6 +225,7 @@ module.exports = {
 
                 return res.ok();
             } catch (err) {
+                sails.log.error(err);
                 if (err.code) return res.badRequest(err);
                 else return res.serverError(err);
             }
@@ -233,7 +240,7 @@ module.exports = {
         try {
             let room, user, card, c_index, acPl;
             let el;
-            sails.log("sanity checking ...");
+            sails.log("playCard - sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
             else throw error(101, "Invalid Session!");
@@ -257,10 +264,11 @@ module.exports = {
 
             // check if user owns card
             card = req.body.card;
+            sails.log.info(card);
             c_index = room.jsonplayers[acPl].hand.findIndex((el) => el == card.id);
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
 
-            sails.log("all good!");
+            sails.log("all good! " + user.name + " played card " + card);
 
             // add card to stack and remove from hand
             let temp_stack = room.stack;
@@ -270,13 +278,12 @@ module.exports = {
 
             // socket event cardplayed
             user = await User.getNameAndHash(user.id);
-            sails.log("cardplayed event triggered");
             sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
 
             // check for full stack
             if (temp_stack.length >= temp_players.length) {
                 // eval win and deal
-                sails.log("Full stack, trigger roundwin event");
+                sails.log("Full stack, eval winner");
                 let winner = evalStack(temp_stack, room.trump.symbol);
                 winner = temp_players.findIndex((el) => el.playerID == winner);
 
@@ -353,6 +360,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -367,7 +375,7 @@ module.exports = {
         try {
             let room, user, cards, c_index, p_index;
 
-            sails.log("sanity checking ...");
+            sails.log("callPair - sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("called").populate("trump");
             else throw error(101, "Invalid Session!");
@@ -387,6 +395,7 @@ module.exports = {
 
             // check if cards are callable
             cards = req.body.cards;
+            sails.log.info(cards);
             if (cards[0].symbol != cards[1].symbol) throw error(104, "These cards are not callable!");
             else if (cards[0].value == cards[1].value) throw error(104, "These cards are not callable!");
             else if ([3,4].includes(cards[0].value) == false || [3,4].includes(cards[1].value) == false) throw error(104, "These cards are not callable!");
@@ -401,7 +410,7 @@ module.exports = {
                 if (c_index < 0) throw error(104, "You do not own this card, cheater!");
             });
 
-            sails.log("all good!");
+            sails.log("all good! " + user.name + " called " + cards);
 
             if (room.jsonplayers[p_index].wins >= 1) {
                 // mark cards as called
@@ -414,12 +423,12 @@ module.exports = {
                 if (room.jsonplayers.length >= 4) {
                     user.team = room.jsonplayers[p_index].team;
                     // get winner teammate
-                    let t_win = room.jsonplayers.findIndex((el) => el.team == user.team && el.playerID != user.id);
+                    let t_win = room.jsonplayers.findIndex((el) => el.team == user.team && el.playerID != room.jsonplayers[p_index].playerID);
                     room.jsonplayers[t_win].score = user.score;
                 }
                 
                 // socket call event
-                sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: cards });
+                sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: cards }, req);
 
                 // save changes
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
@@ -433,6 +442,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -447,7 +457,7 @@ module.exports = {
             let room, user, card, c_index, p_index;
             let players = [];
 
-            sails.log("sanity checking ...");
+            sails.log("robTrump - sanity checking ...");
 
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
@@ -470,11 +480,14 @@ module.exports = {
             if (room.status != "game") throw error(104, "You can not do that right now!");
 
             card = req.body.card;
+            sails.log.info(card);
             // check if played card is trump 7
             if (card.value != 0 || card.symbol != room.trump.symbol) throw error(104, "This is not the right card!");
             // check if user owns card
             c_index = room.jsonplayers[p_index].hand.findIndex((el) => el == card.id);
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
+
+            sails.log("all good! " + user.name + " robbed " + room.trump + " with " + card);
 
             // check if user has enough wins
             if (room.jsonplayers[p_index].wins >= 1) {
@@ -486,10 +499,11 @@ module.exports = {
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });  // beim melden hab ichs nämlich so gemacht, dass alle benachrichtigt werden, macht vlt mehr sinn
             } else throw error(104, "You are not allowed to do that yet!");
 
-            return res.ok();
+            return res.status(200).json({ trump: room.trump });
         } catch (err) {
             // reset robbery
             await Room.updateOne({ id: req.session.roomid }).set({ robbed: false });
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -511,7 +525,6 @@ function evalStack(stack, trump) {
 
     // all trump symbol or no trump symbol
     if (occ.length == stack.length || occ.length == 0) {
-        sails.log(stack);
         for (i = 0; i < stack.length; i++) {
             if (stack[0].card.symbol == stack[i].card.symbol) {
                 if (stack[i].card.value > v_h) {
@@ -520,7 +533,6 @@ function evalStack(stack, trump) {
                 }
             }
         }
-        sails.log(i_t);
         return stack[i_t].playerID;
     } else {
         for (el of occ) {
