@@ -285,9 +285,9 @@ module.exports = {
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
 
             // check for first round
-            if (!temp_player.find((el) => el.wins > 0)) {
+            if (!room.jsonplayers.find((el) => el.wins > 0)) {
                 firstround = true;
-                if (first_type.length > 0) {
+                if (first_type.length <= 0) {
                     if (card.value == 11) first_type = "Second Ace";
                     else if (card.symbol == room.trump.symbol) {
                         let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
@@ -321,10 +321,11 @@ module.exports = {
 
             // socket event cardplayed
             user = await User.getNameAndHash(user.id);
-            if (!firstround) sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
-            else if (firstplay) sails.sockets.broadcast(room.hashID, "firstcard", { user: user, type: first_type }, req);
+            if (!firstround) {
+                sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
+                ChatController.cardplayedmsg(user.name, card, room.hashID);
+            } else if (firstplay) sails.sockets.broadcast(room.hashID, "firstcard", { user: user, type: first_type }, req);
             else sails.sockets.broadcast(room.hashID, "firstcard", { user: user }, req);
-            ChatController.cardplayedmsg(user.name, card, room.hashID);
 
             // check for full stack
             let winner;
@@ -333,6 +334,17 @@ module.exports = {
                 sails.log("Full stack, eval winner");
                 winner = evalStack(temp_stack, room.trump, firstround ? first_type : "");
                 winner = temp_players.findIndex((el) => el.playerID == winner);
+
+                if (firstround) {
+                    let user_stack = {};
+                    let uhash;
+                    for (el of temp_stack) {
+                        uhash = await User.getNameAndHash(el.playerID);
+                        uhash = uhash.hashID.toString();
+                        user_stack[uhash] = el.card;
+                    }
+                    sails.sockets.broadcast(room.hashID, "firstwin", { data: user_stack }); // data: { 345: CardObj, 277: Cardobj, ... }
+                }
 
                 if (temp_players.length <= 3) {
                     for (let i = 0; i < temp_stack.length; i++) {

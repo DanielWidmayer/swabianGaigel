@@ -261,8 +261,7 @@ module.exports = {
                     played: played,
                     stack: stack,
                 };
-                sails.log(room.jsonplayers[p_index].hand);
-                sails.log(hand);
+
                 return res.status(200).json({ users: players, room: r_temp, ownHand: hand });
             }
 
