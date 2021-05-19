@@ -1,6 +1,12 @@
 //const cards = require('./cards');
 
-var containerHeight, containerWidth, deck, upperhand, lowerhand, trumpCard, upperTrickDeck, lowerTrickDeck, lowerPlayingPile, upperPlayingPile, userHash, ownScore;
+var containerHeight,
+    containerWidth,
+    deck,
+    userhands = {},
+    trumpCard,
+    userHash,
+    ownScore;
 
 $(document).ready(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
@@ -21,40 +27,51 @@ $(document).ready(function () {
     //No animation here, just get the deck onto the table.
     deck.render({ immediate: true });
 
-    //Now lets create a couple of hands, one face down, one face up.
-    upperhand = new cards.Hand({ faceUp: false, y: containerHeight / 5 });
-    lowerhand = new cards.Hand({ faceUp: true, y: (containerHeight * 4) / 5 });
-
-    // Adds a trump Card
-    trumpCard = new cards.Deck({ faceUp: true });
-    trumpCard.x -= containerWidth / 5 - 50;
-
-    // Create Trick Decks
-    upperTrickDeck = new cards.Deck({
-        faceUp: false,
-        y: containerHeight / 5,
-        x: containerWidth / 5,
-    });
-    lowerTrickDeck = new cards.Deck({
-        faceUp: false,
-        y: (containerHeight * 4) / 5,
-        x: containerWidth / 5,
-    });
-
-    // Add playing Ground
-    lowerPlayingPile = new cards.Deck({ faceUp: true });
-    lowerPlayingPile.x += 50;
-    upperPlayingPile = new cards.Deck({ faceUp: true });
-    upperPlayingPile.x += 90;
-
     userHash = getCookie("userhash");
 });
 
 //Let's deal when the game has been started
 io.socket.on("start", function (data) {
-    // userHash = data.user[]
+    console.log("start:");
+    console.log(data);
+    let usr_ctr = data.users.length;
+    for (let i = 0; i < usr_ctr; i++) {
+        let user = data.users[i];
+        let tempusrobj;
+        if (userHash == user.hashID) {
+            tempusrobj = {
+                hand: new cards.Hand({ faceUp: true, y: (containerHeight * 4) / 5 }),
+                trickdeck: new cards.Deck({
+                    faceUp: false,
+                    y: (containerHeight * 4) / 5,
+                    x: containerWidth / 5,
+                }),
+                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 2 }),
+            };
+        } else {
+            tempusrobj = {
+                hand: new cards.Hand({ faceUp: false, y: containerHeight / 5, x: containerWidth / (1 + usr_ctr - i) }),
+                trickdeck: new cards.Deck({
+                    faceUp: false,
+                    y: containerHeight / 5,
+                    x: containerWidth / (1.5 + usr_ctr - i),
+                }),
+                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * usr_ctr }),
+            };
+        }
+        userhands[user.hashID] = tempusrobj;
+    }
+
+    // Adds a trump Card
+    trumpCard = new cards.Deck({ faceUp: true });
+    trumpCard.x -= containerWidth / 5 - 50;
+    trumpCard.y = deck.y;
+
     console.log(data);
     $("#bstart").hide();
+    $(".bi-check-circle-fill").remove();
+    $(".bi-x-circle-fill").remove();
+
     ownScore = -1;
     let cardTrump = data.trump;
     trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), cardTrump.id);
@@ -64,28 +81,18 @@ io.socket.on("start", function (data) {
     let cardHand = data.hand;
     for (let i = 0; i < cardHand.length; i++) {
         let card = cardHand[i];
-        let fCard = deck.findCard(card["value"], card["symbol"]);
-        if (fCard == null) {
-            // search through other hands
-            fCard = upperhand.findCard(card["value"], card["symbol"]);
-            upperhand.addCard(deck.topCard());
+        let fCard = findCertainCard(card["value"], card["symbol"]);
+        userhands[userHash].hand.addCard(fCard, card.id);
+        for (key in userhands) {
+            if (key != userHash) {
+                userhands[key].hand.addCard(deck.topCard());
+            }
         }
-        lowerhand.addCard(fCard, card.id);
-        upperhand.addCard(deck.topCard());
     }
-    lowerhand.sortHand();
-    lowerhand.render();
-    upperhand.render();
-});
-
-io.socket.on("ready", function (data) {
-    // <--JB- ich hab das "ready" event durch ein "userevent" ersetzt da es basically dasselbe war, bei "userevent" gebe ich jetzt immer mit:
-    console.log(data); // [ {hashID: int, name: string, ready: bool, team: int}, ... ]
-    let users = data.users; // userevent wird aufgerufen, wenn ein Spieler ready drückt, dem Room beitritt oder den Room verlässt
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].ready) {
-            // TODO
-        }
+    userhands[userHash].hand.sortHand();
+    userhands[userHash].hand.render();
+    for (key in userhands) {
+        userhands[key].hand.render();
     }
 });
 
@@ -93,11 +100,8 @@ io.socket.on("turn", function (data) {
     if (userHash == data.user.hashID) {
         console.log("Its your turn.");
         // Finally, when you click a card in your hand, it is played
-        lowerhand.click(function (card) {
+        userhands[userHash].hand.click(function (card) {
             let bCard = { id: card.id, value: card.value, symbol: card.symbol };
-            console.log(card);
-            console.log(bCard);
-
             io.socket.post("/playCard", { card: bCard }, function (res, jres) {
                 if (jres.statusCode != 200) {
                     console.log(jres);
@@ -105,34 +109,61 @@ io.socket.on("turn", function (data) {
                     console.log(res);
                 }
             });
-            lowerPlayingPile.addCard(card, card.id);
-            lowerPlayingPile.render({
-                callback: lowerPlayingPile.topCard().rotate(getRandomArbitrary(-20, 20)),
+            userhands[userHash].playingpile.addCard(card, card.id);
+            userhands[userHash].playingpile.render({
+                callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
             });
-            lowerhand.render();
-            lowerhand._click = null;
+            userhands[userHash].hand.render();
+            userhands[userHash].hand._click = null;
         });
     } else {
         console.log("Its " + data.user.name + "'s turn.");
     }
 });
 
+function findCertainCard(value, symbol) {
+    let fCard = deck.findCard(value, symbol);
+    if (fCard == null) {
+        for (key in userhands) {
+            userhands[key].hand.findCard(value, symbol);
+            if (fCard != null) {
+                userhands[key].hand.addCard(deck.topCard());
+                break;
+            }
+        }
+    }
+    return fCard;
+}
+
 io.socket.on("cardplayed", function (data) {
     let card = data.card;
-    if (userHash != data.user.hashID) {
+    let playerHash = data.user.hashID;
+    if (userHash != playerHash) {
         let fCard = deck.findCard(card["value"], card["symbol"]);
         if (fCard == null) {
             // search through other hands
-            fCard = upperhand.findCard(card["value"], card["symbol"]);
+            fCard = userhands[playerHash].findCard(card["value"], card["symbol"]);
+            if (fCard == null) {
+                for (key in userhands) {
+                    userhands[key].hand.findCard(value, symbol);
+                    if (fCard != null) {
+                        userhands[key].hand.addCard(userhands[playerHash].topCard());
+                        userhands[playerHash].hand.addCard(fCard);
+                        userhands[key].hand.render({ immediate: true });
+                        userhands[playerHash].hand.render({ immediate: true });
+                        break;
+                    }
+                }
+            }
         } else {
-            deck.addCard(upperhand.topCard());
-            upperhand.addCard(fCard);
-            upperhand.render({ immediate: true });
+            deck.addCard(userhands[playerHash].hand.topCard());
+            userhands[playerHash].hand.addCard(fCard);
+            userhands[playerHash].hand.render({ immediate: true });
             deck.render({ immediate: true });
         }
-        upperPlayingPile.addCard(fCard);
-        upperPlayingPile.render({
-            callback: upperPlayingPile.topCard().rotate(getRandomArbitrary(-200, -160)),
+        userhands[playerHash].playingpile.addCard(fCard);
+        userhands[playerHash].playingpile.render({
+            callback: userhands[playerHash].playingpile.topCard().rotate(getRandomArbitrary(-200, -160)),
         });
     }
 });
@@ -140,15 +171,17 @@ io.socket.on("cardplayed", function (data) {
 io.socket.on("solowin", function (data) {
     let winningTrickDeck;
     if (userHash == data.user.hashID) {
-        winningTrickDeck = lowerTrickDeck;
+        winningTrickDeck = userhands[userHash].trickdeck;
         ownScore = data.user.score;
     } else if (userHash != data.user.hashID) {
-        winningTrickDeck = upperTrickDeck;
+        winningTrickDeck = userhands[data.user.hashID].trickdeck;
     }
 
     setTimeout(() => {
-        winningTrickDeck.addCard(upperPlayingPile.bottomCard());
-        winningTrickDeck.addCard(lowerPlayingPile.bottomCard());
+        for (key in userhands) {
+            winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
+        }
+        winningTrickDeck.addCard(userhands[userHash].playingpile.bottomCard());
         winningTrickDeck.render();
     }, 2500);
     console.log(data.user.name + " now has a score of: " + data.user.score);
@@ -157,19 +190,18 @@ io.socket.on("solowin", function (data) {
 io.socket.on("dealcard", function (data) {
     let card = data.card[0];
     console.log(data.card);
-    let fCard = deck.findCard(card["value"], card["symbol"]);
-    if (fCard == null) {
-        // search through other hands
-        fCard = upperhand.findCard(card["value"], card["symbol"]);
-        upperhand.addCard(deck.topCard());
-    }
+    let fCard = findCertainCard(card["value"], card["symbol"]);
     setTimeout(() => {
-        lowerhand.addCard(fCard, card.id);
-        lowerhand.sortHand();
-        lowerhand.render();
-        upperhand.addCard(deck.topCard());
-        upperhand.render();
-        let pair = lowerhand.getPair();
+        userhands[userHash].hand.addCard(fCard, card.id);
+        userhands[userHash].hand.sortHand();
+        userhands[userHash].hand.render();
+        for (key in userhands) {
+            if (key != userHash) {
+                userhands[key].hand.addCard(deck.topCard());
+                userhands[key].hand.render();
+            }
+        }
+        let pair = userhands[userHash].hand.getPair();
         if (pair.length > 0 && ownScore > -1) {
             let melded = false;
             pair.forEach((card) => {
@@ -184,7 +216,7 @@ io.socket.on("dealcard", function (data) {
         } else {
             $("#bmeld").prop("disabled", true);
         }
-        if (lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && trumpCard.topCard().value != 7) {
+        if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 7) {
             console.log("Has Seven & Can Rob & Seven hasn't been robbed already!");
             $("#bsteal").prop("disabled", false);
         } else {
@@ -204,14 +236,14 @@ io.socket.on("paircalled", function (data) {
             deck.addCard(upperhand.topCard());
             upperhand.addCard(searchCard);
             deck.render({ immediate: true });
-            lowerhand.render({ immediate: true });
+            userhands[userHash].hand.render({ immediate: true });
         }
         fCards.push(searchCard);
     });
     upperPlayingPile.addCard(fCards[0]);
     upperPlayingPile.render();
-    lowerPlayingPile.addCard(fCards[1]);
-    lowerPlayingPile.render();
+    playingpiles[0].addCard(fCards[1]);
+    playingpiles[0].render();
     setTimeout(() => {
         upperhand.addCards(fCards);
         upperhand.render();

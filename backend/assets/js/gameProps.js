@@ -14,7 +14,9 @@ io.socket.post("/socketconnect", function (res, jres) {
         } else console.log(jres);
     } else {
         console.log("socketconnect data: ");
-        console.log(res);
+        if (res != "OK") {
+            console.log(res);
+        }
     }
 });
 
@@ -78,8 +80,8 @@ function meldOnePair() {
                 });
                 upperPlayingPile.addCard(meldCards[0], meldCards[0].id);
                 upperPlayingPile.render();
-                lowerPlayingPile.addCard(meldCards[1], meldCards[1].id);
-                lowerPlayingPile.render();
+                playingpiles[0].addCard(meldCards[1], meldCards[1].id);
+                playingpiles[0].render();
                 setTimeout(() => {
                     meldCards.forEach((card) => {
                         lowerhand.addCard(card, card.id);

@@ -5,7 +5,21 @@ io.socket.on("userevent", function (data) {
     console.log(data);
     if (Array.isArray(data.users)) {
         data.users.forEach((user) => {
-            ul.append(`<i class="bi bi-person-fill"></i>${user.name}${user.ready}<br>`);
+            let readyicon;
+            if (user.ready) {
+                readyicon = '<i class="bi bi-check-circle-fill"></i>';
+            } else {
+                readyicon = '<i class="bi bi-x-circle-fill"></i>';
+            }
+            ul.append(`${readyicon}<i class="bi bi-person-fill"></i>${user.name}<br>`);
         });
-    } else ul.append(`<i class="bi bi-person-fill"></i>${data.users.name}${data.users.ready}<br>`);
+    } else {
+        let readyicon;
+        if (data.users.ready) {
+            readyicon = '<i class="bi bi-check-circle-fill"></i>';
+        } else {
+            readyicon = '<i class="bi bi-x-circle-fill"></i>';
+        }
+        ul.append(`${readyicon}<i class="bi bi-person-fill"></i>${data.users.name}<br>`);
+    }
 });

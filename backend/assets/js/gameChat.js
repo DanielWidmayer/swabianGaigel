@@ -20,34 +20,34 @@ io.socket.on("controllermsg", function (data) {
 
 io.socket.on("chatmsg", function (data) {
     console.log(data.text);
-    chf.append(`<div class="chatmsg"><b>${data.user}: </b><div>${data.text}</div></div>`);
+    chf.append(`<div class="chatmsg"><b>${data.user}:&nbsp;</b>${data.text}</div>`);
 });
 
 io.socket.on("turnmsg", function (data) {
     console.log(data);
     let text;
     if (userHash == data.user.hashID) {
-        text = "It's your turn.";
+        text = '<p>You have won the trick.</p><p class="mb-3">Your score is now ' + data.user.score + '</p><hr class="mt-0"/><p>It\'s your turn.</p>';
     } else {
-        text = "It's " + data.user.name + "'s turn.";
+        text = "<p>" + data.user.name + ' has won the trick.</p><p class="mb-3">' + data.user.name + "'s score is now " + data.user.score + '</p><hr class="mt-0"/><p>It\'s ' + data.user.name + "'s turn.</p>";
     }
-    gamef.append(`<hr class="mt-0"/><p class="mb-0">${text}</p>`);
+    gamef.append(`${text}`);
 });
 
 io.socket.on("cardplayedmsg", function (data) {
     let icon;
     switch (data.card.symbol) {
         case 0:
-            icon = '<i class="icon-eichel"></i>';
+            icon = '<img class="img-icon" src="../images/eichel.png"></img>';
             break;
         case 1:
-            icon = '<i class="icon-schellen"></i>';
+            icon = '<img class="img-icon" src="../images/schellen.png"></img>';
             break;
         case 2:
-            icon = '<i class="icon-herz"></i>';
+            icon = '<img class="img-icon" src="../images/herz.png"></img>';
             break;
         case 3:
-            icon = '<i class="icon-blatt"></i>';
+            icon = '<img class="img-icon" src="../images/blatt.png"></img>';
             break;
         default:
             break;
@@ -76,7 +76,7 @@ io.socket.on("cardplayedmsg", function (data) {
         default:
             break;
     }
-    gamef.append(`<p>${data.username} has played a ${cardletter}${icon}</p>`);
+    gamef.append(`<p>${data.username} has played a ${icon} ${cardletter}</p>`);
 });
 
 bpost.click(postmsg);

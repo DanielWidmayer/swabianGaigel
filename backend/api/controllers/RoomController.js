@@ -44,8 +44,7 @@ module.exports = {
                 stack: [],
             });
             let room = await Room.getListRoom({ hash: hash });
-            sails.sockets.blast("listevent", { room: room });
-            //console.log(room);
+            //sails.sockets.blast("listevent", { room: room });
             return res.redirect(`/room/${hash}`);
         } catch (err) {
             if (err.code) {
@@ -225,9 +224,15 @@ module.exports = {
 
             // check if game is running, provide necessary data for reconnect-render
             if (room.status == "game") {
-                room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump");
+                room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump").populate("called");
                 let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == req.session.userid);
                 let hand = await Card.find().where({ id: room.jsonplayers[p_index].hand });
+                let played = await Card.find();
+                let temp;
+                for (el of room.deck) {
+                    temp = played.findIndex((c) => c.id == el.id);
+                    played.splice(temp, 1);
+                }
                 let stack = [];
                 for (i = 0; i < room.stack; i++) {
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
@@ -252,8 +257,12 @@ module.exports = {
                     trump: room.trump,
                     acPl: room.activePlayer,
                     robbed: room.robbed,
+                    called: room.called,
+                    played: played,
                     stack: stack,
                 };
+                sails.log(room.jsonplayers[p_index].hand);
+                sails.log(hand);
                 return res.status(200).json({ users: players, room: r_temp, ownHand: hand });
             }
 

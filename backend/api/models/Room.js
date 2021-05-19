@@ -51,11 +51,17 @@ module.exports = {
     */
         jsonplayers: {
             type: "json",
+            defaultsTo: "",
         },
 
         activePlayer: {
             type: "number",
             defaultsTo: 0,
+        },
+
+        startoff: {
+            // Trump, Second Ace, Higher wins
+            type: "string",
         },
 
         deck: {
@@ -72,7 +78,7 @@ module.exports = {
         },
 
         called: {
-            collection: "card"
+            collection: "card",
         },
 
         /*
