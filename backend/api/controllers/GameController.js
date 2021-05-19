@@ -230,11 +230,11 @@ module.exports = {
                     sails.sockets.broadcast(pl.socket, "start", { hand: hand, trump: trump_card, users: players });
                 }
 
-                // broadcast turn event
+                // broadcast firstturn event
                 user = await User.getNameAndHash(room.jsonplayers[0].playerID);
                 ChatController.turnmsg(user, room.hashID);
                 sails.log("its " + user.name + " turn");
-                sails.sockets.broadcast(room.hashID, "turn", { user: user });
+                sails.sockets.broadcast(room.hashID, "firstturn", { user: user });
 
                 return res.ok();
             } catch (err) {
@@ -253,6 +253,8 @@ module.exports = {
         try {
             let room, user, card, c_index, acPl;
             let el;
+            let firstplay = false,
+                firstround = false;
             sails.log("playCard - sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump");
@@ -283,14 +285,18 @@ module.exports = {
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
 
             // check for first round
-            if (first_type.length <= 0) {
-                if (card.value == 11) first_type = "Second Ace";
-                else if (card.symbol == room.trump.symbol) {
-                    let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
-                    if (hand.find((el) => el.symbol != room.trump.symbol)) throw error(104, "You are only allowed to start off with a trump suit card if you do not own any other suit!");
-                    else first_type = "Trump";
-                } else first_type = "Higher wins";
-                await Room.updateOne({ id: room.id }).set({ startoff: first_type });
+            if (!temp_player.find((el) => el.wins > 0)) {
+                firstround = true;
+                if (first_type.length > 0) {
+                    if (card.value == 11) first_type = "Second Ace";
+                    else if (card.symbol == room.trump.symbol) {
+                        let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
+                        if (hand.find((el) => el.symbol != room.trump.symbol)) throw error(104, "You are only allowed to start off with a trump suit card if you do not own any other suit!");
+                        else first_type = "Trump";
+                    } else first_type = "Higher wins";
+                    firstplay = true;
+                    await Room.updateOne({ id: room.id }).set({ startoff: first_type });
+                }
             }
 
             // check for empty deck
@@ -315,7 +321,9 @@ module.exports = {
 
             // socket event cardplayed
             user = await User.getNameAndHash(user.id);
-            sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
+            if (!firstround) sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
+            else if (firstplay) sails.sockets.broadcast(room.hashID, "firstcard", { user: user, type: first_type }, req);
+            else sails.sockets.broadcast(room.hashID, "firstcard", { user: user }, req);
             ChatController.cardplayedmsg(user.name, card, room.hashID);
 
             // check for full stack
@@ -323,7 +331,7 @@ module.exports = {
             if (temp_stack.length >= temp_players.length) {
                 // eval win and deal
                 sails.log("Full stack, eval winner");
-                winner = evalStack(temp_stack, room.trump, first_type);
+                winner = evalStack(temp_stack, room.trump, firstround ? first_type : "");
                 winner = temp_players.findIndex((el) => el.playerID == winner);
 
                 if (temp_players.length <= 3) {
@@ -434,9 +442,7 @@ module.exports = {
             // update activePlayer and broadcast next turn
             user = await User.getNameAndHash(temp_players[acPl].playerID);
             sails.log("next player: " + user.name);
-            //if (first_type.length)
             sails.sockets.broadcast(room.hashID, "turn", { user: user });
-            //else sails.sockets.broadcast(room.hashID, "firstturn", { user: user, type: first_type });
 
             // save changes
             sails.log("save changes!");
@@ -582,8 +588,8 @@ module.exports = {
                 let temp = room.jsonplayers[p_index].hand[c_index];
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
-                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req); // <--JB- hier solltest du mir mal sagen wie dus gernen hättest? soll jeder das cardrob event bekommen, also auch der der die Karte geraubt hat, oder alle außer ihm?
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp }); // beim melden hab ichs nämlich so gemacht, dass alle benachrichtigt werden, macht vlt mehr sinn
+                sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
             } else throw error(104, "You are not allowed to do that yet!");
 
             return res.status(200).json({ trump: room.trump });
@@ -649,5 +655,3 @@ function evalStack(stack, trump, type) {
         return stack[i_t].playerID;
     }
 }
-
-function evalGame() {}

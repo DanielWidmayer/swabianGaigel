@@ -293,7 +293,7 @@ module.exports = {
             if (room.status == "game") {
                 // TODO - replace player with Bot
                 sails.log("user disconnected, replace with bot");
-            } else {
+            } else if (room.status == "lobby") {
                 // remove user from player list of connected room
                 players = room.jsonplayers;
                 let pin = players.find((el) => el.playerID == userid);
