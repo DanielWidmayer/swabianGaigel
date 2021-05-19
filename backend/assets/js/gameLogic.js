@@ -6,7 +6,8 @@ var containerHeight,
     userhands = {},
     trumpCard,
     userHash,
-    ownScore;
+    ownScore,
+    firstTrick;
 
 $(document).ready(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
@@ -125,7 +126,7 @@ function findCertainCard(value, symbol) {
     let fCard = deck.findCard(value, symbol);
     if (fCard == null) {
         for (key in userhands) {
-            userhands[key].hand.findCard(value, symbol);
+            fCard = userhands[key].hand.findCard(value, symbol);
             if (fCard != null) {
                 userhands[key].hand.addCard(deck.topCard());
                 break;
@@ -142,7 +143,7 @@ io.socket.on("cardplayed", function (data) {
         let fCard = deck.findCard(card["value"], card["symbol"]);
         if (fCard == null) {
             // search through other hands
-            fCard = userhands[playerHash].findCard(card["value"], card["symbol"]);
+            fCard = userhands[playerHash].hand.findCard(card["value"], card["symbol"]);
             if (fCard == null) {
                 for (key in userhands) {
                     userhands[key].hand.findCard(value, symbol);
@@ -181,7 +182,6 @@ io.socket.on("solowin", function (data) {
         for (key in userhands) {
             winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
         }
-        winningTrickDeck.addCard(userhands[userHash].playingpile.bottomCard());
         winningTrickDeck.render();
     }, 2500);
     console.log(data.user.name + " now has a score of: " + data.user.score);
@@ -223,6 +223,18 @@ io.socket.on("dealcard", function (data) {
             $("#bsteal").prop("disabled", true);
         }
     }, 2500);
+});
+
+io.socket.on("firstturn", function (data) {
+    console.log(data.user);
+    console.log(data.type);
+    // bekommt der user der anfangen soll
+});
+
+io.socket.on("firstcard", function (data) {
+    console.log(data.user);
+    console.log(data.type);
+    // bekommt jeder, enthält user der anfangen soll
 });
 
 io.socket.on("paircalled", function (data) {

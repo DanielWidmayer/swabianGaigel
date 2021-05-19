@@ -289,7 +289,7 @@ module.exports = {
                     let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
                     if (hand.find((el) => el.symbol != room.trump.symbol)) throw error(104, "You are only allowed to start off with a trump suit card if you do not own any other suit!");
                     else first_type = "Trump";
-                } else first_type == "Higher wins";
+                } else first_type = "Higher wins";
                 await Room.updateOne({ id: room.id }).set({ startoff: first_type });
             }
 
@@ -375,8 +375,7 @@ module.exports = {
                         await Room.updateOne({ id: room.id }).set({ status: "won" });
                         return res.ok();
                     }
-                }
-                else if (user.score >= 101) {
+                } else if (user.score >= 101) {
                     sails.sockets.broadcast(room.hashID, "gameover", { user: user });
                     await Room.updateOne({ id: room.id }).set({ status: "won" });
                     return res.ok();
@@ -414,7 +413,7 @@ module.exports = {
                                     hashID: ut.hashID,
                                     score: el.score,
                                     wins: el.wins,
-                                    team: el.team
+                                    team: el.team,
                                 });
                             }
                         }
@@ -435,8 +434,9 @@ module.exports = {
             // update activePlayer and broadcast next turn
             user = await User.getNameAndHash(temp_players[acPl].playerID);
             sails.log("next player: " + user.name);
-            if (first_type.length) sails.sockets.broadcast(room.hashID, "turn", { user: user });
-            else sails.sockets.broadcast(room.hashID, "firstturn", { user: user, type: first_type });
+            //if (first_type.length)
+            sails.sockets.broadcast(room.hashID, "turn", { user: user });
+            //else sails.sockets.broadcast(room.hashID, "firstturn", { user: user, type: first_type });
 
             // save changes
             sails.log("save changes!");

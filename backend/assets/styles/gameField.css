@@ -115,6 +115,8 @@ footer {
     float: left;
     overflow-y: scroll;
     width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: #005ff8;
 }
 
 .scrollbar-primary::-webkit-scrollbar {
@@ -134,4 +136,8 @@ footer {
 .img-icon{
     height: 20px;
     width: 20px;
+}
+.img-icon-thin{
+    height: 20px;
+    width: 12px;
 }

@@ -38,7 +38,7 @@ io.socket.on("cardplayedmsg", function (data) {
     let icon;
     switch (data.card.symbol) {
         case 0:
-            icon = '<img class="img-icon" src="../images/eichel.png"></img>';
+            icon = '<img class="img-icon-thin" src="../images/eichel.png"></img>';
             break;
         case 1:
             icon = '<img class="img-icon" src="../images/schellen.png"></img>';

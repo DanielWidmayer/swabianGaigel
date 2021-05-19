@@ -46,6 +46,9 @@ tr:hover {
 .scrollbar {
     float: left;
     overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: #005ff8;
+    height: 100%;
 }
 
 .scrollbar-primary::-webkit-scrollbar {
