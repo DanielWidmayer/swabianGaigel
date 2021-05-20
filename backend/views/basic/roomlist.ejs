@@ -8,9 +8,13 @@
         </div>
         <div class="col-4">
             <% include ../list/user.ejs %>
-                <div class="card card-transparent mt-3 p-3">
-                    <a type="button" class="btn btn-primary m-2" href="/create"><i class="bi bi-plus-lg text-white"></i>Create new Room</a>
-                </div>
+            <div class="card card-transparent mt-3 p-3" id="activeRoom">
+                    
+            </div>
+            <div class="card card-transparent mt-3 p-3">
+                <a type="button" class="btn btn-primary m-2" href="/create"><i class="bi bi-plus-lg text-white"></i>Create new Room</a>
+            </div>
+                
         </div>
     </div>
 </div>
@@ -43,18 +47,30 @@
 
             <script>
                 const rl = $("#roomlist").children("tbody");
+                const acdiv = $('#activeRoom');
                 var rooms = [];
+                var aRoom = {};
 
                 function getAllRooms() {
                     rooms = [];
-                    // TODO - This should be replaced with a custom route call to ensure password safety
-                    $.get("/room", function (data, status) {
-                        data.forEach((room) => {
+                    console.log($('#penis'));
+                    $.get("/roomList", function (data, status) {
+                        data.rooms.forEach((room) => {
                             room.players = room.jsonplayers.length;
                             rooms.push(room);
                             renderRoom(room);
                         });
+                        if (data.active) {
+                            console.log("active");
+                            aRoom = data.active;
+                            renderActive(data.active);
+                        }
                     });
+                }
+
+                function renderActive(room) {
+                    acdiv[0].innerHTML = `<h4>${room.name}</h4><a type="button" class="btn btn-primary m-2" href="/room/${room.hashID}"><i class="bi bi-plus-lg text-white"></i>Reconnect</a>`;
+                    acdiv.show();
                 }
 
 
@@ -85,12 +101,18 @@
                 }
 
                 window.onload = function () {
+                    acdiv.hide();
                     getAllRooms();
                 };
 
                 io.socket.on("listevent", function (data) {
                     console.log(data);
                     renderRoom(data.room);
+                    if (aRoom.hashID == data.room.hashID) {
+                        console.log("unactive");
+                        acdiv[0].innerHTML = "";
+                        acdiv.hide();
+                    }
                 });
 
             </script>

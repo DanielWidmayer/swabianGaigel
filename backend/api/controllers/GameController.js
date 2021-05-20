@@ -646,7 +646,7 @@ function evalStack(stack, trump, type) {
 }
 
 async function gameover(roomid) {
-    let room = await Room.findOne({ id: roomid }).populate("deck");
+    let room = await Room.findOne({ id: roomid }).populate("admin");
     let winners = [],
         ut;
     if (room) {
@@ -691,20 +691,45 @@ async function gameover(roomid) {
 
         if (winners.length > 0) {
             sails.sockets.broadcast(room.hashID, "gameover", { winners: winners });
-            ChatController.gameovermsg(user, room.hashID);
+            ChatController.gameovermsg(winners, room.hashID);
 
             // reset Room for rematch
-            let bots = [],
-                tb;
-            for (el of room.jsonplayers) {
-                tb = await User.findOne({ id: el.playerID });
-                if (tb.bot) bots.push(tb.id);
-                else {
+            // reset players and delete bots
+            let bot;
+            let players = room.jsonplayers;
+            for (el of players) {
+                bot = await User.findOne({ id: el.playerID });
+                if (!bot.bot) {
+                    el.hand = [];
+                    el.score = 0;
+                    el.ready = false;
+                    el.team = 0;
+                    el.wins = 0;
                 }
+            }
+            bot = players.findIndex((el) => el.bot == true);
+            while(bot >= 0) {
+                await User.destroyOne({ id: players[bot].playerID });
+                players.splice(bot, 1);
+                bot = players.findIndex((el) => el.bot == true);
+            }
+            // switch first player
+            if (players[0].playerID == room.jsonplayers[0].playerID && players.length > 1) {
+                let temp = players.shift();
+                players.push(temp);
             }
             await Room.updateOne({ id: room.id }).set({
                 status: "lobby",
+                jsonplayers: players,
+                admin: players[0].playerID,
+                activePlayer: 0,
+                startoff: "",
+                trump: null,
+                robbed: false,
+                stack: []
             });
+            await Room.replaceCollection(room.id, "deck").members([]);
+            await Room.replaceCollection(room.id, "called").members([]);
             return 1;
         } else return 0;
     } else return 0;
