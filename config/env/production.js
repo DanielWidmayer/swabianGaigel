@@ -226,8 +226,7 @@ module.exports = {
          *                                                                          *
          ***************************************************************************/
         onlyAllowOrigins: [
-           'https://example.com',
-           'https://staging.example.com',
+           'https://gaigelapp.herokuapp.com/'
         ],
         /***************************************************************************
          *                                                                          *
