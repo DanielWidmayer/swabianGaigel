@@ -235,7 +235,7 @@ module.exports = {
 
                 // broadcast firstturn event
                 user = await User.getNameAndHash(room.jsonplayers[0].playerID);
-                ChatController.turnmsg(user, room.hashID);
+                ChatController.firstturnmsg(user, room.hashID);
                 sails.log("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "firstturn", { user: user });
 
@@ -619,9 +619,10 @@ function evalStack(stack, trump, type) {
     // get occurrences of trump symbol
     if (trump.symbol) {
         for (i = 0; i < stack.length; i++) {
-            if (stack[i].card.symbol == trump.symbol) occ.push(i);
+            if (stack[i].card.symbol == trump.symbol) occ.push(stack[i]);
         }
     }
+    sails.log.info(occ);
 
     // all trump symbol or no trump symbol
     if (occ.length == stack.length || occ.length == 0) {
@@ -636,12 +637,12 @@ function evalStack(stack, trump, type) {
         return stack[i_t].playerID;
     } else {
         for (el of occ) {
-            if (stack[el].card.value > v_h) {
-                i_t = el;
-                v_h = stack[el].card.value;
+            if (el.card.value > v_h) {
+                i_t = el.playerID;
+                v_h = el.card.value;
             }
         }
-        return stack[i_t].playerID;
+        return i_t;
     }
 }
 
