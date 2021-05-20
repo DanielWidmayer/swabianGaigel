@@ -105,4 +105,14 @@ module.exports = {
             sails.log(err);
         }
     },
+
+    getList: async () => {
+        let rooms = await Room.find();
+        
+        for (el of rooms) {
+            el = { hashID: el.hashID, name: el.name, password: el.password ? true : false, maxplayers: el.maxplayers, players: el.jsonplayers.length };
+        }
+
+        return rooms;
+    }
 };
