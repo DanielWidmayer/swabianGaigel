@@ -120,14 +120,14 @@ io.socket.on("turn", function (data) {
                     console.log(jres);
                 } else {
                     console.log(res);
-                    userhands[userHash].playingpile.addCard(card, card.id);
-                    userhands[userHash].playingpile.render({
-                        callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
-                    });
-                    userhands[userHash].hand.render();
-                    userhands[userHash].hand._click = null;
                 }
             });
+            userhands[userHash].playingpile.addCard(card, card.id);
+            userhands[userHash].playingpile.render({
+                callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
+            });
+            userhands[userHash].hand.render();
+            userhands[userHash].hand._click = null;
         });
     } else {
         console.log("Its " + data.user.name + "'s turn.");
@@ -263,15 +263,15 @@ io.socket.on("firstturn", function (data) {
                         console.log(jres);
                     } else {
                         console.log(res);
-                        let playingpile = userhands[userHash].playingpile;
-                        playingpile.addCard(card, card.id);
-                        playingpile.render({
-                            callback: playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
-                        });
-                        userhands[userHash].hand.render();
-                        userhands[userHash].hand._click = null;
                     }
                 });
+                let playingpile = userhands[userHash].playingpile;
+                playingpile.addCard(card, card.id);
+                playingpile.render({
+                    callback: playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
+                });
+                userhands[userHash].hand.render();
+                userhands[userHash].hand._click = null;
             } else {
                 console.log("You're not allowed to play a trump card.");
             }

@@ -347,7 +347,7 @@ module.exports = {
                     let uhash;
                     for (el of temp_stack) {
                         uhash = await User.getNameAndHash(el.playerID);
-                        ChatController.cardplayedmsg(uhash.name, el.card, room.hashID);
+                        ChatController.cardplayedmsg(uhash, el.card, room.hashID);
                         uhash = uhash.hashID.toString();
                         user_stack[uhash] = el.card;
                     }
@@ -708,7 +708,7 @@ async function gameover(roomid) {
                 }
             }
             bot = players.findIndex((el) => el.bot == true);
-            while(bot >= 0) {
+            while (bot >= 0) {
                 await User.destroyOne({ id: players[bot].playerID });
                 players.splice(bot, 1);
                 bot = players.findIndex((el) => el.bot == true);
@@ -726,7 +726,7 @@ async function gameover(roomid) {
                 startoff: "",
                 trump: null,
                 robbed: false,
-                stack: []
+                stack: [],
             });
             await Room.replaceCollection(room.id, "deck").members([]);
             await Room.replaceCollection(room.id, "called").members([]);
