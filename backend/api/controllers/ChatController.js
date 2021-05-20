@@ -11,8 +11,10 @@ module.exports = {
         sails.log(`${username} joined room ${roomhash}`);
     },
 
-    leavemsg: (username, roomhash) => {
-        sails.sockets.broadcast(roomhash, "leavemsg", { user: username, text: "has left the game!" });
+    leavemsg: (username, roomhash, bot = "") => {
+        let text = "left the game";
+        if (bot.length) text += " and was replaced by Bot"; 
+        sails.sockets.broadcast(roomhash, "leavemsg", { user: username, text: text, bot: bot });
         sails.log(`${username} left room ${roomhash}`);
     },
 

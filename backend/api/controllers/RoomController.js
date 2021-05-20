@@ -12,6 +12,7 @@ const ChatController = require("./ChatController");
 const error = sails.helpers.errors;
 
 module.exports = {
+    // -------------------------------------------------------------------------------------- roomlist
     accessList: async (req, res) => {
         try {
             // get random user values or use cookies
@@ -27,6 +28,8 @@ module.exports = {
         }
     },
 
+
+    // -------------------------------------------------------------------------------------- Room Creation
     newRoom: async (req, res) => {
         // TODO - check POST-data
         try {
@@ -68,6 +71,8 @@ module.exports = {
         }
     },
 
+
+    // -------------------------------------------------------------------------------------- Join Room
     roomAccess: async (req, res) => {
         try {
             let hash = req.param("roomID");
@@ -81,12 +86,24 @@ module.exports = {
                 throw error(102, "Sorry, but the room you tried to join does not exist!");
             }
 
-            // check if user tries to reconnect
-            if (req.session.roomid == room.id) {
-                // User is reconnecting to room, change from bot to user again - TODO
-
-                return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
+            // check if user object still exists somewhere
+            if (req.session.userid) {
+                user = await User.findOne({ id: req.session.userid });
+                if (!user) {
+                    // kill references
+                    delete req.session.userid;
+                    delete req.session.roomid;
+                }
+                // check if user tries to reconnect
+                else if (req.session.roomid == room.id) {
+                    // change from bot to user again - TODO
+                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
+                }
+                else if (req.session.roomid) {
+                    await unloadtimer({ userid: req.session.userid, roomid: req.session.roomid });
+                }
             }
+            
             // no room connection, carry on
             // check if room is joinable
             if (room.status == "game") throw error(102, "Sorry, but this game is already running!");
@@ -121,84 +138,6 @@ module.exports = {
         }
     },
 
-    leaveUser: async (req, res) => {
-        if (!req.isSocket) {
-            return res.badRequest(new Error("socket request expected, got http instead."));
-        }
-
-        try {
-            let players = [];
-            let pids = [];
-            let bots = [];
-            // check for connected user
-            let user = await User.findOne({ id: req.session.userid });
-            if (!user) throw error(101, "This User was not connected to any room!");
-
-            // check for room
-            let room = await Room.findOne({ id: req.session.roomid });
-            if (!room) throw error(102, "This Room does not exist!");
-            let hash = room.hashID;
-
-            // remove user from player list of connected room
-            players = room.jsonplayers;
-            let pin = players.findIndex((el) => el.playerID == user.id);
-            players.splice(pin, 1);
-
-            // disconnect from socket room and remove session variables
-            sails.sockets.leave(req, hash);
-            delete req.session.roomid;
-            delete req.session.userid;
-
-            // check if room is empty
-            if (players.length > 0) {
-                for (pl of players) pids.push(pl.playerID);
-                bots = await User.find().where({ id: pids });
-                if (bots.find((el) => el.bot == false)) {
-                    // still at least one human player
-                    await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
-                    // leave message
-                    ChatController.leavemsg(user.name, hash);
-                    let users = [],
-                        p_temp;
-                    for (pl of players) {
-                        p_temp = await User.getNameAndHash(pl.id);
-                        users.push({
-                            hashID: p_temp.hashID,
-                            name: p_temp.name,
-                            ready: false,
-                            team: pl.team,
-                        });
-                    }
-                    sails.sockets.broadcast(hash, "userevent", { users: users });
-                    console.log(`${user.name} left room ${hash}`);
-
-                    room = await Room.getListRoom({ id: room.id });
-                } else {
-                    // no human player left, destroy bots and room
-                    await User.destroy({ id: pids });
-                    await Room.destroyOne({ id: room.id });
-                    room.empty = true;
-                }
-            } else {
-                // noone left, destroy room
-                await Room.destroyOne({ id: room.id });
-                room.empty = true;
-            }
-
-            // delete user object
-            await User.destroyOne({ id: user.id });
-
-            // update roomlist
-            sails.sockets.blast("listevent", { room: room });
-
-            // return status 200, redirect on client side
-            return res.ok();
-        } catch (err) {
-            if (err.code) return res.badRequest(err);
-            else return res.serverError(err);
-        }
-    },
-
     socketconnect: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
@@ -220,7 +159,7 @@ module.exports = {
             sails.sockets.broadcast(room.hashID, "userevent", { users: players });
 
             // save socket ID in user obj
-            await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req) });
+            await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req), unload: false });
 
             // check if game is running, provide necessary data for reconnect-render
             if (room.status == "game") {
@@ -272,6 +211,64 @@ module.exports = {
         }
     },
 
+
+    // -------------------------------------------------------------------------------------- Leave Room
+    leaveUser: async (req, res) => {
+        if (!req.isSocket) {
+            return res.badRequest(new Error("socket request expected, got http instead."));
+        }
+
+        try {
+            let players = [];
+            // check for connected user
+            let user = await User.findOne({ id: req.session.userid });
+            if (!user) throw error(101, "This User was not connected to any room!");
+
+            // check for room
+            let room = await Room.findOne({ id: req.session.roomid });
+            if (!room) throw error(102, "This Room does not exist!");
+
+            // disconnect from socket room and remove session variables
+            sails.sockets.leave(req, room.hashID);
+            delete req.session.roomid;
+            delete req.session.userid;
+
+            if (room.status == "game") {
+                sails.log("replace player with bot");
+                // replace player with bot - TODO
+
+
+                // leave message
+                ChatController.leavemsg(user.name, room.hashID, user.botname);
+            }
+            else {
+                // remove user from player list of connected room
+                players = room.jsonplayers;
+                let pin = players.findIndex((el) => el.playerID == user.id);
+                players.splice(pin, 1);
+
+                // delete user object
+                await User.destroyOne({ id: user.id });
+
+                // leave message
+                ChatController.leavemsg(user.name, room.hashID);
+            }
+            
+            await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
+
+            room = await handleEmptyRoom(room.id);
+
+            // update roomlist
+            sails.sockets.blast("listevent", { room: room });
+
+            // return status 200, redirect on client side
+            return res.ok();
+        } catch (err) {
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
+        }
+    },
+
     unloadUser: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
@@ -283,71 +280,19 @@ module.exports = {
             if (!req.session.roomid) throw error(101, "roomid Session missing!");
             let room = await Room.findOne({ id: req.session.roomid });
             if (!room) throw error(102, "Room does not exist!");
+            let roomid = room.id;
 
             // disconnect user from socket. independently from room status
             sails.sockets.leave(req, room.hashID);
-            await User.updateOne({ id: userid }).set({ socket: "" });
+            // user unload
+            await User.updateOne({ id: userid }).set({ socket: "", unload: true });
 
-            // check room status
-            if (room.status == "game") {
-                // TODO - replace player with Bot
-                sails.log("user disconnected, replace with bot");
-            } else if (room.status == "lobby") {
-                // remove user from player list of connected room
-                players = room.jsonplayers;
-                let pin = players.find((el) => el.playerID == userid);
-                players.splice(pin, 1);
-
-                // remove session variables
-                delete req.session.roomid;
-                delete req.session.userid;
-
-                let pids = [];
-                // check if room is empty
-                if (players.length > 0) {
-                    for (pl of players) pids.push(pl.playerID);
-                    bots = await User.find().where({ id: pids });
-                    if (bots.find((el) => el.bot == false)) {
-                        // still at least one human player
-                        await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
-                        // leave message
-                        ChatController.leavemsg(user.name, room.hashID);
-                        let users = [],
-                            p_temp;
-                        for (pl of players) {
-                            p_temp = await User.getNameAndHash(pl.id);
-                            users.push({
-                                hashID: p_temp.hashID,
-                                name: p_temp.name,
-                                ready: false,
-                                team: pl.team,
-                            });
-                        }
-                        sails.sockets.broadcast(room.hashID, "userevent", { users: users });
-
-                        room = await Room.getListRoom({ id: room.id });
-                    } else {
-                        // no human player left, destroy bots and room
-                        sails.log("destroy room " + room.hashID);
-                        await User.destroy({ id: pids });
-                        await Room.destroyOne({ id: room.id });
-                        room.empty = true;
-                    }
-                } else {
-                    // noone left, destroy room
-                    sails.log("destroy room " + room.hashID);
-                    await Room.destroyOne({ id: room.id });
-                    room.empty = true;
-                }
-
-                // update roomlist
-                sails.sockets.blast("listevent", { room: room });
-
-                // destroy user object
-                sails.log("destroy user object");
-                await User.destroyOne({ id: userid });
+            room = await handleEmptyRoom(roomid);
+            // start 30s timeout if room not empty
+            if (!room.empty) {
+                setTimeout(unloadtimer, 30000, { userid: userid, roomid: roomid });
             }
-
+            
             return res.ok();
         } catch (err) {
             if (err.code) return res.badRequest(err);
@@ -355,3 +300,92 @@ module.exports = {
         }
     },
 };
+
+
+// -------------------------------------------------------------------------------------- Helper Functions
+
+async function handleEmptyRoom (roomID) {
+    let pids = [], bots = [], empty = true;
+    let room = await Room.findOne({ id: roomID });
+    // check if room is empty
+    if (room.jsonplayers.length > 0) {
+        for (pl of room.jsonplayers) pids.push(pl.playerID);
+        bots = await User.find().where({ id: pids });
+        if (bots.find((el) => el.bot == false)) {
+            // still at least one human player  
+            let users = [],
+                p_temp;
+            for (pl of room.jsonplayers) {
+                p_temp = await User.getNameAndHash(pl.id);
+                users.push({
+                    hashID: p_temp.hashID,
+                    name: p_temp.name,
+                    ready: false,
+                    team: pl.team,
+                });
+            }
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users });
+            empty = false;
+        } else {
+            // no human player left, destroy bots
+            await User.destroy({ id: pids });
+        }
+    } 
+    room = await Room.getListRoom({ id: room.id });
+
+    if (empty) {
+        // destroy room
+        sails.log("destroy room " + room.hashID);
+        await Room.destroyOne({ id: roomID });
+    }
+    room.empty = empty;
+    return room;
+}
+
+
+async function unloadtimer (args) {
+    let user = await User.findOne({ id: args.userid });
+    let room = await Room.findOne({ id: args.roomid });
+
+    sails.log("unloadtimer triggered for " + user.name);
+    // check if user reconnected within timeout
+    if (user.unload == false || !user || !room) return -1;
+
+    // check room status
+    if (room.status == "game") {
+        // TODO - replace player with Bot
+        player = room.jsonplayers;
+        sails.log("user disconnected, replace with bot");
+
+        await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
+
+        room = await handleEmptyRoom(room.id);
+        if (!room.empty) {
+            // leave message
+            ChatController.leavemsg(user.name, room.hashID, user.botname);
+        }
+        
+        return 0;
+    } else {
+        // remove user from player list of connected room
+        players = room.jsonplayers;
+        let pin = players.find((el) => el.playerID == user.id);
+        players.splice(pin, 1);
+
+        await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
+
+        room = await handleEmptyRoom(room.id);
+        if (!room.empty) {
+            // leave message
+            ChatController.leavemsg(user.name, room.hashID);
+        }
+
+        // update roomlist
+        sails.sockets.blast("listevent", { room: room });
+
+        // destroy user object
+        sails.log("destroy user object");
+        await User.destroyOne({ id: user.id });
+        return 1;
+    }
+}

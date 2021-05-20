@@ -643,7 +643,7 @@ function evalStack(stack, trump, type) {
     // get occurrences of trump symbol
     if (trump.symbol) {
         for (i = 0; i < stack.length; i++) {
-            if (stack[i].card.symbol == trump) occ.push(i);
+            if (stack[i].card.symbol == trump.symbol) occ.push(i);
         }
     }
 

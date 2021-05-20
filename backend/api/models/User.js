@@ -33,6 +33,11 @@ module.exports = {
             type: "boolean",
             defaultsTo: false,
         },
+
+        unload: {
+            type: "boolean",
+            defaultsTo: false
+        }
     },
 
     newUser: async (req, res) => {

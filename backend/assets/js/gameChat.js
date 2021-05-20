@@ -8,9 +8,9 @@ io.socket.on("joinmsg", function (data) {
     chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
 });
 
-io.socket.on("leavemsg", function (data) {
+io.socket.on("leavemsg", function (data) {          // data.user = username, data.text = message, data.bot = botname
     console.log("left");
-    chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
+    chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text} ${data.bot}</p>`);
 });
 
 io.socket.on("controllermsg", function (data) {
