@@ -35,6 +35,7 @@ var cssFilesToInject = [
 
   // Bring in `.css` files for themes and style guides (e.g. Bootstrap, Foundation)
   'dependencies/*.css',
+  'dependencies/bootstrap-icons-1.4.1/**/**'
 
   // All of the rest of your custom `.css` files will be injected here,
   // in no particular order.  To customize the ordering, add additional
