@@ -343,6 +343,7 @@ async function handleEmptyRoom (roomID) {
 async function leavehandler (args) {
     let user = await User.findOne({ id: args.userid });
     let room = await Room.findOne({ id: args.roomid });
+    let players;
 
     if (user) sails.log("leavehandler triggered for " + user.name + " " + user.id);
     else sails.log("leavehandler triggered, but User was already destroyed");
@@ -352,7 +353,7 @@ async function leavehandler (args) {
     // check room status
     if (room.status == "game") {
         // TODO - replace player with Bot
-        player = room.jsonplayers;
+        players = room.jsonplayers;
         sails.log("user disconnected, replace with bot");
 
         await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
