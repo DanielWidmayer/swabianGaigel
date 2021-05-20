@@ -13,7 +13,7 @@ module.exports = {
 
     leavemsg: (username, roomhash, bot = "") => {
         let text = "left the game";
-        if (bot.length) text += " and was replaced by Bot"; 
+        if (bot.length) text += " and was replaced by Bot";
         sails.sockets.broadcast(roomhash, "leavemsg", { user: username, text: text, bot: bot });
         sails.log(`${username} left room ${roomhash}`);
     },
@@ -26,8 +26,24 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "turnmsg", { user: user });
     },
 
-    cardplayedmsg: (username, card, roomhash) => {
-        sails.sockets.broadcast(roomhash, "cardplayedmsg", { username: username, card: card });
+    cardplayedmsg: (user, card, roomhash) => {
+        sails.sockets.broadcast(roomhash, "cardplayedmsg", { user: user, card: card });
+    },
+
+    paircalledmsg: (user, symbol, roomhash) => {
+        sails.sockets.broadcast(roomhash, "paircalledmsg", { user: user, symbol: symbol });
+    },
+
+    cardrobmsg: (user, card, roomhash) => {
+        sails.sockets.broadcast(roomhash, "cardrobmsg", { user: user, card: card });
+    },
+
+    gameovermsg: (user, roomhash) => {
+        sails.sockets.broadcast(roomhash, "gameovermsg", { user: user });
+    },
+
+    firstcardtypemsg: (first_type, roomhash) => {
+        sails.sockets.broadcast(roomhash, "firstcardtypemsg", { first_type: first_type });
     },
 
     chatpost: async (req, res) => {

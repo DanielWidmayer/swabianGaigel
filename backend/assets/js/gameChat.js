@@ -8,7 +8,8 @@ io.socket.on("joinmsg", function (data) {
     chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
 });
 
-io.socket.on("leavemsg", function (data) {          // data.user = username, data.text = message, data.bot = botname
+io.socket.on("leavemsg", function (data) {
+    // data.user = username, data.text = message, data.bot = botname
     console.log("left");
     chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text} ${data.bot}</p>`);
 });
@@ -35,8 +36,63 @@ io.socket.on("turnmsg", function (data) {
 });
 
 io.socket.on("cardplayedmsg", function (data) {
+    let icon = getHtmlSymbol(data.card.symbol);
+    let cardletter = getCardLetter(data.card.value);
+    let text;
+    if (userHash == data.user.hashID) {
+        text = "You have";
+    } else {
+        text = `${data.user.name} has`;
+    }
+    gamef.append(`<p>${text} played a ${icon} ${cardletter}</p>`);
+});
+
+io.socket.on("paircalledmsg", function (data) {
+    let text;
+    let icon = getHtmlSymbol(data.symbol);
+    if (userHash == data.user.hashID) {
+        text = `<hr class="mt-0"/><p>You have melded in ${icon}.</p><p class="mb-3">Your score is now ${data.user.score}</p><hr class="mt-0"/>`;
+    } else {
+        text = `<hr class="mt-0"/><p>${data.user.name} has melded in ${icon}.</p><p class="mb-3">${data.user.name}'s score is now ${data.user.score}</p><hr class="mt-0"/>`;
+    }
+    gamef.append(`${text}`);
+});
+
+io.socket.on("cardrobmsg", function (data) {
+    let text;
+    let icon = getHtmlSymbol(data.card.symbol);
+    let cardletter = getCardLetter(data.card.value);
+    if (userHash == data.user.hashID) {
+        text = `<hr class="mt-0"/><p>You have robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
+    } else {
+        text = `<hr class="mt-0"/><p>${data.user.name} has robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
+    }
+    gamef.append(`${text}`);
+});
+
+io.socket.on("gameovermsg", function (data) {
+    let text;
+    if (userHash == data.user.hashID) {
+        text = `<hr class="mt-0"/><p>Congratulations You have won the game!</p><hr class="mt-0"/>`;
+    } else {
+        text = `<hr class="mt-0"/><p>Game Over! ${data.user.name} has won the game!.</p><hr class="mt-0"/>`;
+    }
+    gamef.append(`${text}`);
+});
+
+io.socket.on("firstcardtypemsg", function (data) {
+    let text;
+    if (userHash == data.user.hashID) {
+        text = `<p>You have called ${data.first_type}.</p>`;
+    } else {
+        text = `<p>${data.user.name} has called ${data.first_type}.</p>`;
+    }
+    gamef.append(`${text}`);
+});
+
+function getHtmlSymbol(symbol) {
     let icon;
-    switch (data.card.symbol) {
+    switch (symbol) {
         case 0:
             icon = '<img class="img-icon-thin" src="../images/eichel.png"></img>';
             break;
@@ -50,18 +106,23 @@ io.socket.on("cardplayedmsg", function (data) {
             icon = '<img class="img-icon" src="../images/blatt.png"></img>';
             break;
         default:
+            icon = "";
             break;
     }
+    return icon;
+}
+
+function getCardLetter(value) {
     let cardletter;
-    switch (data.card.value) {
+    switch (value) {
         case 0:
             cardletter = "7";
             break;
         case 2:
-            cardletter = "J";
+            cardletter = "U";
             break;
         case 3:
-            cardletter = "Q";
+            cardletter = "O";
             break;
         case 4:
             cardletter = "K";
@@ -74,10 +135,11 @@ io.socket.on("cardplayedmsg", function (data) {
             break;
 
         default:
+            cardletter = "";
             break;
     }
-    gamef.append(`<p>${data.username} has played a ${icon} ${cardletter}</p>`);
-});
+    return cardletter;
+}
 
 bpost.click(postmsg);
 
