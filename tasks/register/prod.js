@@ -21,6 +21,7 @@ module.exports = function(grunt) {
     'cssmin',
     'sails-linker:prodJs',
     'sails-linker:prodStyles',
+    'copy:dev'
   ]);
 };
 
