@@ -11,7 +11,7 @@ io.socket.post("/socketconnect", function (res, jres) {
     if (jres.statusCode != 200) {
         if (jres.statusCode == 400) {
             window.location.href = "/list";
-        } else //console.log(jres);
+        } else console.log(jres);
     } else {
         //console.log("socketconnect data: ");
         if (res != "OK") {
