@@ -9,7 +9,7 @@ var containerHeight,
     ownScore,
     firstTrick;
 
-$(document).ready(function () {
+$(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
     //console.log(containerWidth + " x " + containerHeight);
@@ -57,17 +57,27 @@ io.socket.on("start", function (data) {
                     y: (containerHeight * 5) / 6,
                     x: containerWidth / 2 - 220,
                 }),
-                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * i }),
+                playingpile: new cards.Deck({
+                    faceUp: true,
+                    x: containerWidth / 3 + 100 * i,
+                }),
             };
         } else {
             tempusrobj = {
-                hand: new cards.Hand({ faceUp: false, x: positions[0].x, y: positions[0].y }),
+                hand: new cards.Hand({
+                    faceUp: false,
+                    x: positions[0].x,
+                    y: positions[0].y,
+                }),
                 trickdeck: new cards.Deck({
                     faceUp: false,
                     x: positions[0].x - 160,
                     y: positions[0].y,
                 }),
-                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * i }),
+                playingpile: new cards.Deck({
+                    faceUp: true,
+                    x: containerWidth / 3 + 100 * i,
+                }),
             };
             positions.shift();
         }
@@ -325,7 +335,7 @@ io.socket.on("paircalled", function (data) {
         secondpile = userhands[key].playingpile;
         if (secondpile != firstpile) break;
     }
-    secondpile.addCard(fCards[0]);
+    secondpile.addCard(fCards[1]);
     secondpile.render();
     setTimeout(() => {
         userhand.addCards(fCards);
@@ -348,6 +358,13 @@ io.socket.on("cardrob", function (data) {
 io.socket.on("gameover", function (data) {
     //console.log(data);
     // array data.winners
+    if (data.winners.find((el) => el.hashID == userHash)) {
+        $("body").append('<img class="gameover-img" src="/images/font_victory.png"></img>');
+        $(".gameover-img").animate({ opacity: 1.0 });
+    } else {
+        $("body").append('<img class="gameover-img" src="/images/font_gameover.png"></img>');
+        $(".gameover-img").animate({ opacity: 1.0 });
+    }
 });
 
 function getRandomArbitrary(min, max) {
