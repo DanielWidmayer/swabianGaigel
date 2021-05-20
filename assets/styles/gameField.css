@@ -141,3 +141,14 @@ footer {
     height: 20px;
     width: 12px;
 }
+
+.gameover-img {
+    position: absolute;
+    top: 30%;
+    left: 20%;
+    opacity: 0;
+}
+
+.hr-thick{
+    height: 3px!important;
+}
