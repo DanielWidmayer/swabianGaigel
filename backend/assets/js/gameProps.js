@@ -62,7 +62,7 @@ function startGame() {
 }
 
 function meldOnePair() {
-    let meldCards = lowerhand.getPair();
+    let meldCards = userhands[userHash].hand.getPair();
     if (meldCards.length > 0) {
         if (meldCards.length > 2) {
             // TODO: ask user which pair to meld if he has two pairs
@@ -78,15 +78,17 @@ function meldOnePair() {
                 meldCards.forEach((card) => {
                     card.melded = true;
                 });
-                upperPlayingPile.addCard(meldCards[0], meldCards[0].id);
-                upperPlayingPile.render();
-                playingpiles[0].addCard(meldCards[1], meldCards[1].id);
-                playingpiles[0].render();
+                let firstpile = userhands[userHash].playingpile;
+                firstpile.addCard(meldCards[0], meldCards[0].id);
+                firstpile.render();
+                let secondpile = userhands.find((el) => el.playingpile != firstpile);
+                secondpile.addCard(meldCards[1], meldCards[1].id);
+                secondpile.render();
                 setTimeout(() => {
                     meldCards.forEach((card) => {
-                        lowerhand.addCard(card, card.id);
+                        userhands[userHash].hand.addCard(card, card.id);
                     });
-                    lowerhand.render();
+                    userhands[userHash].hand.render();
                 }, 2000);
             }
         });
@@ -94,7 +96,7 @@ function meldOnePair() {
 }
 
 function stealTrumpCard() {
-    let trumpSeven = lowerhand.getTrumpSeven(trumpCard.bottomCard().symbol);
+    let trumpSeven = userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol);
     if (trumpSeven != null) {
         let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
         io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
@@ -102,12 +104,13 @@ function stealTrumpCard() {
                 console.log(jres);
             } else {
                 console.log(res);
+                let userhand = userhands[userHash].hand;
                 bsteal.prop("disabled", true);
                 trumpCard.bottomCard().rotate(0);
-                lowerhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
+                userhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
                 trumpCard.addCard(trumpSeven);
-                lowerhand.sortHand();
-                lowerhand.render();
+                userhand.sortHand();
+                userhand.render();
                 trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
                 trumpCard.topCard().moveToBack();
             }
