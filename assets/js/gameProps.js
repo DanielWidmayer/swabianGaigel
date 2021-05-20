@@ -11,11 +11,11 @@ io.socket.post("/socketconnect", function (res, jres) {
     if (jres.statusCode != 200) {
         if (jres.statusCode == 400) {
             window.location.href = "/list";
-        } else console.log(jres);
+        } else //console.log(jres);
     } else {
-        console.log("socketconnect data: ");
+        //console.log("socketconnect data: ");
         if (res != "OK") {
-            console.log(res);
+            //console.log(res);
         }
     }
 });
@@ -32,7 +32,7 @@ function quitPage() {
 function socketleave() {
     io.socket.delete("/leave", function (res, jres) {
         if (jres.statusCode != 200) {
-            console.log(res);
+            //console.log(res);
         } else {
             userLeft = true;
             window.location.href = "/list";
@@ -44,15 +44,15 @@ function startGame() {
     // ready animation
     io.socket.post("/startGame", function (res, jres) {
         if (jres.statusCode != 200) {
-            console.log(res);
+            //console.log(res);
         } else {
             if (!ready) {
-                console.log("ready");
+                //console.log("ready");
                 ready = true;
                 bstart.children().removeClass("bi-check");
                 bstart.children().addClass("bi-check-square-fill");
             } else {
-                console.log("unready");
+                //console.log("unready");
                 ready = false;
                 bstart.children().removeClass("bi-check-square-fill");
                 bstart.children().addClass("bi-check");
@@ -73,7 +73,7 @@ function meldOnePair() {
         });
         io.socket.post("/callPair", { cards: b_meldCards }, function (res, jres) {
             if (jres.statusCode != 200) {
-                console.log(jres);
+                //console.log(jres);
             } else {
                 meldCards.forEach((card) => {
                     card.melded = true;
@@ -105,9 +105,9 @@ function stealTrumpCard() {
         let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
         io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
             if (jres.statusCode != 200) {
-                console.log(jres);
+                //console.log(jres);
             } else {
-                console.log(res);
+                //console.log(res);
                 let userhand = userhands[userHash].hand;
                 bsteal.prop("disabled", true);
                 trumpCard.bottomCard().rotate(0);
@@ -120,7 +120,7 @@ function stealTrumpCard() {
             }
         });
     } else {
-        console.log("Trumpcard could not be found, something has messed up.");
+        //console.log("Trumpcard could not be found, something has messed up.");
     }
 }
 
@@ -130,9 +130,9 @@ function userUnloaded() {
     if (!userLeft) {
         io.socket.post("/unloadUser", function (res, jres) {
             if (jres.statusCode != 200) {
-                console.log(res);
+                //console.log(res);
             } else {
-                console.log("User Unloaded");
+                //console.log("User Unloaded");
             }
         });
     }

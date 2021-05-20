@@ -53,7 +53,6 @@
 
                 function getAllRooms() {
                     rooms = [];
-                    console.log($('#penis'));
                     $.get("/roomList", function (data, status) {
                         data.rooms.forEach((room) => {
                             room.players = room.jsonplayers.length;
@@ -61,7 +60,6 @@
                             renderRoom(room);
                         });
                         if (data.active) {
-                            console.log("active");
                             aRoom = data.active;
                             renderActive(data.active);
                         }
@@ -106,10 +104,8 @@
                 };
 
                 io.socket.on("listevent", function (data) {
-                    console.log(data);
                     renderRoom(data.room);
                     if (aRoom.hashID == data.room.hashID) {
-                        console.log("unactive");
                         acdiv[0].innerHTML = "";
                         acdiv.hide();
                     }

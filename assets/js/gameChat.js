@@ -4,28 +4,28 @@ const fpost = $("#fpost");
 const bpost = $("#bpost");
 
 io.socket.on("joinmsg", function (data) {
-    console.log("joined");
+    //console.log("joined");
     chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`);
 });
 
 io.socket.on("leavemsg", function (data) {
     // data.user = username, data.text = message, data.bot = botname
-    console.log("left");
+    //console.log("left");
     chf.append(`<p style="font-weigth: bold;">${data.user} ${data.text} ${data.bot}</p>`);
 });
 
 io.socket.on("controllermsg", function (data) {
-    console.log(data.msg);
+    //console.log(data.msg);
     gamef.append(`<p>${data.msg}</p>`);
 });
 
 io.socket.on("chatmsg", function (data) {
-    console.log(data.text);
+    //console.log(data.text);
     chf.append(`<div class="chatmsg"><b>${data.user}:&nbsp;</b>${data.text}</div>`);
 });
 
 io.socket.on("turnmsg", function (data) {
-    console.log(data);
+    //console.log(data);
     let text;
     if (userHash == data.user.hashID) {
         text = '<p>You have won the trick.</p><p class="mb-3">Your score is now ' + data.user.score + '</p><hr class="mt-0"/><p>It\'s your turn.</p>';
@@ -150,13 +150,13 @@ fpost.keypress(function (e) {
 
 function postmsg() {
     if (fpost.val().length > 0) {
-        console.log("posting");
+        //console.log("posting");
         io.socket.post("/chatpost", { text: fpost.val() }, function (res, jres) {
             if (jres.statusCode != 200) {
-                console.log(jres);
-                console.log(res);
+                //console.log(jres);
+                //console.log(res);
             } else {
-                console.log(res);
+                //console.log(res);
             }
             fpost.val("");
         });

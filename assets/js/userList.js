@@ -2,7 +2,7 @@ const ul = $("#userlist");
 
 io.socket.on("userevent", function (data) {
     ul.empty();
-    console.log(data);
+    //console.log(data);
     if (Array.isArray(data.users)) {
         data.users.forEach((user) => {
             let readyicon;

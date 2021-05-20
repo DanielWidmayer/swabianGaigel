@@ -12,7 +12,7 @@ var containerHeight,
 $(document).ready(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
-    console.log(containerWidth + " x " + containerHeight);
+    //console.log(containerWidth + " x " + containerHeight);
     //Tell the library which element to use for the table
     cards.init({ table: "#card-table", type: GAIGEL });
 
@@ -43,7 +43,7 @@ io.socket.on("start", function (data) {
     if (usr_ctr > 2) positions.push({ x: containerWidth - 135, y: containerHeight / 6 });
     if (usr_ctr > 3 || usr_ctr == 2) positions.push({ x: containerWidth / 2, y: containerHeight / 6 });
     if (usr_ctr > 2) positions.push({ x: containerWidth / 6, y: containerHeight / 6 });
-    console.log(positions);
+    //console.log(positions);
     let j = data.users.findIndex((el) => el.hashID == userHash);
     if (j == -1) j = 0;
     for (let i = 0; i < usr_ctr; i++) {
@@ -111,15 +111,15 @@ io.socket.on("start", function (data) {
 
 io.socket.on("turn", function (data) {
     if (userHash == data.user.hashID) {
-        console.log("Its your turn.");
+        //console.log("Its your turn.");
         // Finally, when you click a card in your hand, it is played
         userhands[userHash].hand.click(function (card) {
             let bCard = { id: card.id, value: card.value, symbol: card.symbol };
             io.socket.post("/playCard", { card: bCard }, function (res, jres) {
                 if (jres.statusCode != 200) {
-                    console.log(jres);
+                    //console.log(jres);
                 } else {
-                    console.log(res);
+                    //console.log(res);
                 }
             });
             userhands[userHash].playingpile.addCard(card, card.id);
@@ -130,7 +130,7 @@ io.socket.on("turn", function (data) {
             userhands[userHash].hand._click = null;
         });
     } else {
-        console.log("Its " + data.user.name + "'s turn.");
+        //console.log("Its " + data.user.name + "'s turn.");
     }
 });
 
@@ -203,11 +203,11 @@ io.socket.on("solowin", function (data) {
         }
         winningTrickDeck.render();
     }, 2500);
-    console.log(data.user.name + " now has a score of: " + data.user.score);
+    //console.log(data.user.name + " now has a score of: " + data.user.score);
 });
 
 io.socket.on("teamwin", function (data) {
-    console.log(data); //data.users
+    //console.log(data); //data.users
 });
 
 io.socket.on("dealcard", function (data) {
@@ -230,7 +230,7 @@ io.socket.on("dealcard", function (data) {
                 if (card.melded) melded = true;
             });
             if (!melded) {
-                console.log("Has Pair & Can Meld & Neither one of the cards was melded already!");
+                //console.log("Has Pair & Can Meld & Neither one of the cards was melded already!");
                 $("#bmeld").prop("disabled", false);
             } else {
                 $("#bmeld").prop("disabled", true);
@@ -239,7 +239,7 @@ io.socket.on("dealcard", function (data) {
             $("#bmeld").prop("disabled", true);
         }
         if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 7) {
-            console.log("Has Seven & Can Rob & Seven hasn't been robbed already!");
+            //console.log("Has Seven & Can Rob & Seven hasn't been robbed already!");
             $("#bsteal").prop("disabled", false);
         } else {
             $("#bsteal").prop("disabled", true);
@@ -248,21 +248,21 @@ io.socket.on("dealcard", function (data) {
 });
 
 io.socket.on("dealTrump", function (data) {
-    console.log(data); // data.user, data.card
+    //console.log(data); // data.user, data.card
 });
 
 io.socket.on("firstturn", function (data) {
     if (userHash == data.user.hashID) {
-        console.log("You begin the game");
+        //console.log("You begin the game");
         userhands[userHash].hand.click(function (card) {
             let hand = userhands[userHash].hand;
             if (card.symbol != trumpCard.bottomCard().symbol || !hand.find((el) => el.symbol != trumpCard.bottomCard().symbol)) {
                 let bCard = { id: card.id, value: card.value, symbol: card.symbol };
                 io.socket.post("/playCard", { card: bCard }, function (res, jres) {
                     if (jres.statusCode != 200) {
-                        console.log(jres);
+                        //console.log(jres);
                     } else {
-                        console.log(res);
+                        //console.log(res);
                     }
                 });
                 let playingpile = userhands[userHash].playingpile;
@@ -273,19 +273,19 @@ io.socket.on("firstturn", function (data) {
                 userhands[userHash].hand.render();
                 userhands[userHash].hand._click = null;
             } else {
-                console.log("You're not allowed to play a trump card.");
+                //console.log("You're not allowed to play a trump card.");
             }
         });
     } else {
-        console.log(data.user.name + " begins the game.");
+        //console.log(data.user.name + " begins the game.");
     }
 });
 
 io.socket.on("firstcard", function (data) {
-    console.log(data);
+    //console.log(data);
     let playerHash = data.user.hashID;
     if (userHash != playerHash) {
-        console.log(data.type); // TODO: First Trick Type Animation
+        //console.log(data.type); // TODO: First Trick Type Animation
         let playingpile = userhands[playerHash].playingpile;
         playingpile.faceUp = false;
         playingpile.addCard(userhands[playerHash].hand.topCard());
@@ -307,7 +307,7 @@ io.socket.on("firstwin", function (data) {
 });
 
 io.socket.on("paircalled", function (data) {
-    console.log(data);
+    //console.log(data);
     let cards = data.cards;
     let fCards = [];
     let userhand = userhands[data.user.hashID].hand;
@@ -334,7 +334,7 @@ io.socket.on("paircalled", function (data) {
 });
 
 io.socket.on("cardrob", function (data) {
-    console.log(data);
+    //console.log(data);
     let card = data.card;
     let userhand = userhands[data.user.hashID].hand;
     let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
@@ -346,7 +346,7 @@ io.socket.on("cardrob", function (data) {
 });
 
 io.socket.on("gameover", function (data) {
-    console.log(data);
+    //console.log(data);
     // array data.winners
 });
 
