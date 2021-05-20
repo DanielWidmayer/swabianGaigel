@@ -165,8 +165,8 @@ module.exports = {
          * > (For a full list, see https://sailsjs.com/plugins/sessions)            *
          *                                                                          *
          ***************************************************************************/
-        //adapter: '@sailshq/connect-redis',
-        //url: 'redis://:pd995f0f8bba391abbde8c2fc223fcffdc3e10b6df044521cb285c662ec9d4d26@ec2-54-170-187-17.eu-west-1.compute.amazonaws.com:25040',
+        adapter: '@sailshq/connect-redis',
+        url: 'redis://:RTxVRvnwFp07cMN0BgdgIp1fY9xxijJr@redis-15894.c247.eu-west-1-1.ec2.cloud.redislabs.com:15894',
         
         //--------------------------------------------------------------------------
         // /\   OR, to avoid checking it in to version control, you might opt to
