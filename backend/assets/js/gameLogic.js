@@ -12,7 +12,7 @@ var containerHeight,
 $(document).ready(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
-
+    console.log(containerWidth + " x " + containerHeight);
     //Tell the library which element to use for the table
     cards.init({ table: "#card-table", type: GAIGEL });
 
@@ -20,7 +20,8 @@ $(document).ready(function () {
     deck = new cards.Deck();
 
     //By default it's in the middle of the container, put it to the side
-    deck.x -= containerWidth / 5;
+    deck.x -= containerWidth / 3;
+    deck.y += 47;
 
     //cards.all contains all cards, put them all in the deck
     deck.addCards(cards.all);
@@ -36,36 +37,52 @@ io.socket.on("start", function (data) {
     console.log("start:");
     console.log(data);
     let usr_ctr = data.users.length;
+    let positions = [];
+    if (usr_ctr == 6) {
+        positions.push({ x: containerWidth - 135, y: (containerHeight * 5) / 6 });
+        positions.push({ x: containerWidth - 135, y: containerHeight / 2 });
+    }
+    if (usr_ctr > 2) positions.push({ x: containerWidth - 135, y: containerHeight / 6 });
+    if (usr_ctr > 3 || usr_ctr == 2) positions.push({ x: containerWidth / 2, y: containerHeight / 6 });
+    if (usr_ctr > 2) positions.push({ x: containerWidth / 6, y: containerHeight / 6 });
+    console.log(positions);
+    let j = data.users.findIndex((el) => el.hashID == userHash);
+    if (j == -1) j = 0;
     for (let i = 0; i < usr_ctr; i++) {
-        let user = data.users[i];
+        console.log(j);
+        console.log(data.users[j]);
+        let user = data.users[j];
         let tempusrobj;
         if (userHash == user.hashID) {
             tempusrobj = {
-                hand: new cards.Hand({ faceUp: true, y: (containerHeight * 4) / 5 }),
+                hand: new cards.Hand({ faceUp: true, y: (containerHeight * 5) / 6 }),
                 trickdeck: new cards.Deck({
                     faceUp: false,
-                    y: (containerHeight * 4) / 5,
-                    x: containerWidth / 5,
+                    y: (containerHeight * 5) / 6,
+                    x: containerWidth / 2 - 220,
                 }),
-                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 2 }),
+                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * i }),
             };
         } else {
             tempusrobj = {
-                hand: new cards.Hand({ faceUp: false, y: containerHeight / 5, x: containerWidth / (1 + usr_ctr - i) }),
+                hand: new cards.Hand({ faceUp: false, x: positions[0].x, y: positions[0].y }),
                 trickdeck: new cards.Deck({
                     faceUp: false,
-                    y: containerHeight / 5,
-                    x: containerWidth / (1.5 + usr_ctr - i),
+                    x: positions[0].x - 160,
+                    y: positions[0].y,
                 }),
-                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * usr_ctr }),
+                playingpile: new cards.Deck({ faceUp: true, x: containerWidth / 3 + 100 * i }),
             };
+            positions.shift();
         }
         userhands[user.hashID] = tempusrobj;
+        j++;
+        if (j >= usr_ctr) j = 0;
     }
 
     // Adds a trump Card
     trumpCard = new cards.Deck({ faceUp: true });
-    trumpCard.x -= containerWidth / 5 - 50;
+    trumpCard.x -= containerWidth / 3 - 60;
     trumpCard.y = deck.y;
 
     console.log(data);
@@ -187,6 +204,7 @@ io.socket.on("solowin", function (data) {
     setTimeout(() => {
         for (key in userhands) {
             winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
+            winningTrickDeck.topCard().rotate(90);
         }
         winningTrickDeck.render();
     }, 2500);
@@ -294,42 +312,33 @@ io.socket.on("paircalled", function (data) {
     console.log(data);
     let cards = data.cards;
     let fCards = [];
+    let userhand = userhands[data.user.hashID].hand;
     cards.forEach((card) => {
-        let searchCard = upperhand.findCard(card.value, card.symbol);
-        if (searchCard == null) {
-            searchCard = deck.findCard(card.value, card.symbol);
-            deck.addCard(upperhand.topCard());
-            upperhand.addCard(searchCard);
-            deck.render({ immediate: true });
-            userhands[userHash].hand.render({ immediate: true });
-        }
+        let fCard = userhand.topCard();
+        if (fCards.find((el) => el == fCard)) fCard = userhand.bottomCard();
+        let searchCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, fCard);
         fCards.push(searchCard);
     });
-    upperPlayingPile.addCard(fCards[0]);
-    upperPlayingPile.render();
-    playingpiles[0].addCard(fCards[1]);
-    playingpiles[0].render();
+    let firstpile = userhands[data.user.hashID].playingpile;
+    firstpile.addCard(fCards[0]);
+    firstpile.render();
+    let secondpile = userhands.find((el) => el.playingpile != firstpile);
+    secondpile.playingpile.addCard(fCards[0]);
+    secondpile.playingpile.render();
     setTimeout(() => {
-        upperhand.addCards(fCards);
-        upperhand.render();
+        userhand.addCards(fCards);
+        userhand.render();
     }, 2000);
 });
 
 io.socket.on("cardrob", function (data) {
     console.log(data);
     let card = data.card;
-    let fCard = deck.findCard(card.value, card.symbol);
-    if (fCard == null) {
-        fCard = upperhand.findCard(card.value, card.symbol);
-    } else {
-        deck.addCard(upperhand.bottomCard());
-        upperhand.addCard(fCard);
-        deck.render({ immediate: true });
-        upperhand.render({ immediate: true });
-    }
-    upperhand.addCard(trumpCard.bottomCard());
+    let userhand = userhands[data.user.hashID].hand;
+    let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
+    userhand.addCard(trumpCard.bottomCard());
     trumpCard.addCard(fCard);
-    upperhand.render();
+    userhand.render();
     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
     trumpCard.topCard().moveToBack();
 });
