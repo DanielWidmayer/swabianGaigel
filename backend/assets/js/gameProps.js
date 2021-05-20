@@ -81,7 +81,11 @@ function meldOnePair() {
                 let firstpile = userhands[userHash].playingpile;
                 firstpile.addCard(meldCards[0], meldCards[0].id);
                 firstpile.render();
-                let secondpile = userhands.find((el) => el.playingpile != firstpile);
+                let secondpile;
+                for (const key in userhands) {
+                    secondpile = userhands[key].playingpile;
+                    if (secondpile != firstpile) break;
+                }
                 secondpile.addCard(meldCards[1], meldCards[1].id);
                 secondpile.render();
                 setTimeout(() => {
@@ -108,7 +112,7 @@ function stealTrumpCard() {
                 bsteal.prop("disabled", true);
                 trumpCard.bottomCard().rotate(0);
                 userhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
-                trumpCard.addCard(trumpSeven);
+                trumpCard.addCard(trumpSeven, trumpSeven.id);
                 userhand.sortHand();
                 userhand.render();
                 trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
