@@ -96,7 +96,7 @@ io.socket.on("start", function (data) {
         let card = cardHand[i];
         let fCard = findCertainCard(card["value"], card["symbol"]);
         userhands[userHash].hand.addCard(fCard, card.id);
-        for (key in userhands) {
+        for (const key in userhands) {
             if (key != userHash) {
                 userhands[key].hand.addCard(deck.topCard());
             }
@@ -104,7 +104,7 @@ io.socket.on("start", function (data) {
     }
     userhands[userHash].hand.sortHand();
     userhands[userHash].hand.render();
-    for (key in userhands) {
+    for (const key in userhands) {
         userhands[key].hand.render();
     }
 });
@@ -137,7 +137,7 @@ io.socket.on("turn", function (data) {
 function findCertainCard(value, symbol) {
     let fCard = deck.findCard(value, symbol);
     if (fCard == null) {
-        for (key in userhands) {
+        for (const key in userhands) {
             if (key != userHash) {
                 fCard = userhands[key].hand.findCard(value, symbol);
                 if (fCard != null) {
@@ -155,7 +155,7 @@ function findAndChangeCard(value, symbol, id, hashID, cardToReplace) {
     if (fCard == null) {
         fCard = userhands[hashID].hand.findCard(value, symbol);
         if (fCard == null) {
-            for (key in userhands) {
+            for (const key in userhands) {
                 fCard = userhands[key].hand.findCard(value, symbol);
                 if (fCard != null) {
                     userhands[key].hand.addCard(cardToReplace);
@@ -197,7 +197,7 @@ io.socket.on("solowin", function (data) {
     }
 
     setTimeout(() => {
-        for (key in userhands) {
+        for (const key in userhands) {
             winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
             winningTrickDeck.topCard().rotate(90);
         }
@@ -217,7 +217,7 @@ io.socket.on("dealcard", function (data) {
         userhands[userHash].hand.addCard(fCard, card.id);
         userhands[userHash].hand.sortHand();
         userhands[userHash].hand.render();
-        for (key in userhands) {
+        for (const key in userhands) {
             if (key != userHash) {
                 userhands[key].hand.addCard(deck.topCard());
                 userhands[key].hand.render();
