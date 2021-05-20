@@ -42,8 +42,8 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "gameovermsg", { user: user });
     },
 
-    firstcardtypemsg: (first_type, roomhash) => {
-        sails.sockets.broadcast(roomhash, "firstcardtypemsg", { first_type: first_type });
+    firstcardtypemsg: (user, first_type, roomhash) => {
+        sails.sockets.broadcast(roomhash, "firstcardtypemsg", { user: user, first_type: first_type });
     },
 
     chatpost: async (req, res) => {

@@ -345,7 +345,7 @@ io.socket.on("cardrob", function (data) {
     trumpCard.topCard().moveToBack();
 });
 
-socket.io.on("gameover", function (data) {
+io.socket.on("gameover", function (data) {
     console.log(data);
     // array data.winners
 });
