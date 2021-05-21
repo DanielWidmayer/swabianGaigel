@@ -19,11 +19,10 @@ module.exports = {
             // update cookie
             res.cookie('username', uname);
         
-            return res.redirect('/list');
+            return res.ok();
         } catch (err) {
             if (err.code) {
-                res.cookie("errmsg", err.message);
-                return res.redirect("/list");
+                return res.status(400).json(err.msg);
             }
             else return res.serverError(err);
         }

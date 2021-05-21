@@ -19,131 +19,24 @@
     </div>
 </div>
 <% if (errmsg) { %>
-    <div class="modal fade" id="errModal" tabindex="-1" role="dialog">
+    <div class="modal fade in" id="errModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Error</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
                 <div class="modal-body">
-                    <div id="errmsg" style="color: red;">
+                    <div id="errmsg" style="color: red; font-size: 1.2rem; font-weight: 600;" class="mb-1">
                         <%= errmsg %>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <small class="text-muted">Click anywhere outside this box to close it.</small>
                 </div>
             </div>
         </div>
     </div>
-
     <% } %>
-        <!-- JB - errmsg enthält die Fehlermeldung -->
 
-        <%- include ../list/modal_change_username.ejs %>
+        <!--<%- include ../list/modal_change_username.ejs %>-->
 
         <%- include ../list/modal_password.ejs %>
 
-            <script>
-                const rl = $("#roomlist").children("tbody");
-                const acdiv = $('#activeRoom');
-                const pwmodal = $('#passwordModal');
-                var rooms = [];
-                var aRoom = {};
 
-                function getAllRooms() {
-                    rooms = [];
-                    $.get("/roomList", function (data, status) {
-                        data.rooms.forEach((room) => {
-                            room.players = room.jsonplayers.length;
-                            rooms.push(room);
-                            renderRoom(room);
-                        });
-                        if (data.active) {
-                            aRoom = data.active;
-                            renderActive(data.active);
-                        }
-                    });
-                }
-
-                function renderActive(room) {
-                    acdiv[0].innerHTML = `<h4>${room.name}</h4><a type="button" class="btn btn-primary m-2" href="/room/${room.hashID}"><i class="bi bi-plus-lg text-white"></i>Reconnect</a>`;
-                    acdiv.show();
-                }
-
-
-                function renderRoom(room) {
-                    let target = $(`#${room.hashID}`);
-                    if (room.empty) {
-                        target.remove();
-                        return 1;
-                    }
-                    let playerIcons = '';
-                    for (let i = 0; i < room.players; i++) {
-                        playerIcons += '<i class="bi bi-person-fill"></i>';
-                    }
-                    for (let i = 0; i < room.maxplayers - room.players; i++) {
-                        playerIcons += '<i class="bi bi-person"></i>';
-                    }
-                    if (target.length) {
-                        target.children(".rpl").html(playerIcons);
-                    } else {
-                        if (room.password) {
-                            rl.append(`
-                            <tr id="${room.hashID}" onclick="protected('${room.hashID}','${room.name}');">
-                            <td class="rname">${room.name}</td>
-                            <td class="rpl">` + playerIcons + `</td>
-                            <td class="rpw"><i class="bi bi-x-square-fill"></i></td>
-                            </tr>`);
-                        } else {
-                            rl.append(`
-                            <tr id="${room.hashID}" onclick="window.location.href='/room/${room.hashID}';">
-                            <td class="rname">${room.name}</td>
-                            <td class="rpl">` + playerIcons + `</td>
-                            <td class="rpw"><i class='bi bi-check-square-fill'></i></td>
-                            </tr>`);
-                        }
-                    }
-                }
-
-                function protected(rhash, rname) {
-                    $('#passwordModalLabel').html(`Password for ${rname}`);
-                    $('#hiddenhash').val(rhash);
-                    pwmodal.modal("show");
-                }
-
-                window.onload = function () {
-                    acdiv.hide();
-                    getAllRooms();
-                };
-
-                io.socket.on("listevent", function (data) {
-                    renderRoom(data.room);
-                    if (aRoom.hashID == data.room.hashID) {
-                        acdiv[0].innerHTML = "";
-                        acdiv.hide();
-                    }
-                });
-
-                $('#pwForm').on('submit', function(e) {
-                    e.preventDefault();
-                    let hash = $('#hiddenhash').val();
-                    $.ajax({
-                        type: "POST",
-                        url: "/protect",
-                        data: { hash: hash, passwd: $('#passwd').val() },
-                        statusCode: {
-                            403: function (err) {
-                                $('#pwerr').html(err.responseJSON.err.msg);
-                            }
-                        },
-                        success: function (data) {
-                            window.location.href = `/room/${hash}`;
-                        }
-                    });
-                })
-
-            </script>
+            <!-- load roomlist functions -->
+            <script src="/js/roomlist.js"></script>
