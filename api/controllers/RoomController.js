@@ -87,7 +87,7 @@ module.exports = {
         } catch (err) {
             sails.log(err);
             if (err.code) {
-                res.cookie("errmsg", err.message);
+                res.cookie("errmsg", err.msg);
                 return res.redirect("/create");
             }
             return res.serverError(err);
@@ -198,9 +198,9 @@ module.exports = {
             ChatController.joinmsg(user.name, room.hashID);
             return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
         } catch (err) {
+            sails.log(err);
             if (err.code) {
-                sails.log(err);
-                res.cookie("errmsg", err.message);
+                res.cookie("errmsg", err.msg);
                 return res.redirect("/list");
             } else return res.serverError(err);
         }

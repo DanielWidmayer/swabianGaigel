@@ -2,15 +2,29 @@
     <div id="username" class="text-center">
         <h1><i class="bi bi-person"></i></h1>
         <h3>
-            <p class="text-center" onclick="$('#changeUsernameModal').modal('show');">
+            <p class="text-center" id="unameplaceholder">
                 <%= username %>
-                    <sup><a type="button" class="btn text-white" style="position: absolute;" onclick="$('#changeUsernameModal').modal('show');"><i class="bi bi-pencil"></i></a></sup>
+                    <sup><a type="button" class="btn text-white" onclick="togglecolUI();" style="position: absolute;"><i class="bi bi-pencil"></i></a></sup>
 
             </p>
-            <div id="userid">
+            <div class="collapse" id="colUI">
+                <form method="POST" id="changeUsernameForm" action="/username">
+                    <div class="form-row mx-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="NiG">Name</span>
+                            </div>
+                            <input type="text" name="uname" id="unameinput" class="form-control" aria-describedby="NiG" placeholder="enter new username ...">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="userid" class="mt-3">
                 <p>#<%= userhash %>
                 </p>
             </div>
         </h3>
     </div>
 </div>
+
+<!--$('#changeUsernameModal').modal('show');-->
