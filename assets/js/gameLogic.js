@@ -200,7 +200,7 @@ io.socket.on("cardplayed", function (data) {
     }
 });
 
-io.socket.on("solowin", function (data) {
+io.socket.on("roundwin", function (data) {
     let winningTrickDeck;
     if (userHash == data.user.hashID) {
         winningTrickDeck = userhands[userHash].trickdeck;
@@ -217,10 +217,6 @@ io.socket.on("solowin", function (data) {
         winningTrickDeck.render();
     }, 2500);
     console.log(data.user.name + " now has a score of: " + data.user.score);
-});
-
-io.socket.on("teamwin", function (data) {
-    console.log(data); //data.users
 });
 
 io.socket.on("dealcard", function (data) {
@@ -368,7 +364,7 @@ io.socket.on("gameover", function (data) {
         $("body").append('<img class="gameover-img" src="/images/font_gameover.png"></img>');
         $(".gameover-img").animate({ opacity: 1.0 });
     }
-    $(".gameutils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
+    $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
 });
 
 function getRandomArbitrary(min, max) {

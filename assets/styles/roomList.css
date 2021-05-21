@@ -35,6 +35,7 @@ body {
     color: #fff!important; 
 }
 thead {
+    position: -webkit-sticky;
     position: sticky;
 }
 
@@ -68,4 +69,8 @@ tr:hover {
 
 .maincard{
     height: 60vh;
+}
+
+#pwfield {
+    display: none;
 }

@@ -52,11 +52,11 @@ img.preload {
     height: 100%;
     width: 100%;
     border: solid 6px brown;
-    border-radius: 8px;
     -webkit-border-radius: 8px;
     -moz-border-radius: 8px;
     -ms-border-radius: 8px;
     -o-border-radius: 8px;
+    border-radius: 8px;
     box-shadow: #111 1px 1px 2px;
 }
 
@@ -159,6 +159,7 @@ footer {
     top: 30%;
     left: 20%;
     opacity: 0;
+    z-index: 7777;
 }
 
 .hr-thick{
