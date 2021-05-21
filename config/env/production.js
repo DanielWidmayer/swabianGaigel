@@ -44,8 +44,9 @@ module.exports = {
          *                                                                          *
          ***************************************************************************/
         default: {
-            // adapter: 'sails-mysql',
-            // url: 'mysql://user:password@host:port/database',
+            adapter: 'sails-postgresql',
+            url: process.env.DATABASE_URL,
+            ssl: true
             //--------------------------------------------------------------------------
             //  /\   To avoid checking it in to version control, you might opt to set
             //  ||   sensitive credentials like `url` using an environment variable.
@@ -166,7 +167,7 @@ module.exports = {
          *                                                                          *
          ***************************************************************************/
         adapter: '@sailshq/connect-redis',
-        url: 'redis://:RTxVRvnwFp07cMN0BgdgIp1fY9xxijJr@redis-15894.c247.eu-west-1-1.ec2.cloud.redislabs.com:15894',
+        url: process.env.REDISCLOUD_URL,
         
         //--------------------------------------------------------------------------
         // /\   OR, to avoid checking it in to version control, you might opt to
