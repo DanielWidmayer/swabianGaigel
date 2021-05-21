@@ -9,6 +9,8 @@
 const crypto = require("crypto");
 const ChatController = require("./ChatController");
 
+const { uniqueNamesGenerator, countries } = require("unique-names-generator");
+
 const error = sails.helpers.errors;
 
 module.exports = {
@@ -22,6 +24,7 @@ module.exports = {
             }
             return res.json({ rooms: rooms, active: active });
         } catch (err) {
+            sails.log(err);
             return res.serverError(err);
         }
     },
@@ -40,14 +43,30 @@ module.exports = {
 
             return res.view("basic/roomlist", { layout: "basic_layout", username: uname, userhash: uhash, errmsg: errmsg });
         } catch (err) {
+            sails.log(err);
             return res.serverError(err);
         }
     },
 
     // -------------------------------------------------------------------------------------- Room Creation
     newRoom: async (req, res) => {
-        // TODO - check POST-data
         try {
+            let data = req.body;
+            let re = /^([A-Za-z0-9]+\s?)+$/;
+            // sanity checking of post data
+            if (data.roomname.length <= 0 || data.roomname.length > 21) throw error(103, "Please provide a Room Name between 1 and 25 characters");
+            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces");
+
+            let mp = parseInt(data.maxplayers);
+            if (![2,3,4,6].includes(mp)) throw error(103, "Please provide a valid count of max players");
+
+            re = /^[A-Za-z0-9._/\-:\\+#=()&%$§@,;]{5,15}$/;
+            let pw = data.passwd;
+            if (data.pwcb) {
+                if (!re.test(pw)) throw error(103, "Please provide a valid password between 5 and 15 characters");
+            } else pw = "";
+            // all good
+
             let hash = crypto.randomBytes(10).toString("hex");
             while (await Room.findOne({ hashID: hash })) {
                 sails.log("hashID already in use, creating new one ...");
@@ -55,15 +74,18 @@ module.exports = {
             }
             await Room.create({
                 hashID: hash,
-                name: req.body.roomname,
-                password: req.body.passwd,
-                maxplayers: parseInt(req.body.maxplayers),
+                name: data.roomname,
+                password: pw,
+                maxplayers: mp,
                 jsonplayers: [],
                 stack: [],
             });
+            let room = await Room.findOne({ hashID: hash });
+            req.session.roomid = room.id;
             //sails.sockets.blast("listevent", { room: room });
             return res.redirect(`/room/${hash}`);
         } catch (err) {
+            sails.log(err);
             if (err.code) {
                 res.cookie("errmsg", err.message);
                 return res.redirect("/create");
@@ -75,17 +97,43 @@ module.exports = {
     createPage: async (req, res) => {
         try {
             let user = { name: User.getRandomName(req.cookies.username), hash: await User.getUniqueHash(req.cookies.userhash) };
+            let rname;
+            const re = /^([A-Za-z0-9]+\s?)+$/;
+            // create random roomname
+            do {
+                rname = uniqueNamesGenerator({
+                    dictionaries: [countries],
+                    length: 1,
+                    style: "capital",
+                });
+            } while (!re.test(rname) || rname.length > 21);
 
             let errmsg = req.cookies.errmsg;
             if (errmsg) res.clearCookie("errmsg");
 
-            return res.view("basic/create", { layout: "basic_layout", username: user.name, userhash: user.hash, errmsg: errmsg });
+            return res.view("basic/create", { layout: "basic_layout", username: user.name, userhash: user.hash, roomname: rname, errmsg: errmsg });
         } catch (err) {
+            sails.log(err);
             return res.serverError(err);
         }
     },
 
     // -------------------------------------------------------------------------------------- Join Room
+    protectRoom: async (req, res) => {
+        try {
+            let room = req.body.hash;
+            room = await Room.findOne({ hashID: room }).decrypt();
+            if (!room) throw error(102, "Sorry, but the room you tried to join does not exist!");
+
+            if (req.body.passwd != room.password) throw error(103, "Invalid password!");
+            req.session.roomid = room.id;
+            return res.ok();
+        } catch (err) {
+            sails.log(err);
+            return res.status(403).json({ err: err });
+        }
+    },
+
     roomAccess: async (req, res) => {
         try {
             let hash = req.param("roomID");
@@ -99,16 +147,23 @@ module.exports = {
                 throw error(102, "Sorry, but the room you tried to join does not exist!");
             }
 
+            // check if room is password protected
+            if (room.password.length > 0) {
+                if (req.session.roomid != room.id) throw error(102, "This Room is password protected!");
+            }
+
             // check if user object still exists somewhere
             if (req.session.userid) {
                 user = await User.findOne({ id: req.session.userid });
                 if (!user) {
+                    sails.log("kill references");
                     // kill references
                     delete req.session.userid;
                     delete req.session.roomid;
                 }
                 // check if user tries to reconnect
                 else if (req.session.roomid == room.id) {
+                    sails.log("bot to user");
                     // change from bot to user again - TODO
                     return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
                 } else if (req.session.roomid) {
@@ -144,6 +199,7 @@ module.exports = {
             return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
         } catch (err) {
             if (err.code) {
+                sails.log(err);
                 res.cookie("errmsg", err.message);
                 return res.redirect("/list");
             } else return res.serverError(err);
@@ -218,6 +274,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            sails.log(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -280,6 +337,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
+            sails.log(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }

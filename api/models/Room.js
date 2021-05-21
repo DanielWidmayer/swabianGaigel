@@ -97,22 +97,26 @@ module.exports = {
             if (ident.id) room = await Room.findOne({ id: ident.id });
             else if (ident.hash) room = await Room.findOne({ hashID: ident.hash });
             if (room) {
-                return { hashID: room.hashID, name: room.name, password: room.password ? true : false, maxplayers: room.maxplayers, players: room.jsonplayers.length };
+                return { hashID: room.hashID, name: room.name, password: room.password.length ? true : false, maxplayers: room.maxplayers, players: room.jsonplayers.length };
             } else {
                 return null;
             }
         } catch (err) {
-            sails.log(err);
+            throw (err);
         }
     },
 
     getList: async () => {
-        let rooms = await Room.find();
+        try {
+            let rooms = await Room.find();
         
-        for (el of rooms) {
-            el = { hashID: el.hashID, name: el.name, password: el.password ? true : false, maxplayers: el.maxplayers, players: el.jsonplayers.length };
-        }
+            for (el of rooms) {
+                el = { hashID: el.hashID, name: el.name, password: el.password.length ? true : false, maxplayers: el.maxplayers, players: el.jsonplayers.length };
+            }
 
-        return rooms;
+            return rooms;
+        } catch (err) {
+            throw (err);
+        }
     }
 };
