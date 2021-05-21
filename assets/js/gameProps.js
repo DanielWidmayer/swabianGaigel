@@ -92,6 +92,7 @@ function meldOnePair() {
                     meldCards.forEach((card) => {
                         userhands[userHash].hand.addCard(card, card.id);
                     });
+                    userhands[userHash].hand.sortHand();
                     userhands[userHash].hand.render();
                 }, 2000);
             }

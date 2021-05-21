@@ -26,6 +26,10 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "turnmsg", { user: user });
     },
 
+    firstturnmsg: (user, roomhash) => {
+        sails.sockets.broadcast(roomhash, "firstturnmsg", { user: user });
+    },
+
     cardplayedmsg: (user, card, roomhash) => {
         sails.sockets.broadcast(roomhash, "cardplayedmsg", { user: user, card: card });
     },
@@ -38,8 +42,8 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "cardrobmsg", { user: user, card: card });
     },
 
-    gameovermsg: (user, roomhash) => {
-        sails.sockets.broadcast(roomhash, "gameovermsg", { user: user });
+    gameovermsg: (users, roomhash) => {
+        sails.sockets.broadcast(roomhash, "gameovermsg", { users: users });
     },
 
     firstcardtypemsg: (user, first_type, roomhash) => {
