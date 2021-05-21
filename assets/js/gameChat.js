@@ -6,22 +6,30 @@ const bpost = $("#bpost");
 
 // Automatic Scroll if user is at bottom of chat
 function appendMessage(text, field) {
+    let actualScroll = field[0].scrollTop + field[0].clientHeight;
+    let shouldScroll = actualScroll >= field[0].scrollHeight - 10 && actualScroll <= field[0].scrollHeight + 10;
     field.append(text);
-    field.animate({ scrollTop: field[0].scrollHeight }, 500);
+    if (shouldScroll) {
+        field.animate({ scrollTop: field[0].scrollHeight }, 500);
+    }
 }
+
+// function ScrollDown(field) {
+//     field.animate({ scrollTop: field[0].scrollHeight }, 700);
+// }
 
 // Chat Socket Events
 io.socket.on("joinmsg", function (data) {
-    appendMessage(`<p style="font-weigth: bold;">${data.user} ${data.text}</p>`, chf);
+    appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-plus-fill text-success"></i>${data.user} ${data.text}</p>`, chf);
 });
 
 io.socket.on("leavemsg", function (data) {
     // data.user = username, data.text = message, data.bot = botname
-    appendMessage(`<p style="font-weigth: bold;">${data.user} ${data.text} ${data.bot}</p>`, chf);
+    appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-door-open-fill text-danger"></i>${data.user} ${data.text} ${data.bot}</p>`, chf);
 });
 
 io.socket.on("controllermsg", function (data) {
-    appendMessage(`<p>${data.msg}</p>`, gamef);
+    appendMessage(`<p><i class="bi bi-controller text-info"></i>${data.msg}</p>`, gamef);
 });
 
 io.socket.on("chatmsg", function (data) {
@@ -31,9 +39,19 @@ io.socket.on("chatmsg", function (data) {
 io.socket.on("turnmsg", function (data) {
     let text;
     if (userHash == data.user.hashID) {
-        text = "<p>You have won the trick.</p><p>Your score is now " + data.user.score + '</p><hr class="hr-thick"/><p>It\'s your turn.</p>';
+        text =
+            '<p><i class="bi bi-trophy"></i>You have won the trick.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ' + data.user.score + '</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>';
     } else {
-        text = "<p>" + data.user.name + " has won the trick.</p><p>" + data.user.name + "'s score is now " + data.user.score + '</p><hr class="hr-thick"/><p>It\'s ' + data.user.name + "'s turn.</p>";
+        text =
+            '<p><i class="bi bi-trophy"></i>' +
+            data.user.name +
+            ' has won the trick.</p><p><i class="bi bi-trophy-fill"></i>' +
+            data.user.name +
+            "'s score is now " +
+            data.user.score +
+            '</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' +
+            data.user.name +
+            "'s turn.</p>";
     }
     appendMessage(`${text}`, gamef);
 });
@@ -41,9 +59,9 @@ io.socket.on("turnmsg", function (data) {
 io.socket.on("firstturnmsg", function (data) {
     let text;
     if (userHash == data.user.hashID) {
-        text = "<p>It's your turn to start the game.</p>";
+        text = '<p><i class="bi bi-hourglass-split text-warning"></i>You start the game.</p>';
     } else {
-        text = `<p>It\'s ${data.user.name}'s turn to start the game.</p>`;
+        text = `<p><i class="bi bi-hourglass-split"></i>${data.user.name} start's the game.</p>`;
     }
     appendMessage(`${text}`, gamef);
 });
@@ -53,20 +71,20 @@ io.socket.on("cardplayedmsg", function (data) {
     let cardletter = getCardLetter(data.card.value);
     let text;
     if (userHash == data.user.hashID) {
-        text = "You have";
+        text = "You";
     } else {
-        text = `${data.user.name} has`;
+        text = `${data.user.name}`;
     }
-    appendMessage(`<p>${text} played a ${icon} ${cardletter}</p>`, gamef);
+    appendMessage(`<p><i class="bi bi-file-play"></i>${text}: played ${icon} ${cardletter}</p>`, gamef);
 });
 
 io.socket.on("paircalledmsg", function (data) {
     let text;
     let icon = getHtmlSymbol(data.symbol);
     if (userHash == data.user.hashID) {
-        text = `<hr class="mb-0"/><p>You have melded in ${icon}.</p><p>Your score is now ${data.user.score}</p><hr class="mt-0"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-people-fill text-info"></i>You have melded in ${icon}.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ${data.user.score}</p><hr class="mt-0"/>`;
     } else {
-        text = `<hr class="mb-0"/><p>${data.user.name} has melded in ${icon}.</p><p>${data.user.name}'s score is now ${data.user.score}</p><hr class="mt-0"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-people-fill text-info"></i>${data.user.name} has melded in ${icon}.</p><p><i class="bi bi-trophy-fill"></i>${data.user.name}'s score is now ${data.user.score}</p><hr class="mt-0"/>`;
     }
     appendMessage(`${text}`, gamef);
 });
@@ -76,9 +94,9 @@ io.socket.on("cardrobmsg", function (data) {
     let icon = getHtmlSymbol(data.card.symbol);
     let cardletter = getCardLetter(data.card.value);
     if (userHash == data.user.hashID) {
-        text = `<hr class="mb-0"/><p>You have robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-file-arrow-down text-info"></i>You have robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
     } else {
-        text = `<hr class="mb-0"/><p>${data.user.name} has robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-file-arrow-down text-info"></i>${data.user.name} has robbed the ${icon} ${cardletter}.</p><hr class="mt-0"/>`;
     }
     appendMessage(`${text}`, gamef);
 });
@@ -86,13 +104,13 @@ io.socket.on("cardrobmsg", function (data) {
 io.socket.on("gameovermsg", function (data) {
     let text;
     if (data.users.find((el) => el.hashID == userHash)) {
-        text = `<hr class="mb-0"/><p>Congratulations You have won the game!</p><hr class="mt-0 hr-thick"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i>Congratulations You have won the game!</p><hr class="mt-0 hr-thick"/><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i>`;
     } else {
         let winners = "";
         for (const user of data.users) {
             winners += user.name + " ";
         }
-        text = `<hr class="mb-0"/><p>Game Over! ${winners} has won the game!</p><hr class="mt-0 hr-thick"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-award"></i>Game Over! ${winners} has won the game!</p><hr class="mt-0 hr-thick"/>`;
     }
     appendMessage(`${text}`, gamef);
 });
@@ -100,9 +118,9 @@ io.socket.on("gameovermsg", function (data) {
 io.socket.on("firstcardtypemsg", function (data) {
     let text;
     if (userHash == data.user.hashID) {
-        text = `<p>You have called ${data.first_type}.</p>`;
+        text = `<p><i class="bi bi-person"></i>You: called ${data.first_type}.</p>`;
     } else {
-        text = `<p>${data.user.name} has called ${data.first_type}.</p>`;
+        text = `<p><i class="bi bi-person"></i>${data.user.name}: called ${data.first_type}.</p>`;
     }
     appendMessage(`${text}`, gamef);
 });

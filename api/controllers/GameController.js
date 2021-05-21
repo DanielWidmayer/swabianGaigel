@@ -325,14 +325,17 @@ module.exports = {
             temp_stack.push({ playerID: user.id, card: card });
 
             // socket event cardplayed
-            user = await User.getNameAndHash(user.id);
+            let t_user = await User.getNameAndHash(user.id);
             if (!firstround) {
-                sails.sockets.broadcast(room.hashID, "cardplayed", { user: user, card: card }, req);
+                sails.sockets.broadcast(room.hashID, "cardplayed", { user: t_user, card: card });
                 ChatController.cardplayedmsg(user, card, room.hashID);
-            } else if (firstplay) {
-                sails.sockets.broadcast(room.hashID, "firstcard", { user: user, type: first_type }, req);
+            } else {
+                sails.sockets.broadcast(user.socket, "firstcard", { user: t_user, card: card });
+                sails.sockets.broadcast(room.hashID, "firstcard", { user: t_user }, req);
+            }
+            if (firstplay) {
                 ChatController.firstcardtypemsg(user, first_type, room.hashID);
-            } else sails.sockets.broadcast(room.hashID, "firstcard", { user: user }, req);
+            }
 
             // check for full stack
             let winner;
@@ -482,7 +485,7 @@ module.exports = {
             // check if user owns both cards
             cards.forEach((card) => {
                 c_index = room.jsonplayers[p_index].hand.findIndex((el) => el == card.id);
-                if (c_index < 0) throw error(104, "You do not own this card, cheater!");
+                if (c_index < 0) throw error(104, `You do not own card ${card.id}, cheater!`);
             });
 
             sails.log("all good! " + user.name + " called " + cards);

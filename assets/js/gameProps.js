@@ -20,10 +20,10 @@ io.socket.post("/socketconnect", function (res, jres) {
     }
 });
 
-bleave.click(quitPage);
-bstart.click(startGame);
-bmeld.click(meldOnePair);
-bsteal.click(stealTrumpCard);
+bleave.on("click", quitPage);
+bstart.on("click", startGame);
+bmeld.on("click", meldOnePair);
+bsteal.on("click", stealTrumpCard);
 
 function quitPage() {
     $("#quitPageModal").modal("show");
@@ -63,9 +63,10 @@ function startGame() {
 
 function meldOnePair() {
     let meldCards = userhands[userHash].hand.getPair();
-    if (meldCards.length > 0) {
+    if (meldCards.length > 0 && trumpCard != null) {
         if (meldCards.length > 2) {
             // TODO: ask user which pair to meld if he has two pairs
+            meldCards.splice(2, 2);
         }
         let b_meldCards = [];
         meldCards.forEach((card) => {
@@ -101,27 +102,27 @@ function meldOnePair() {
 }
 
 function stealTrumpCard() {
-    let trumpSeven = userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol);
-    if (trumpSeven != null) {
-        let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
-        io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
-            if (jres.statusCode != 200) {
-                console.log(jres);
-            } else {
-                console.log(res);
-                let userhand = userhands[userHash].hand;
-                bsteal.prop("disabled", true);
-                trumpCard.bottomCard().rotate(0);
-                userhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
-                trumpCard.addCard(trumpSeven, trumpSeven.id);
-                userhand.sortHand();
-                userhand.render();
-                trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
-                trumpCard.topCard().moveToBack();
-            }
-        });
-    } else {
-        console.log("Trumpcard could not be found, something has messed up.");
+    if (trumpCard != null) {
+        let trumpSeven = userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol);
+        if (trumpSeven != null) {
+            let b_trumpSeven = { id: trumpSeven.id, symbol: trumpSeven.symbol, value: trumpSeven.value };
+            io.socket.post("/robTrump", { card: b_trumpSeven }, function (res, jres) {
+                if (jres.statusCode != 200) {
+                    console.log(jres);
+                } else {
+                    console.log(res);
+                    let userhand = userhands[userHash].hand;
+                    bsteal.prop("disabled", true);
+                    trumpCard.bottomCard().rotate(0);
+                    userhand.addCard(trumpCard.bottomCard(), trumpCard.bottomCard().id);
+                    trumpCard.addCard(trumpSeven, trumpSeven.id);
+                    userhand.sortHand();
+                    userhand.render();
+                    trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+                    trumpCard.topCard().moveToBack();
+                }
+            });
+        }
     }
 }
 
