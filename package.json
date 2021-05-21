@@ -33,8 +33,5 @@
     "url": "git://github.com/anonymous node/sails user/backend.git"
   },
   "author": "anonymous node/sails user",
-  "license": "",
-  "engines": {
-    "node": "^12.16"
-  }
+  "license": ""
 }
