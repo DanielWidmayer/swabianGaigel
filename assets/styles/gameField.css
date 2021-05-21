@@ -13,6 +13,10 @@ p{
     color: white;
     margin-bottom: 0!important;;
 }
+i{
+    padding-left: .25rem;
+    padding-right: .25rem;
+}
 
 footer{
     margin: 0!important;
@@ -62,7 +66,7 @@ img.preload {
 }
 
 #chatfield{
-    height: 30vh;
+    height: 20vh;
     overflow-y: scroll;
 }
 
@@ -74,10 +78,18 @@ img.preload {
 }
 
 #userlist{
-    height: 30%;
     padding: 7px!important;
     margin-bottom: 0px!important;
     color: white;
+    font-size:larger;
+}
+
+#currentUserIcon{
+    position: absolute;
+    font-size: xx-large;
+    color: white;
+    z-index: 5000;
+    opacity: 0;
 }
 
 .chatmsgsend{

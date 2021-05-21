@@ -401,7 +401,9 @@ var cards = (function () {
             let pairs = [];
             for (var i = 0; i < this.length; i++) {
                 if (this[i].value == 3 || this[i].value == 4) {
-                    meldCards.push(this[i]);
+                    if (!this[i].melded) {
+                        meldCards.push(this[i]);
+                    }
                 }
             }
             if (meldCards.length > 1) {

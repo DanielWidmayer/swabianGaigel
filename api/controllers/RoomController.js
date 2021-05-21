@@ -44,7 +44,6 @@ module.exports = {
         }
     },
 
-
     // -------------------------------------------------------------------------------------- Room Creation
     newRoom: async (req, res) => {
         // TODO - check POST-data
@@ -86,7 +85,6 @@ module.exports = {
         }
     },
 
-
     // -------------------------------------------------------------------------------------- Join Room
     roomAccess: async (req, res) => {
         try {
@@ -113,12 +111,11 @@ module.exports = {
                 else if (req.session.roomid == room.id) {
                     // change from bot to user again - TODO
                     return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
-                }
-                else if (req.session.roomid) {
+                } else if (req.session.roomid) {
                     await leavehandler({ userid: req.session.userid, roomid: req.session.roomid });
                 }
             }
-            
+
             // no room connection, carry on
             // check if room is joinable
             if (room.status == "game") throw error(102, "Sorry, but this game is already running!");
@@ -226,7 +223,6 @@ module.exports = {
         }
     },
 
-
     // -------------------------------------------------------------------------------------- Leave Room
     leaveUser: async (req, res) => {
         if (!req.isSocket) {
@@ -281,7 +277,7 @@ module.exports = {
             if (!room.empty) {
                 setTimeout(leavehandler, 30000, { userid: userid, roomid: roomid });
             }
-            
+
             return res.ok();
         } catch (err) {
             if (err.code) return res.badRequest(err);
@@ -290,19 +286,20 @@ module.exports = {
     },
 };
 
-
 // -------------------------------------------------------------------------------------- Helper Functions
 
-async function handleEmptyRoom (roomID) {
-    let pids = [], bots = [], empty = true;
+async function handleEmptyRoom(roomID) {
+    let pids = [],
+        bots = [],
+        empty = true;
     let room = await Room.findOne({ id: roomID }).populate("admin");
     // check if room is empty
     if (room.jsonplayers.length > 0) {
         for (pl of room.jsonplayers) pids.push(pl.playerID);
         bots = await User.find().where({ id: pids });
-        let human = bots.find((el) => el.bot == false)
+        let human = bots.find((el) => el.bot == false);
         if (human) {
-            // still at least one human player  
+            // still at least one human player
             let users = [],
                 p_temp;
             for (pl of room.jsonplayers) {
@@ -327,7 +324,7 @@ async function handleEmptyRoom (roomID) {
             // no human player left, destroy bots
             await User.destroy({ id: pids });
         }
-    } 
+    }
     room = await Room.getListRoom({ id: room.id });
 
     if (empty) {
@@ -339,8 +336,7 @@ async function handleEmptyRoom (roomID) {
     return room;
 }
 
-
-async function leavehandler (args) {
+async function leavehandler(args) {
     let user = await User.findOne({ id: args.userid });
     let room = await Room.findOne({ id: args.roomid });
     let players, p_index;
@@ -348,7 +344,7 @@ async function leavehandler (args) {
     if (user) sails.log("leavehandler triggered for " + user.name + " " + user.id);
     else sails.log("leavehandler triggered, but User was already destroyed");
     // check if user reconnected within timeout
-    if (user.unload == false || !user || !room) return -1;
+    if (!user || !room || user.unload == false) return -1;
 
     // check room status
     if (room.status == "game") {
@@ -361,7 +357,7 @@ async function leavehandler (args) {
             // leave message
             ChatController.leavemsg(user.name, room.hashID, user.botname);
         }
-        
+
         return 0;
     } else {
         // remove user from player list of connected room

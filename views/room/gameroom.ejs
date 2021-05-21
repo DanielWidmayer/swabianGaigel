@@ -1,13 +1,3 @@
-<!-- <div style="width: 100%; height: 500px; background-color: lightgreen;">
-    <div style="display: flex;">
-        <div id="playfield" style="width: 70%;"><%- include roomparts/playfield.ejs %></div>
-        <div style="width: 30%;">
-            <div><%- include roomparts/userlist.ejs %></div>
-            <div><%- include roomparts/chatfield.ejs %></div>
-        </div>
-    </div>
-    
-</div> -->
 <div class="m-5">
     <div class="row">
         <div class="col-8">
@@ -31,13 +21,14 @@
         <div class="col-4">
             <div class="card card-transparent mb-3">
                 <div id="game-history">
-                    <h3 class="p-2 text-white">Spielverlauf</h3>
-                    <%- include roomparts/userlist.ejs %>
-                        <hr class="m-0">
-                        <div id="gamehistoryfield" class="scrollbar scrollbar-primary"></div>
+                    <h3 class="p-2 text-white">Game History</h3>
+                    <hr class="m-0">
+                    <div id="gamehistoryfield" class="scrollbar scrollbar-primary"></div>
                 </div>
             </div>
-
+            <div class="card card-transparent mb-3">
+                <%- include roomparts/userlist.ejs %>
+            </div>
             <div class="card card-transparent">
                 <div id="chat">
                     <h3 class="p-2 text-white">Chat</h3>
@@ -49,7 +40,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="quitPageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<div id="currentUserIcon"><i class="bi bi-file-play-fill"></i></div>
+
+<div class="modal fade" id="quitPageModal" tabindex="-1" role="dialog" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
