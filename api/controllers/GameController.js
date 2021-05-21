@@ -214,7 +214,7 @@ module.exports = {
                     for (i = 0; i < room.jsonplayers.length; i++) {
                         ts = i % (room.jsonplayers.length / 2);
                         room.jsonplayers[i] = teams[ts][ps];
-                        if (i >= room.jsonplayers.length / 2) ps = 1;
+                        if (i + 1 >= room.jsonplayers.length / 2) ps = 1;
                     }
                 }
 
