@@ -45,9 +45,12 @@
 
         <%- include ../list/modal_change_username.ejs %>
 
+        <%- include ../list/modal_password.ejs %>
+
             <script>
                 const rl = $("#roomlist").children("tbody");
                 const acdiv = $('#activeRoom');
+                const pwmodal = $('#passwordModal');
                 var rooms = [];
                 var aRoom = {};
 
@@ -88,13 +91,28 @@
                     if (target.length) {
                         target.children(".rpl").html(playerIcons);
                     } else {
-                        rl.append(`
-                    <tr id="${room.hashID}" onclick=" window.location.href='/room/${room.hashID}';">
-                        <td class="rname">${room.name}</td>
-                        <td class="rpl">` + playerIcons + `</td>
-                        <td class="rpw">${room.password ? "<i class='bi bi-x-square-fill'></i>" : "<i class='bi bi-check-square-fill'></i>"}</td>
-                    </tr>`);
+                        if (room.password) {
+                            rl.append(`
+                            <tr id="${room.hashID}" onclick="protected('${room.hashID}','${room.name}');">
+                            <td class="rname">${room.name}</td>
+                            <td class="rpl">` + playerIcons + `</td>
+                            <td class="rpw"><i class="bi bi-x-square-fill"></i></td>
+                            </tr>`);
+                        } else {
+                            rl.append(`
+                            <tr id="${room.hashID}" onclick="window.location.href='/room/${room.hashID}';">
+                            <td class="rname">${room.name}</td>
+                            <td class="rpl">` + playerIcons + `</td>
+                            <td class="rpw"><i class='bi bi-check-square-fill'></i></td>
+                            </tr>`);
+                        }
                     }
+                }
+
+                function protected(rhash, rname) {
+                    $('#passwordModalLabel').html(`Password for ${rname}`);
+                    $('#hiddenhash').val(rhash);
+                    pwmodal.modal("show");
                 }
 
                 window.onload = function () {
@@ -109,5 +127,23 @@
                         acdiv.hide();
                     }
                 });
+
+                $('#pwForm').on('submit', function(e) {
+                    e.preventDefault();
+                    let hash = $('#hiddenhash').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/protect",
+                        data: { hash: hash, passwd: $('#passwd').val() },
+                        statusCode: {
+                            403: function (err) {
+                                $('#pwerr').html(err.responseJSON.err.msg);
+                            }
+                        },
+                        success: function (data) {
+                            window.location.href = `/room/${hash}`;
+                        }
+                    });
+                })
 
             </script>

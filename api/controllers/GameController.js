@@ -424,14 +424,14 @@ module.exports = {
                 else acPl = 0;
             }
 
+            // save changes
+            sails.log("save changes!");
+            await Room.updateOne({ id: room.id }).set({ stack: temp_stack, activePlayer: acPl });
+
             // update activePlayer and broadcast next turn
             user = await User.getNameAndHash(temp_players[acPl].playerID);
             sails.log("next player: " + user.name);
             sails.sockets.broadcast(room.hashID, "turn", { user: user });
-
-            // save changes
-            sails.log("save changes!");
-            await Room.updateOne({ id: room.id }).set({ stack: temp_stack, activePlayer: acPl });
 
             return res.ok();
         } catch (err) {
