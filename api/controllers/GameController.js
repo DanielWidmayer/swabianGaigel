@@ -366,7 +366,7 @@ module.exports = {
                     user = await User.getNameAndHash(temp_players[winner].playerID);
                     user.score = temp_players[winner].score;
                     user.wins = temp_players[winner].wins;
-                    sails.sockets.broadcast(room.hashID, "solowin", { user: user });
+                    sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
                     ChatController.turnmsg(user, room.hashID);
                     acPl = winner;
                 } else {
@@ -379,18 +379,17 @@ module.exports = {
 
                     for (el of p_win) {
                         for (let i = 0; i < temp_stack.length; i++) {
-                            // DWM - gesamten Stich als Score hochzählen
+                            // gesamten Stich als Score hochzählen
                             temp_players[el].score += temp_stack[i].card.value;
                         }
                         temp_players[el].wins += 1;
                     }
 
-                    user = await User.getNameAndHash([temp_players[p_win[0]].playerID, temp_players[p_win[1]].playerID]);
-                    user[0].score = temp_players[p_win[0]].score;
-                    user[0].wins = temp_players[p_win[0]].wins;
-                    user[1].score = user[0].score;
-                    user[1].wins = user[0].wins;
-                    sails.sockets.broadcast(room.hashID, "teamwin", { users: user });
+                    user = await User.getNameAndHash(temp_players[winner].playerID);
+                    user.score = temp_players[winner].score;
+                    user.wins = temp_players[winner].wins;
+
+                    sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
 
                     if (p_win[0] == acPl) acPl = p_win[1];
                     else acPl = p_win[0];

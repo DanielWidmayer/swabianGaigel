@@ -104,7 +104,7 @@ io.socket.on("cardrobmsg", function (data) {
 io.socket.on("gameovermsg", function (data) {
     let text;
     if (data.users.find((el) => el.hashID == userHash)) {
-        text = `<hr class="mb-0"/><p><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i>Congratulations You have won the game!</p><hr class="mt-0 hr-thick"/><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i>Congratulations You have won the game!<i class="bi bi-trophy"></i><i class="bi bi-trophy"></i><i class="bi bi-trophy"></i></p><hr class="mt-0 hr-thick"/>`;
     } else {
         let winners = "";
         for (const user of data.users) {
