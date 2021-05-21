@@ -142,7 +142,7 @@ module.exports = {
                 players = [];
 
             // check if room exists
-            room = await Room.findOne({ hashID: hash });
+            room = await Room.findOne({ hashID: hash }).populate("admin");
             if (!room) {
                 throw error(102, "Sorry, but the room you tried to join does not exist!");
             }
@@ -165,7 +165,7 @@ module.exports = {
                 else if (req.session.roomid == room.id) {
                     sails.log("bot to user");
                     // change from bot to user again - TODO
-                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
+                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID , admin: req.session.userid == room.admin.id ? true : false });
                 } else if (req.session.roomid) {
                     await leavehandler({ userid: req.session.userid, roomid: req.session.roomid });
                 }
@@ -180,7 +180,11 @@ module.exports = {
             user = await User.newUser(req, res);
 
             // make user admin if he is the first one to join
-            if (room.jsonplayers.length == 0) await Room.updateOne({ id: room.id }).set({ admin: user.id });
+            let admin_flag = false;
+            if (room.jsonplayers.length == 0) {
+                await Room.updateOne({ id: room.id }).set({ admin: user.id });
+                admin_flag = true;
+            }
 
             // add user to player list
             players = room.jsonplayers;
@@ -196,7 +200,7 @@ module.exports = {
 
             // join message
             ChatController.joinmsg(user.name, room.hashID);
-            return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID });
+            return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: admin_flag });
         } catch (err) {
             sails.log(err);
             if (err.code) {
