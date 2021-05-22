@@ -58,7 +58,7 @@ module.exports = {
             else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces");
 
             let mp = parseInt(data.maxplayers);
-            if (![2,3,4,6].includes(mp)) throw error(103, "Please provide a valid count of max players");
+            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Please provide a valid count of max players");
 
             re = /^[A-Za-z0-9._/\-:\\+#=()&%$§@,;]{5,15}$/;
             let pw = data.passwd;
@@ -252,6 +252,7 @@ module.exports = {
                         card: room.stack[i].card,
                     });
                 }
+                players = [];
                 for (let el of room.jsonplayers) {
                     p_temp = await User.getNameAndHash(el.playerID);
                     players.push({
@@ -265,15 +266,15 @@ module.exports = {
                 }
                 let r_temp = {
                     deck: room.deck.length,
-                    trump: room.trump,
                     acPl: room.activePlayer,
                     robbed: room.robbed,
                     called: room.called,
                     played: played,
                     stack: stack,
+                    status: room.status,
                 };
 
-                return res.status(200).json({ users: players, room: r_temp, ownHand: hand });
+                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump });
             }
 
             return res.ok();

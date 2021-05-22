@@ -22,3 +22,7 @@ io.socket.on("userevent", function (data) {
         ul.append(`<i class="bi bi-person-fill px-1"></i>${data.users.name}${readyicon}<br>`);
     }
 });
+
+/* text =<div class="game-utils">
+<button id="bshuffle" class="btn btn-game btn-secondary" title="Shuffle players" onclick="shufflePlayers"><i class="bi bi-shuffle"></i> </button>
+</div> */

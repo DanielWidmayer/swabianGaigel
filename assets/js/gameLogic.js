@@ -32,8 +32,7 @@ $(function () {
     userHash = getCookie("userhash");
 });
 
-//Let's deal when the game has been started
-io.socket.on("start", function (data) {
+function initialize(data) {
     let usr_ctr = data.users.length;
     let positions = [];
     if (usr_ctr == 6) {
@@ -43,7 +42,6 @@ io.socket.on("start", function (data) {
     if (usr_ctr > 2) positions.push({ x: containerWidth - 135, y: containerHeight / 6 });
     if (usr_ctr > 3 || usr_ctr == 2) positions.push({ x: containerWidth / 2, y: containerHeight / 6 });
     if (usr_ctr > 2) positions.push({ x: containerWidth / 6, y: containerHeight / 6 });
-    //console.log(positions);
     let j = data.users.findIndex((el) => el.hashID == userHash);
     if (j == -1) j = 0;
     for (let i = 0; i < usr_ctr; i++) {
@@ -117,6 +115,11 @@ io.socket.on("start", function (data) {
     for (const key in userhands) {
         userhands[key].hand.render();
     }
+}
+
+//Let's deal when the game has been started
+io.socket.on("start", function (data) {
+    initialize(data);
 });
 
 io.socket.on("turn", function (data) {
@@ -385,5 +388,3 @@ function getCookie(cname) {
     }
     return "";
 }
-
-//Tell the library which element to use for the table

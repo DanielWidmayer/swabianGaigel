@@ -13,9 +13,12 @@ io.socket.post("/socketconnect", function (res, jres) {
             window.location.href = "/list";
         } else console.log(jres);
     } else {
-        //console.log("socketconnect data: ");
         if (res != "OK") {
-            //console.log(res);
+            console.log("socketconnect data: ");
+            console.log(res);
+            if (res.room.status == "game") {
+                initialize(res);
+            }
         }
     }
 });
