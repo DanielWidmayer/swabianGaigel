@@ -6,6 +6,7 @@ const pwmodal = $('#passwordModal');
 
 var rooms = [];
 var activeRoom = {};
+var activeHash = 0;
 
 // --------------------------------------------------------------------- onload
 window.onload = function () {
@@ -18,19 +19,21 @@ window.onload = function () {
 function getAllRooms() {
     rooms = [];
     $.get("/roomList", function (data) {
+        console.log(data);
         data.rooms.forEach((room) => {
-            room.players = room.jsonplayers.length;
             rooms.push(room);
             renderRoom(room);
         });
         if (data.active) {
-            aRoom = data.active;
+            activeRoom = data.active;
             renderActive(data.active);
         }
+        if (data.ahash) activeHash = data.ahash;
     });
 }
 
 function renderRoom(room) {
+    console.log(room);
     let target = $(`#${room.hashID}`);
     if (room.empty) {
         target.remove();
@@ -39,7 +42,7 @@ function renderRoom(room) {
 
     let playerIcons = '';
     for (let i = 0; i < room.maxplayers; i++) {
-        if (i < room.players) playerIcons += '<i class="bi bi-person-fill"></i>';
+        if (i < room.players.length) playerIcons += '<i class="bi bi-person-fill"></i>';
         else playerIcons += '<i class="bi bi-person"></i>';
     }
 
@@ -66,9 +69,9 @@ function renderRoom(room) {
 }
 
 io.socket.on("listevent", function (data) {
-    //console.log(data);
+    console.log(data.room);
     renderRoom(data.room);
-    if (activeRoom.hashID == data.room.hashID) {
+    if (activeRoom.hashID == data.room.hashID && !data.room.players.includes(activeHash)) {
         activecard.html('');
         activecard.hide();
     }
@@ -77,7 +80,7 @@ io.socket.on("listevent", function (data) {
 
 // --------------------------------------------------------------------- render active room
 function renderActive(room) {
-    activecard.html(`<h4><span class="text-center"${room.name}</span></h4><a type="button" class="btn btn-info m-2" href="/room/${room.hashID}">Reconnect</a>`);
+    activecard.html(`<h4 class="text-center">${room.name}</h4><a type="button" class="btn btn-info m-2" href="/room/${room.hashID}">Reconnect</a>`);
     activecard.show();
 }
 

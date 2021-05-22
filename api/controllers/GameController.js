@@ -133,6 +133,125 @@ module.exports = {
         }
     },
 
+    // -------------------------------------------------------------------------------------- addBot
+
+    addBot: async (req, res) => {
+        if (!req.isSocket) {
+            return res.badRequest(new Error("socket request expected, got http instead."));
+        }
+        try {
+            let user, room, players;
+            // check authentication
+            if (req.session.roomid && req.session.userid) {
+                room = await Room.findOne({ id: req.session.roomid }).populate("admin");
+                user = await User.findOne({ id: req.session.userid });
+            } else throw error(101, "Invalid Session!");
+            if (!room) throw error(102, "This Room could not be found!");
+            if (!user) throw error(101, "This User could not be found!");
+            players = room.jsonplayers;
+
+            // check if user is in room
+            if (players.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
+
+            // check if user is admin
+            if (user.id != room.admin.id) throw error(102, "You are not allowed to do this!");
+
+            // check if room is full
+            if (players.length >= room.maxplayers) throw error(102, "Room is already full!");
+
+            let bot = await User.newBot();
+
+            players.push({
+                playerID: bot.id,
+                hand: [],
+                score: 0,
+                wins: 0,
+                team: 0,
+                ready: true
+            })
+
+            await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
+
+            let users = [];
+            for (pl of players) {
+                players.push(await User.getNameAndHash(pl.playerID));
+                players[players.length - 1].ready = pl.ready;
+                players[players.length - 1].team = pl.team;
+            }
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users });
+            ChatController.botmsg(bot.name, room.hashID, 1);
+
+            return res.ok();
+        } catch (err) {
+            sails.log.error(err);
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
+        }
+    },
+
+    // -------------------------------------------------------------------------------------- kickPlayer
+
+    kickPlayer: async (req, res) => {
+        if (!req.isSocket) {
+            return res.badRequest(new Error("socket request expected, got http instead."));
+        }
+        try {
+            let user, room, players, t_index;
+            let target = req.body.hash;
+            // check authentication
+            if (req.session.roomid && req.session.userid) {
+                room = await Room.findOne({ id: req.session.roomid }).populate("admin");
+                user = await User.findOne({ id: req.session.userid });
+            } else throw error(101, "Invalid Session!");
+            if (!room) throw error(102, "This Room could not be found!");
+            if (!user) throw error(101, "This User could not be found!");
+            players = room.jsonplayers;
+
+            // check if user and target are in room 
+            target = await User.findOne({ hashID: target });
+            if (!target) throw error(101, "This User does not exist!");
+            if (players.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
+            t_index = players.findIndex((pl) => pl.playerID == target.id);
+            if (t_index < 0) throw error(101, "User is not in this room!");
+
+            // check if user is admin and if he wants to kick himself
+            if (user.id != room.admin.id || target.id == room.admin.id) throw error(102, "You are not allowed to do this!");
+
+            players.splice(t_index, 1);
+            room.jsonplayers = players;
+
+            await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+
+            players = [];
+            if (target.bot) {
+                if (room.status == "game") throw error(102, "You can't kick a Bot once the game has started!");
+                else {
+                    await User.destroyOne({ id: target.id });
+                    ChatController.botmsg(target.botname, room.hashID, -1);
+                    for (el of room.jsonplayers) {
+                        players.push(await User.getNameAndHash(el.playerID));
+                        players[players.length - 1].ready = el.ready;
+                        players[players.length - 1].team = el.team;
+                    }
+                    sails.sockets.broadcast(room.hashID, "userevent", { users: players });
+                }
+            }
+            else {
+                // server can't force a player to refresh page or redirect on a socket request, this has to be done on client side
+                // if a user modifies its code to not receive the disconnect event all further socket requests should at least be blocked
+                await User.updateOne({ id: target.id }).set({ kicked: true, unload: true });
+
+                sails.sockets.broadcast(target.socket, "kicked");
+            }
+
+            return res.ok();
+        } catch (err) {
+            sails.log.error(err);
+            if (err.code) return res.badRequest(err);
+            else return res.serverError(err);
+        }
+    },
+
     // -------------------------------------------------------------------------------------- startGame
 
     startGame: async (req, res) => {
@@ -177,7 +296,7 @@ module.exports = {
                     sails.sockets.broadcast(room.hashID, "userevent", { users: players });
                     return res.status(200).json({ ready: room.jsonplayers[user].ready });
                 }
-                if (room.jsonplayers.length == 5 || room.jsonplayers.length > 6) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
+                if ([2,3,4,6].includes(room.jsonplayers.length) == false) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw error(104, "Game is already running!");
@@ -323,7 +442,7 @@ module.exports = {
             let temp_players = room.jsonplayers;
             temp_players[acPl].hand.splice(c_index, 1);
             temp_stack.push({ playerID: user.id, card: card });
-            sails.log.info(room.jsonplayers);
+            //sails.log.info(room.jsonplayers);
 
             // socket event cardplayed
             let t_user = await User.getNameAndHash(user.id);
@@ -398,7 +517,7 @@ module.exports = {
                 sails.log(user.name + " won!");
 
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
-                sails.log.info(room.jsonplayers);
+                //sails.log.info(room.jsonplayers);
 
                 // check for win condition
                 if (await gameover(room.id)) return res.ok();
@@ -417,7 +536,7 @@ module.exports = {
                         }
                     }
                 }
-                sails.log.info(room.jsonplayers);
+                //sails.log.info(room.jsonplayers);
 
                 // reset stack
                 temp_stack = [];
@@ -430,7 +549,7 @@ module.exports = {
 
             // save changes
             sails.log("save changes!");
-            sails.log.info(room.jsonplayers);
+            //sails.log.info(room.jsonplayers);
             await Room.updateOne({ id: room.id }).set({ stack: temp_stack, activePlayer: acPl });
 
             // update activePlayer and broadcast next turn
@@ -593,10 +712,14 @@ module.exports = {
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
-    },
+    }
 
-    pauseGame: async (req, res) => {},
 };
+
+// -------------------------------------------------------------------------------------- Bot Functions - TODO
+async function botPlay() {
+
+}
 
 // -------------------------------------------------------------------------------------- Helper Functions
 

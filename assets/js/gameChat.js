@@ -19,14 +19,42 @@ function appendMessage(text, field) {
 // }
 
 // Chat Socket Events
+// ------------ JBHR ----------- begin
 io.socket.on("joinmsg", function (data) {
-    appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-plus-fill text-success"></i>${data.user} ${data.text}</p>`, chf);
+    switch(data.trigger) {
+        case 0:
+            appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-plus-fill text-success"></i>${data.user} joined the room</p>`, chf);
+            break;
+        case 1:
+            appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-check-fill text-success"></i>${data.user} reconnected</p>`, chf);
+            break;
+    }
 });
 
 io.socket.on("leavemsg", function (data) {
-    // data.user = username, data.text = message, data.bot = botname
-    appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-door-open-fill text-danger"></i>${data.user} ${data.text} ${data.bot}</p>`, chf);
+    switch (data.trigger) {
+        case 0:
+            appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-door-open-fill text-danger"></i>${data.user} left the room</p>`, chf);
+            break;
+        case 1:
+            appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-x-fill text-danger"></i>${data.user} disconnected (timeout)</p>`, chf);
+            break;
+        case 2:
+            appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-dash-fill text-danger"></i>${data.user} was kicked</p>`, chf);
+            break;
+    }
 });
+
+io.socket.on("botmsg", function (data) {
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-success"></i>Bot ${data.bot} added</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-danger"></i>Bot ${data.bot} removed</p>`, chf);
+});
+
+io.socket.on("replacemsg", function (data) {
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>${data.user} replaced Bot ${data.bot}</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>Bot ${data.bot} replaced ${data.user}</p>`, chf);
+});
+// ------------ JBHR ----------- end
 
 io.socket.on("controllermsg", function (data) {
     appendMessage(`<p><i class="bi bi-controller text-info"></i>${data.msg}</p>`, gamef);
