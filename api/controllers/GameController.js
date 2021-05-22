@@ -214,7 +214,7 @@ module.exports = {
                     for (i = 0; i < room.jsonplayers.length; i++) {
                         ts = i % (room.jsonplayers.length / 2);
                         room.jsonplayers[i] = teams[ts][ps];
-                        if (i >= room.jsonplayers.length / 2) ps = 1;
+                        if (i + 1 >= room.jsonplayers.length / 2) ps = 1;
                     }
                 }
 
@@ -323,6 +323,7 @@ module.exports = {
             let temp_players = room.jsonplayers;
             temp_players[acPl].hand.splice(c_index, 1);
             temp_stack.push({ playerID: user.id, card: card });
+            sails.log.info(room.jsonplayers);
 
             // socket event cardplayed
             let t_user = await User.getNameAndHash(user.id);
@@ -359,7 +360,7 @@ module.exports = {
 
                 if (temp_players.length <= 3) {
                     for (let i = 0; i < temp_stack.length; i++) {
-                        // DWM - gesamten Stich als Score hochzählen
+                        // gesamten Stich als Score hochzählen
                         temp_players[winner].score += temp_stack[i].card.value;
                     }
                     temp_players[winner].wins += 1;
@@ -397,6 +398,7 @@ module.exports = {
                 sails.log(user.name + " won!");
 
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
+                sails.log.info(room.jsonplayers);
 
                 // check for win condition
                 if (await gameover(room.id)) return res.ok();
@@ -415,6 +417,7 @@ module.exports = {
                         }
                     }
                 }
+                sails.log.info(room.jsonplayers);
 
                 // reset stack
                 temp_stack = [];
@@ -422,10 +425,12 @@ module.exports = {
                 // next player turn
                 if (acPl < room.jsonplayers.length - 1) acPl += 1;
                 else acPl = 0;
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
             }
 
             // save changes
             sails.log("save changes!");
+            sails.log.info(room.jsonplayers);
             await Room.updateOne({ id: room.id }).set({ stack: temp_stack, activePlayer: acPl });
 
             // update activePlayer and broadcast next turn
@@ -619,12 +624,11 @@ function evalStack(stack, trump, type) {
     }
 
     // get occurrences of trump symbol
-    if (trump.symbol) {
+    if (trump.symbol !== null) {
         for (i = 0; i < stack.length; i++) {
             if (stack[i].card.symbol == trump.symbol) occ.push(stack[i]);
         }
     }
-    sails.log.info(occ);
 
     // all trump symbol or no trump symbol
     if (occ.length == stack.length || occ.length == 0) {
