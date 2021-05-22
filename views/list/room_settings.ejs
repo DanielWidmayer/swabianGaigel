@@ -5,9 +5,9 @@
         <div class="card card-light-transparent mb-3">
             <div class="input-group m-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">Room Name</span>
+                    <span class="input-group-text" id="ba1">Room Name</span>
                 </div>
-                <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="basic-addon1" value="<%= roomname %>">
+                <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="ba1" value="<%= roomname %>">
             </div>
         </div>
         <div class="row">
@@ -73,7 +73,7 @@
             </div>
 
         </div>
-        <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit(); ">Create Room</button>
+        <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit();">Create Room</button>
     </form>
 
 </div>
