@@ -97,7 +97,10 @@ module.exports = {
             if (ident.id) room = await Room.findOne({ id: ident.id });
             else if (ident.hash) room = await Room.findOne({ hashID: ident.hash });
             if (room) {
-                return { hashID: room.hashID, name: room.name, password: room.password.length ? true : false, maxplayers: room.maxplayers, players: room.jsonplayers.length };
+                let players = room.jsonplayers.map((pl) => pl.playerID);
+                players = await User.find({ id: players });
+                players = players.map((pl) => pl.hashID);
+                return { hashID: room.hashID, name: room.name, password: room.password.length ? true : false, maxplayers: room.maxplayers, players: players };
             } else {
                 return null;
             }
@@ -109,12 +112,15 @@ module.exports = {
     getList: async () => {
         try {
             let rooms = await Room.find();
-        
+            let lrooms = [], players = [];
             for (el of rooms) {
-                el = { hashID: el.hashID, name: el.name, password: el.password.length ? true : false, maxplayers: el.maxplayers, players: el.jsonplayers.length };
+                players = el.jsonplayers.map((pl) => pl.playerID);
+                players = await User.find({ id: players });
+                players = players.map((pl) => pl.hashID);
+                lrooms.push({ hashID: el.hashID, name: el.name, password: el.password.length ? true : false, maxplayers: el.maxplayers, players: players });
             }
 
-            return rooms;
+            return lrooms;
         } catch (err) {
             throw (err);
         }

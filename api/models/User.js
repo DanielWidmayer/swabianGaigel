@@ -37,6 +37,11 @@ module.exports = {
         unload: {
             type: "boolean",
             defaultsTo: false
+        },
+
+        kicked: {
+            type: "boolean",
+            defaultsTo: false
         }
     },
 
@@ -71,8 +76,8 @@ module.exports = {
         let res = [];
 
         for (el of players) {
-            if (el.bot) res.push({ hashID: el.hashID, name: el.botname });
-            else res.push({ hashID: el.hashID, name: el.name });
+            if (el.bot) res.push({ hashID: el.hashID, name: el.botname, bot: true });
+            else res.push({ hashID: el.hashID, name: el.name, bot: false });
         }
 
         if (res.length == 1) return res.pop();
@@ -101,7 +106,7 @@ module.exports = {
     getUniqueHash: async (c_hash) => {
         try {
             let uhash;
-            if (c_hash) uhash = c_hash;
+            if (c_hash) uhash = c_hash
             else uhash = Math.floor(Math.random() * (999 - 100) + 100);
             // unique hash
             while (await User.findOne({ hashID: uhash })) {
@@ -129,16 +134,26 @@ module.exports = {
         }
     },
 
-    getPlayers: async (roomID) => {
+    newBot: async () => {
         try {
-            let players = [];
-            let room = await Room.findOne({ id: roomID });
+            let hash = await sails.models.user.getUniqueHash(false);
+            let bot = uniqueNamesGenerator({
+                dictionaries: [colors],
+                length: 1,
+                style: "capital",
+            });
 
-            for (el of room.jsonplayers) {
-                if (el.bot == false) players.push(el.playerID);
-            }
+            // create User
+            await User.create({
+                hashID: hash,
+                name: "bot",
+                botname: bot,
+                bot: true
+            });
 
-            return players;
+            bot = await User.findOne({ hashID: hash });
+
+            return bot;
         } catch (err) {
             throw err;
         }
