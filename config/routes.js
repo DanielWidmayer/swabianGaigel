@@ -53,6 +53,10 @@ module.exports.routes = {
 
     "/switchTeam": "GameController.switchTeam",
 
+    "/addBot": "GameController.addBot",
+
+    "/kickPlayer": "GameController.kickPlayer",
+
     "/playCard": "GameController.playCard",
 
     "/callPair": "GameController.callPair",

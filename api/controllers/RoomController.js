@@ -248,7 +248,7 @@ module.exports = {
             let players = [],
                 p_temp;
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
-            let room = await Room.findOne({ id: req.session.roomid });
+            let room = await Room.findOne({ id: req.session.roomid }).populate("admin");
 
             for (const el of room.jsonplayers) {
                 players.push(await User.getNameAndHash(el.playerID));
@@ -257,7 +257,9 @@ module.exports = {
             }
 
             sails.sockets.join(req, room.hashID);
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players });
+            // check if user is admin
+            if (req.session.userid == room.admin.id) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
 
             // save socket ID in user obj
             await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req), unload: false });
@@ -414,14 +416,14 @@ async function handleEmptyRoom(roomID) {
                 users[users.length - 1].team = pl.team;
                 if (room.status == "lobby") users[users.length - 1].ready = false;
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users });
             empty = false;
 
             // switch admin if neccessary
             if (!room.admin || room.admin.bot) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
-                sails.sockets.broadcast(human.socket, "promoted", {});
+                sails.sockets.broadcast(human.socket, "adminchange", {});
             }
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });
