@@ -75,7 +75,7 @@ module.exports = {
         let players = await User.find().where({ id: pids });
         let res = [];
 
-        for (el of players) {
+        for (const el of players) {
             if (el.bot) res.push({ hashID: el.hashID, name: el.botname, bot: true });
             else res.push({ hashID: el.hashID, name: el.name, bot: false });
         }
@@ -124,7 +124,7 @@ module.exports = {
             let bots = [];
             let room = await Room.findOne({ id: roomID });
 
-            for (el of room.jsonplayers) {
+            for (const el of room.jsonplayers) {
                 if (el.bot == true) bots.push(el.playerID);
             }
 

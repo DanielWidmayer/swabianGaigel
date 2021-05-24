@@ -46,13 +46,13 @@ io.socket.on("leavemsg", function (data) {
 });
 
 io.socket.on("botmsg", function (data) {
-    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-success"></i>Bot ${data.bot} added</p>`, chf);
-    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-danger"></i>Bot ${data.bot} removed</p>`, chf);
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-success"></i>Bot ${data.bot} added</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-danger"></i>Bot ${data.bot} removed</p>`, chf);
 });
 
 io.socket.on("replacemsg", function (data) {
-    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>${data.user} replaced Bot ${data.bot}</p>`, chf);
-    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>Bot ${data.bot} replaced ${data.user}</p>`, chf);
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-warning"></i>${data.user} replaced Bot ${data.bot}</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-warning"></i>Bot ${data.bot} replaced ${data.user}</p>`, chf);
 });
 // ------------ JBHR ----------- end
 
