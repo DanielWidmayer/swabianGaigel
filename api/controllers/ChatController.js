@@ -16,8 +16,8 @@ module.exports = {
         sails.log(`${username} left room ${roomhash}`);
     },
 
-    controllermsg: (roomhash, msg) => {
-        sails.sockets.broadcast(roomhash, "controllermsg", { text: msg });
+    errormsg: (roomhash, msg) => {
+        sails.sockets.broadcast(roomhash, "errormsg", { text: msg });
     },
 
     turnmsg: (user, roomhash) => {

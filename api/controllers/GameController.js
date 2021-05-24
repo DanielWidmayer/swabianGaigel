@@ -12,28 +12,26 @@ const error = sails.helpers.errors;
 module.exports = {
     // -------------------------------------------------------------------------------------- randomOrder
     randomOrder: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let room,
-                user,
-                players = [],
-                temp = [];
+            let players = [], temp = [];
 
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
                 user = await User.findOne({ id: req.session.userid });
             } else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This Room could not be found!");
+            if (!room) throw error(101, "This Room could not be found!");
             if (!user) throw error(101, "This User could not be found!");
 
             // check if user is in room
             if (room.jsonplayers.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
 
             // check if user is admin
-            if (user.id != room.admin.id) throw error(102, "You are not allowed to do this!");
+            if (user.id != room.admin.id) throw error(104, "You are not allowed to do this!");
 
             // shuffle
             temp = room.jsonplayers;
@@ -74,7 +72,10 @@ module.exports = {
             return res.ok();
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg);
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -82,18 +83,18 @@ module.exports = {
     // -------------------------------------------------------------------------------------- switchTeam
 
     switchTeam: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let user, room;
             let teams = [0, 0, 0, 0];
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
                 user = await User.findOne({ id: req.session.userid });
             } else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This Room could not be found!");
+            if (!room) throw error(101, "This Room could not be found!");
             if (!user) throw error(101, "This User could not be found!");
 
             // check if user is in room
@@ -128,7 +129,10 @@ module.exports = {
             return res.status(200).json({ team: room.jsonplayers[p_index].team });
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -136,17 +140,18 @@ module.exports = {
     // -------------------------------------------------------------------------------------- addBot
 
     addBot: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let user, room, players;
+            let players;
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
                 user = await User.findOne({ id: req.session.userid });
             } else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This Room could not be found!");
+            if (!room) throw error(101, "This Room could not be found!");
             if (!user) throw error(101, "This User could not be found!");
             players = room.jsonplayers;
 
@@ -154,10 +159,10 @@ module.exports = {
             if (players.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
 
             // check if user is admin
-            if (user.id != room.admin.id) throw error(102, "You are not allowed to do this!");
+            if (user.id != room.admin.id) throw error(104, "You are not allowed to do this!");
 
             // check if room is full
-            if (players.length >= room.maxplayers) throw error(102, "Room is already full!");
+            if (players.length >= room.maxplayers) throw error(104, "Room is already full!");
 
             let bot = await User.newBot();
 
@@ -184,7 +189,10 @@ module.exports = {
             return res.ok();
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -192,40 +200,36 @@ module.exports = {
     // -------------------------------------------------------------------------------------- kickPlayer
 
     kickPlayer: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let user, room, players, t_index;
+            let players = [], t_index;
             let target = req.body.hash;
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
                 user = await User.findOne({ id: req.session.userid });
             } else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This Room could not be found!");
+            if (!room) throw error(101, "This Room could not be found!");
             if (!user) throw error(101, "This User could not be found!");
-            players = room.jsonplayers;
 
             // check if user and target are in room 
             target = await User.findOne({ hashID: target });
             if (!target) throw error(101, "This User does not exist!");
-            if (players.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
-            t_index = players.findIndex((pl) => pl.playerID == target.id);
+            if (room.jsonplayers.findIndex((pl) => pl.playerID == user.id) < 0) throw error(101, "User is not in this room!");
+            t_index = room.jsonplayers.findIndex((pl) => pl.playerID == target.id);
             if (t_index < 0) throw error(101, "User is not in this room!");
 
             // check if user is admin and if he wants to kick himself
-            if (user.id != room.admin.id || target.id == room.admin.id) throw error(102, "You are not allowed to do this!");
+            if (user.id != room.admin.id || target.id == room.admin.id) throw error(104, "You are not allowed to do this!");
 
-            players.splice(t_index, 1);
-            room.jsonplayers = players;
-
-            await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
-
-            players = [];
             if (target.bot) {
-                if (room.status == "game") throw error(102, "You can't kick a Bot once the game has started!");
+                if (room.status == "game") throw error(104, "You can't kick a Bot once the game has started!");
                 else {
+                    room.jsonplayers.splice(t_index, 1);
+                    await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
                     await User.destroyOne({ id: target.id });
                     ChatController.botmsg(target.botname, room.hashID, -1);
                     for (el of room.jsonplayers) {
@@ -247,7 +251,10 @@ module.exports = {
             return res.ok();
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -255,30 +262,29 @@ module.exports = {
     // -------------------------------------------------------------------------------------- startGame
 
     startGame: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         } else {
             try {
-                let room,
-                    user,
-                    players = [],
+                let players = [],
                     carddeck,
                     cards,
                     trump_card;
-                let el, pl;
+                let u_index, el, pl;
                 // check authentication
                 if (req.session.roomid && req.session.userid) {
                     room = await Room.findOne({ id: req.session.roomid });
                     user = await User.findOne({ id: req.session.userid });
                 } else throw error(101, "Invalid Session!");
-                if (!room) throw error(102, "This Room could not be found!");
+                if (!room) throw error(101, "This Room could not be found!");
                 if (!user) throw error(101, "This User could not be found!");
 
                 // check if user is in room and set ready
-                user = room.jsonplayers.findIndex((pl) => pl.playerID == user.id);
-                if (user < 0) throw error(101, "User is not in this room!");
-                if (room.jsonplayers[user].ready == false) room.jsonplayers[user].ready = true;
-                else room.jsonplayers[user].ready = false;
+                u_index = room.jsonplayers.findIndex((pl) => pl.playerID == user.id);
+                if (u_index < 0) throw error(101, "User is not in this room!");
+                if (room.jsonplayers[u_index].ready == false) room.jsonplayers[u_index].ready = true;
+                else room.jsonplayers[u_index].ready = false;
 
                 // wait till all players are ready
                 let rps = room.jsonplayers.reduce((cb, pv) => {
@@ -294,9 +300,9 @@ module.exports = {
                     }
 
                     sails.sockets.broadcast(room.hashID, "userevent", { users: players });
-                    return res.status(200).json({ ready: room.jsonplayers[user].ready });
+                    return res.status(200).json({ ready: room.jsonplayers[u_index].ready });
                 }
-                if ([2,3,4,6].includes(room.jsonplayers.length) == false) throw error(104, `Can't start a game with ${room.jsonplayers.length} players!`);
+                if ([2,3,4,6].includes(room.jsonplayers.length) == false) throw error(102, `Can't start a game with ${room.jsonplayers.length} players!`);
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw error(104, "Game is already running!");
@@ -361,7 +367,11 @@ module.exports = {
                 return res.ok();
             } catch (err) {
                 sails.log.error(err);
-                if (err.code) return res.badRequest(err);
+                if (err.code) {
+                    if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                    if (err.code == 102) ChatController.errormsg(room.hashID, err.msg);
+                    return res.badRequest(err);
+                }
                 else return res.serverError(err);
             }
         }
@@ -370,20 +380,22 @@ module.exports = {
     // -------------------------------------------------------------------------------------- playCard
 
     playCard: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
-            let room, user, card, c_index, acPl;
+            let card, c_index, acPl;
             let el;
             let firstplay = false,
                 firstround = false;
+            let delay = 1000;
             sails.log("playCard - sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump");
             else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This room could not be found!");
+            if (!room) throw error(101, "This room could not be found!");
 
             acPl = room.activePlayer;
             let first_type = room.startoff;
@@ -426,10 +438,11 @@ module.exports = {
             // check for empty deck
             if (!room.trump && room.stack.length > 0) {
                 let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
+                c_index = hand.findIndex((el) => el.id == card.id);
                 hand.splice(c_index, 1);
                 // check if user could have played symbol
                 if (card.symbol != room.stack[0].symbol) {
-                    if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same symbol!");
+                    if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same suit!");
                 } else {
                     if (hand.find((el) => el.value > room.stack[0].card.value)) throw error(104, "You have to play a higher card if you own one!");
                 }
@@ -444,80 +457,29 @@ module.exports = {
             temp_stack.push({ playerID: user.id, card: card });
             //sails.log.info(room.jsonplayers);
 
+            await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players, stack: temp_stack });
+
             // socket event cardplayed
             let t_user = await User.getNameAndHash(user.id);
             if (!firstround) {
                 sails.sockets.broadcast(room.hashID, "cardplayed", { user: t_user, card: card });
-                ChatController.cardplayedmsg(user, card, room.hashID);
+                ChatController.cardplayedmsg(t_user, card, room.hashID);
             } else {
                 sails.sockets.broadcast(user.socket, "firstcard", { user: t_user, card: card });
                 sails.sockets.broadcast(room.hashID, "firstcard", { user: t_user }, req);
             }
             if (firstplay) {
-                ChatController.firstcardtypemsg(user, first_type, room.hashID);
+                ChatController.firstcardtypemsg(t_user, first_type, room.hashID);
             }
 
             // check for full stack
-            let winner;
+            let winner = -1;
             if (temp_stack.length >= temp_players.length) {
                 // eval win and deal
                 sails.log("Full stack, eval winner");
                 winner = evalStack(temp_stack, room.trump, firstround ? first_type : "");
-                winner = temp_players.findIndex((el) => el.playerID == winner);
 
-                if (firstround) {
-                    let user_stack = {};
-                    let uhash;
-                    for (el of temp_stack) {
-                        uhash = await User.getNameAndHash(el.playerID);
-                        ChatController.cardplayedmsg(uhash, el.card, room.hashID);
-                        uhash = uhash.hashID.toString();
-                        user_stack[uhash] = el.card;
-                    }
-                    sails.sockets.broadcast(room.hashID, "firstwin", { data: user_stack }); // data: { 345: CardObj, 277: Cardobj, ... }
-                }
-
-                if (temp_players.length <= 3) {
-                    for (let i = 0; i < temp_stack.length; i++) {
-                        // gesamten Stich als Score hochzählen
-                        temp_players[winner].score += temp_stack[i].card.value;
-                    }
-                    temp_players[winner].wins += 1;
-                    user = await User.getNameAndHash(temp_players[winner].playerID);
-                    user.score = temp_players[winner].score;
-                    user.wins = temp_players[winner].wins;
-                    sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-                    ChatController.turnmsg(user, room.hashID);
-                    acPl = winner;
-                } else {
-                    let p_win = [];
-                    let p_team = temp_players[winner].team;
-                    // get winner team
-                    for (pl of temp_players) {
-                        if (pl.team == p_team) p_win.push(pl.playerID);
-                    }
-
-                    for (el of p_win) {
-                        for (let i = 0; i < temp_stack.length; i++) {
-                            // gesamten Stich als Score hochzählen
-                            temp_players[el].score += temp_stack[i].card.value;
-                        }
-                        temp_players[el].wins += 1;
-                    }
-
-                    user = await User.getNameAndHash(temp_players[winner].playerID);
-                    user.score = temp_players[winner].score;
-                    user.wins = temp_players[winner].wins;
-
-                    sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-
-                    if (p_win[0] == acPl) acPl = p_win[1];
-                    else acPl = p_win[0];
-                }
-                sails.log(user.name + " won!");
-
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
-                //sails.log.info(room.jsonplayers);
+                acPl = await applyWin(room.id, firstround, winner);
 
                 // check for win condition
                 if (await gameover(room.id)) return res.ok();
@@ -530,37 +492,44 @@ module.exports = {
                         if (card.length) {
                             sails.sockets.broadcast(user.socket, "dealcard", { card: card });
                         } else {
-                            user = await User.getNameAndHash({ id: el.playerID });
+                            user = await User.getNameAndHash(el.playerID);
                             sails.sockets.broadcast(room.hashID, "dealTrump", { user: user, card: room.trump });
                             await Room.updateOne({ id: room.id }).set({ trump: null });
                         }
                     }
                 }
                 //sails.log.info(room.jsonplayers);
-
-                // reset stack
-                temp_stack = [];
             } else {
                 // next player turn
                 if (acPl < room.jsonplayers.length - 1) acPl += 1;
                 else acPl = 0;
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
+                //await Room.updateOne({ id: room.id }).set({ jsonplayers: temp_players });
             }
 
-            // save changes
-            sails.log("save changes!");
-            //sails.log.info(room.jsonplayers);
-            await Room.updateOne({ id: room.id }).set({ stack: temp_stack, activePlayer: acPl });
-
             // update activePlayer and broadcast next turn
+            await Room.updateOne({ id: room.id }).set({ activePlayer: acPl });
             user = await User.getNameAndHash(temp_players[acPl].playerID);
             sails.log("next player: " + user.name);
             sails.sockets.broadcast(room.hashID, "turn", { user: user });
 
+            // check for bot turn
+            user = await User.findOne({ id: temp_players[acPl].playerID });
+            if (user.bot == true) {
+                await botRob(room.id, user.id);
+                await botCall(room.id, user.id);
+                if (winner >= 0) delay = 4000;
+                setTimeout(botPlay, delay, { roomid: room.id, botid: user.id });
+            }
+
+            sails.log(temp_players);
+
             return res.ok();
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -568,18 +537,19 @@ module.exports = {
     // -------------------------------------------------------------------------------------- callPair
 
     callPair: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
         try {
-            let room, user, cards, c_index, p_index;
+            let cards, c_index, p_index;
 
             sails.log("callPair - sanity checking ...");
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("called").populate("trump");
             else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This room could not be found!");
+            if (!room) throw error(101, "This room could not be found!");
 
             // check if user exists
             if (req.session.userid) user = await User.getNameAndHash(req.session.userid);
@@ -603,12 +573,12 @@ module.exports = {
             if (room.called) {
                 if (room.called.find((el) => el.id == cards[0].id) || room.called.find((el) => el.id == cards[1].id)) throw error(104, "These cards have already been called!");
             }
-            if (!room.trump) throw error(104, "You cannot call any more pairs if the deck is empty!");
+            if (!room.trump) throw error(104, "You can't call any more pairs if the deck is empty!");
 
             // check if user owns both cards
             cards.forEach((card) => {
                 c_index = room.jsonplayers[p_index].hand.findIndex((el) => el == card.id);
-                if (c_index < 0) throw error(104, `You do not own card ${card.id}, cheater!`);
+                if (c_index < 0) throw error(104, `You do not own this card, cheater!`);
             });
 
             sails.log("all good! " + user.name + " called " + cards);
@@ -642,7 +612,10 @@ module.exports = {
             return res.ok();
         } catch (err) {
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
     },
@@ -650,6 +623,7 @@ module.exports = {
     // -------------------------------------------------------------------------------------- robTrump
 
     robTrump: async (req, res) => {
+        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
@@ -663,10 +637,10 @@ module.exports = {
             // check if room exists
             if (req.session.roomid) room = await Room.findOne({ id: req.session.roomid }).populate("trump");
             else throw error(101, "Invalid Session!");
-            if (!room) throw error(102, "This room could not be found!");
+            if (!room) throw error(101, "This room could not be found!");
 
             // check if trump card exists
-            if (!room.trump) throw error(104, "No Trump found!");
+            if (!room.trump) throw error(104, "You can't rob anymore!");
 
             // block robbery just to be safe
             await Room.updateOne({ id: room.id }).set({ robbed: true });
@@ -681,12 +655,12 @@ module.exports = {
             if (p_index < 0) throw error(101, "User is not in this room!");
 
             // check room status
-            if (room.status != "game") throw error(104, "You can not do that right now!");
+            if (room.status != "game") throw error(104, "You can't do that right now!");
 
             card = req.body.card;
             sails.log.info(card);
             // check if played card is trump 7
-            if (card.value != 0 || card.symbol != room.trump.symbol) throw error(104, "This is not the right card!");
+            if (card.value != 0 || card.symbol != room.trump.symbol) throw error(104, "You can't rob with this card!");
             // check if user owns card
             c_index = room.jsonplayers[p_index].hand.findIndex((el) => el == card.id);
             if (c_index < 0) throw error(104, "You do not own this card, cheater!");
@@ -709,16 +683,267 @@ module.exports = {
             // reset robbery
             await Room.updateOne({ id: req.session.roomid }).set({ robbed: false });
             sails.log.error(err);
-            if (err.code) return res.badRequest(err);
+            if (err.code) {
+                if (err.code == 104) ChatController.errormsg(user.socket, err.msg); 
+                return res.badRequest(err);
+            }
             else return res.serverError(err);
         }
+    },
+
+    triggerBot: async (roomid, botid) => {
+        let room = await Room.findOne({ id: roomid });
+
+        if (room.jsonplayers[room.activePlayer].playerID == botid) {
+            botPlay({ roomid: roomid, botid: botid });
+        }
+        return 1;
     }
 
 };
 
 // -------------------------------------------------------------------------------------- Bot Functions - TODO
-async function botPlay() {
+async function botPlay(args) {
+    let room = await Room.findOne({ id: args.roomid }).populate("deck").populate("trump");
+    let bot = room.jsonplayers.find((el) => el.playerID == args.botid);
+    let stack = room.stack;
+    let players = room.jsonplayers;
+    let firstplay = false;
+    let firstround = false;
+    let empty = false;
+    let delay = 1000;
 
+    sails.log("botPlay called");
+
+    let hand = await Card.find({ id: bot.hand });
+    let p_index = players.findIndex((el) => el.playerID == bot.playerID);
+    let t_user = await User.getNameAndHash(bot.playerID);
+
+    // check if bot is still bot
+    if (t_user.bot == false) return 0;
+
+    // check for first round and first play
+    if (!players.find((el) => el.wins > 0)) {
+        firstround = true;
+        if (stack.length <= 0) firstplay = true;
+    }
+
+    // check empty deck
+    if (!room.trump && stack.length > 0) empty = true;
+
+    // play Card
+    let pcards = [];
+    let card = 0, c_index;
+    if (firstplay) {            // bot starts off, play random card that is not trump suit or else if only trump owned
+        for (el of hand) {
+            if (el.symbol != room.trump.symbol) pcards.push(el);
+        }
+    }
+    else if (firstround) {      // first round, only play trump if Trump has been called
+        if (room.startoff == "Trump") {
+            for (el of hand) {
+                if (el.symbol == room.trump.symbol) pcards.push(el);
+            }
+        }
+        else {
+            for (el of hand) {
+                if (el.symbol != room.trump.symbol) pcards.push(el);
+            }
+        }
+    }
+    else if (empty && stack.length > 0) {
+        let highest = -1;
+        let ct;
+        for (el of hand) {
+            if (el.symbol == stack[0].card.symbol && el.value > highest) {
+                highest = el.value;
+                ct = el;
+            }
+        }
+        if (highest >= 0) pcards.push(ct);
+    }
+    else {
+        let ht = -1;
+        let hv = -1;
+        if (stack.length == players.length - 1) {           // check if bot could win
+            for (i = 0; i < stack.length; i++) {
+                if (stack[i].card.symbol == room.trump.symbol && stack[i].card.value > ht) ht = stack[i].card.value;
+                else if (stack[i].card.symbol == stack[0].card.symbol && stack[i].card.value > hv) hv = stack[i].card.value;
+            }
+            if (ht >= 0) {
+                let ci = hand.findIndex((el) => el.value > ht && el.symbol == room.trump.symbol);
+                if (ci >= 0) pcards.push(hand[ci]);
+            } else {
+                let ci = hand.findIndex((el) => el.value > hv && el.symbol == stack[0].card.symbol);
+                if (ci >= 0) pcards.push(hand[ci]);
+            }
+        }
+    }
+    // if no card has been picked, select all
+    if (pcards.length <= 0) pcards = hand;
+    // pick random card out of possible cards
+    c_index = Math.floor(Math.random() * pcards.length);
+    card = hand[c_index];
+
+    c_index = bot.hand.findIndex((el) => el == card.id);
+    bot.hand.splice(c_index, 1);
+    players[p_index].hand = bot.hand;
+    room.stack.push({ playerID: bot.playerID, card: card });
+
+    sails.log(card);
+
+    await Room.updateOne({ id: room.id }).set({ stack: room.stack, jsonplayers: players });
+
+    // socket event cardplayed
+    if (firstplay) {
+        if (card.symbol == room.trump.symbol) room.startoff = "Trump";
+        else if (card.value == 11) room.startoff = "Second Ace";
+        else room.startoff = "Higher wins";
+        await Room.updateOne({ id: roomid }).set({ startoff: room.startoff });
+        ChatController.firstcardtypemsg(t_user, room.startoff, room.hashID);
+        sails.log.info("bot firstplay");
+    }
+    if (firstround) {
+        sails.sockets.broadcast(room.hashID, "firstcard", { user: t_user });
+        sails.log.info("bot firstround");
+    } else {
+        sails.sockets.broadcast(room.hashID, "cardplayed", { user: t_user, card: card });
+        ChatController.cardplayedmsg(t_user, card, room.hashID);
+        sails.log.info("bot cardplayed");
+    }
+
+    // check for full stack
+    let winner = -1;
+    if (stack.length >= players.length) {
+        // eval win and deal
+        sails.log("Full stack, eval winner");
+        winner = evalStack(stack, room.trump, firstround ? room.startoff : "");
+
+        room.activePlayer = await applyWin(room.id, firstround, winner);
+
+        // check for win condition
+        if (await gameover(room.id)) return 1;
+
+        // only deal cards if deck is not empty
+        if (room.deck.length > 0) {
+            for (el of players) {
+                t_user = await User.findOne({ id: el.playerID });
+                let dealcard = await Card.dealCard(1, el.playerID, room.id);
+                if (dealcard.length) {
+                    if (!t_user.bot) sails.sockets.broadcast(t_user.socket, "dealcard", { card: dealcard });
+                } else {
+                    t_user = await User.getNameAndHash(el.playerID);
+                    sails.sockets.broadcast(room.hashID, "dealTrump", { user: t_user, card: room.trump });
+                    await Room.updateOne({ id: room.id }).set({ trump: null });
+                }
+            }
+        }
+       
+    } else {
+        // next player turn
+        if (room.activePlayer < room.jsonplayers.length - 1) room.activePlayer += 1;
+        else room.activePlayer = 0;
+    }
+
+    // update activePlayer and broadcast next turn
+    await Room.updateOne({ id: room.id }).set({ activePlayer: room.activePlayer });
+    t_user = await User.getNameAndHash(players[room.activePlayer].playerID);
+    sails.log("next player: " + t_user.name);
+    sails.sockets.broadcast(room.hashID, "turn", { user: t_user });
+
+    // check for bot turn
+    t_user = await User.findOne({ id: players[room.activePlayer].playerID });
+    if (t_user.bot == true) {
+        botRob(room.id, t_user.id);
+        botCall(room.id, t_user.id);
+        if (winner >= 0) delay = 4000;
+        setTimeout(botPlay, delay, { roomid: room.id, botid: t_user.id });
+    }
+
+    sails.log(players);
+
+    return 1;
+}
+
+async function botCall(roomid, botid) {
+    let room = await Room.findOne({ id: roomid }).populate("called").populate("trump");
+    let bot = room.jsonplayers.find((el) => el.playerID == botid);
+    let p_index = room.jsonplayers.findIndex((el) => el.playerID == botid);
+    let hand = await Card.find({ id: bot.hand });
+    let pairs = [];
+    let call = [];
+    let tcall = [];
+
+    if (bot.wins >= 1 && room.trump) {
+        for (el of hand) {
+            if ((el.value == 3 || el.value == 4) && !room.called.find((cd) => cd.id == el.id)) pairs.push(el);
+        }
+        if (pairs.length >= 2) {
+            for (x = 0; x < pairs.length - 1; x++) {
+                for (y = x + 1; y < pairs.length; y++) {
+                    if (pairs[x].symbol == pairs[y].symbol && pairs[x].value != pairs[y].value) {
+                        if (pairs[x].symbol == room.trump.symbol) tcall = [pairs[x], pairs[y]];
+                        else call = [pairs[x], pairs[y]];
+                    }
+                }
+            }
+        } else return 0;
+
+        if (tcall.length == 2) {
+            await Room.addToCollection(room.id, "called", [tcall[0].id, tcall[1].id]);
+            bot.score += 40;
+            call = tcall;
+        }
+        else if (call.length == 2) {
+            await Room.addToCollection(room.id, "called", [call[0].id, call[1].id]);
+            bot.score += 20;
+        }
+        else return 0;
+
+        room.jsonplayers[p_index].score = bot.score;
+
+        if (room.jsonplayers.length >= 4) {
+            // get winner teammate
+            let t_win = room.jsonplayers.findIndex((el) => el.team == bot.team && el.playerID != bot.playerID);
+            room.jsonplayers[t_win].score = bot.score;
+        }
+
+        // socket call event
+        let user = await User.getNameAndHash(bot.playerID);
+        user.score = bot.score;
+        user.team = bot.team;
+        sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: call });
+        ChatController.paircalledmsg(user, call[0].symbol, room.hashID);
+
+        // save changes
+        await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+
+        // check for game win condition
+        await gameover(room.id);
+    } else return 0;
+
+    return 1;
+}
+
+async function botRob(roomid, botid) {
+    let room = await Room.findOne({ id: roomid }).populate("trump");
+    let bot = room.jsonplayers.find((el) => el.playerID == botid);
+    let p_index = room.jsonplayers.findIndex((el) => el.playerID == botid);
+    let hand = await Card.find({ id: bot.hand });
+
+    if (bot.wins > 0 && room.trump) {
+        let c_index = hand.findIndex((el) => el.symbol == room.trump.symbol && el.value == 0);
+        if (c_index >= 0) {
+            let card = hand[c_index];
+            room.jsonplayers[p_index].hand[c_index] = room.trump.id;
+            let user = await User.getNameAndHash(bot.playerID);
+            sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card });
+            ChatController.cardrobmsg(user, card, room.hashID);
+            await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: card });
+        }
+    } else return 0;
+
+    return 1;
 }
 
 // -------------------------------------------------------------------------------------- Helper Functions
@@ -772,6 +997,77 @@ function evalStack(stack, trump, type) {
             }
         }
         return i_t;
+    }
+}
+
+async function applyWin(roomid, firstround, winnerID) {
+    try {
+        let room = await Room.findOne({ id: roomid });
+        let players = room.jsonplayers;
+        let stack = room.stack;
+        let acPl = room.activePlayer;
+        let winner = players.findIndex((el) => el.playerID == winnerID);
+        let user;
+        
+        if (firstround) {
+            let user_stack = {};
+            let uhash;
+            for (el of stack) {
+                uhash = await User.getNameAndHash(el.playerID);
+                ChatController.cardplayedmsg(uhash, el.card, room.hashID);
+                uhash = uhash.hashID.toString();
+                user_stack[uhash] = el.card;
+            }
+            sails.sockets.broadcast(room.hashID, "firstwin", { data: user_stack }); // data: { 345: CardObj, 277: Cardobj, ... }
+        }
+
+        if (players.length <= 3) {
+            for (let i = 0; i < stack.length; i++) {
+                // gesamten Stich als Score hochzählen
+                players[winner].score += stack[i].card.value;
+            }
+            players[winner].wins += 1;
+            user = await User.getNameAndHash(players[winner].playerID);
+            user.score = players[winner].score;
+            user.wins = players[winner].wins;
+            sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
+            ChatController.turnmsg(user, room.hashID);
+            acPl = winner;
+        } else {
+            let p_win = [];
+            let p_team = players[winner].team;
+            // get winner team
+            for (let i = 0; i < players.length; i++) {
+                if (players[i].team == p_team) {
+                    p_win.push(players[i].playerID);
+                    p_win[p_win.length - 1].index = i;
+                }
+            }
+
+            for (el of p_win) {
+                for (let i = 0; i < stack.length; i++) {
+                    // gesamten Stich als Score hochzählen
+                    players[el.index].score += stack[i].card.value;
+                }
+                players[el.index].wins += 1;
+            }
+
+            user = await User.getNameAndHash(players[winner].playerID);
+            user.score = players[winner].score;
+            user.wins = players[winner].wins;
+
+            sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
+
+            if (p_win[0].index == acPl) acPl = p_win[1].index;
+            else acPl = p_win[0].index;
+        }
+        sails.log(user.name + " won!");
+
+        await Room.updateOne({ id: room.id }).set({ jsonplayers: players, stack: [] });
+
+        return acPl;
+    } catch (err) {
+        throw (err);
     }
 }
 
@@ -829,6 +1125,7 @@ async function gameover(roomid) {
             let players = room.jsonplayers;
             for (el of players) {
                 bot = await User.findOne({ id: el.playerID });
+                sails.log(bot);
                 if (!bot.bot) {
                     el.hand = [];
                     el.score = 0;
@@ -836,9 +1133,11 @@ async function gameover(roomid) {
                     el.team = 0;
                     el.wins = 0;
                 }
+                sails.log(el)
             }
             bot = players.findIndex((el) => el.bot == true);
             while (bot >= 0) {
+                sails.log("destroy " + bot);
                 await User.destroyOne({ id: players[bot].playerID });
                 players.splice(bot, 1);
                 bot = players.findIndex((el) => el.bot == true);

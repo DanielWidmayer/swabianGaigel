@@ -8,6 +8,7 @@
 //const Room = require("../models/Room");
 const crypto = require("crypto");
 const ChatController = require("./ChatController");
+const GameController = require("./GameController");
 
 const { uniqueNamesGenerator, countries } = require("unique-names-generator");
 
@@ -188,7 +189,7 @@ module.exports = {
                     }
                     // check if user was already replaced by bot
                     if (user.bot) {
-                        sails.log("user reconnected, replace bot");
+                        sails.log("User " + user.name + " reconnected, replace Bot");
                         await User.updateOne({ id: req.session.userid }).set({ bot: false });
                         ChatController.joinmsg(user.name, room.hashID, 1);
                         ChatController.replacemsg(user.name, user.botname, room.hashID, 1);
@@ -251,8 +252,8 @@ module.exports = {
 
             for (let el of room.jsonplayers) {
                 players.push(await User.getNameAndHash(el.playerID));
-                players[players.length - 1].ready = el.ready;
                 players[players.length - 1].team = el.team;
+                if (room.status == "lobby") players[players.length - 1].ready = el.ready;
             }
 
             sails.sockets.join(req, room.hashID);
@@ -396,17 +397,11 @@ async function handleEmptyRoom(roomID) {
         let human = bots.find((el) => el.bot == false);
         if (human) {
             // still at least one human player
-            let users = [],
-                p_temp;
+            let users = [];
             for (pl of room.jsonplayers) {
-                p_temp = await User.getNameAndHash(pl.playerID);
-                users.push({
-                    hashID: p_temp.hashID,
-                    name: p_temp.name,
-                    ready: false,
-                    team: pl.team,
-                    bot: p_temp.bot
-                });
+                users.push(await User.getNameAndHash(pl.playerID));
+                users[users.length - 1].team = pl.team;
+                if (room.status == "lobby") users[users.length - 1].ready = false;
             }
             sails.sockets.broadcast(room.hashID, "userevent", { users: users });
             empty = false;
@@ -450,12 +445,15 @@ async function leavehandler(args) {
 
     // check room status
     if (room.status == "game") {
-        // TODO - replace player with Bot
-        sails.log("user disconnected, replace with bot");
-        await User.updateOne({ id: user.id }).set({ bot: true });
+        // replace player with Bot
+        sails.log(user.name + " disconnected, replace with Bot");
+        await User.updateOne({ id: user.id }).set({ bot: true, unload: false });
         ChatController.replacemsg(user.name, user.botname, room.hashID, -1);
 
-        await handleEmptyRoom(room.id);
+        let t_room = await handleEmptyRoom(room.id);
+
+        // trigger bot if player left during his turn
+        if (!t_room.empty) GameController.triggerBot(room.id, user.id);
 
         return 0;
     } else {
@@ -471,7 +469,7 @@ async function leavehandler(args) {
         if (!room.empty) sails.sockets.blast("listevent", { room: room });
 
         // destroy user object
-        sails.log("destroy user object");
+        sails.log("destroy user object " + user.name + " " + user.id);
         await User.destroyOne({ id: user.id });
         return 1;
     }
