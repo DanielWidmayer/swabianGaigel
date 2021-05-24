@@ -56,8 +56,8 @@ io.socket.on("replacemsg", function (data) {
 });
 // ------------ JBHR ----------- end
 
-io.socket.on("errorermsg", function (data) {
-    appendMessage(`<p><i class="bi bi-exclamantion-diamond-fill text-danger"></i>${data.text}</p>`, chf);
+io.socket.on("errormsg", function (data) {
+    appendMessage(`<p class="chaterrmsg"><i class="bi bi-exclamation-diamond text-danger"></i>${data.text}</p>`, chf);
 });
 
 io.socket.on("chatmsg", function (data) {
