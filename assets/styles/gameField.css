@@ -165,3 +165,8 @@ footer {
 .hr-thick{
     height: 3px!important;
 }
+
+.pow{
+    font-size: 1.3rem!important; 
+    vertical-align: top;
+}
