@@ -117,7 +117,7 @@ function initialize(data) {
     }
 }
 
-//Let's deal when the game has been started
+// initialize as the game started
 io.socket.on("start", function (data) {
     initialize(data);
 });
@@ -126,17 +126,8 @@ io.socket.on("turn", function (data) {
     $("#currentUserIcon").animate({ left: userhands[data.user.hashID].hand.x + 30, top: userhands[data.user.hashID].hand.y + 150 });
     if (userHash == data.user.hashID) {
         console.log("Its your turn.");
-        // Finally, when you click a card in your hand, it is played
-        userhands[userHash].hand.click(function (card) {
-            let bCard = { id: card.id, value: card.value, symbol: card.symbol };
-            io.socket.post("/playCard", { card: bCard }, function (res, jres) {
-                if (jres.statusCode != 200) {
-                    console.log(jres);
-                } else {
-                    console.log(res);
-                }
-            });
-        });
+        // allow card click to play a card
+        allowCardPlay();
     } else {
         console.log("Its " + data.user.name + "'s turn.");
     }
@@ -193,7 +184,7 @@ io.socket.on("cardplayed", function (data) {
             callback: userhands[playerHash].playingpile.topCard().rotate(getRandomArbitrary(-200, -160)),
         });
     } else {
-        let fCard = userhands[userHash].hand.findCard(data.card.value, data.card.symbol);
+        let fCard = userhands[userHash].hand.findCardByID(data.card.id);
         userhands[userHash].playingpile.addCard(fCard, data.card.id);
         userhands[userHash].playingpile.render({
             callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
@@ -288,10 +279,8 @@ io.socket.on("firstturn", function (data) {
 });
 
 io.socket.on("firstcard", function (data) {
-    console.log(data);
     let playerHash = data.user.hashID;
     if (userHash != playerHash) {
-        console.log(data.type); // TODO: First Trick Type Animation
         let playingpile = userhands[playerHash].playingpile;
         playingpile.faceUp = false;
         playingpile.addCard(userhands[playerHash].hand.topCard());
@@ -372,9 +361,23 @@ io.socket.on("gameover", function (data) {
     $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
 });
 
-io.socket.on("kicked", function (data) {            // <--- JBHR ---
+io.socket.on("kicked", function (data) {
+    // <--- JBHR ---
     location.reload();
 });
+
+function allowCardPlay() {
+    userhands[userHash].hand.click(function (card) {
+        let bCard = { id: card.id, value: card.value, symbol: card.symbol };
+        io.socket.post("/playCard", { card: bCard }, function (res, jres) {
+            if (jres.statusCode != 200) {
+                console.log(jres);
+            } else {
+                console.log(res);
+            }
+        });
+    });
+}
 
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;

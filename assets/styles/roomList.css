@@ -14,16 +14,20 @@ body {
 
 .input-transparent
 {
-    background: transparent!important;
+    background: rgba(0, 0, 0, 0.2)!important;
     border: none!important;
     color: white!important;
-    flex: 1 1 auto;
     padding: .375rem .75rem;
+    width: 70%;
 }
 
 .input-transparent:focus
 {
     outline: none!important;
+}
+
+.input-transparent::placeholder{
+    color: rgba(255, 255, 255, 0.7)!important;
 }
 
 /* .input-transparent:
@@ -73,4 +77,12 @@ tr:hover {
 
 #pwfield {
     display: none;
+}
+
+.posterr{
+    font-size: 1.0rem!important;
+}
+
+.modal-dark{
+    background-color: rgba(0, 0, 0, 0.8)!important;
 }
