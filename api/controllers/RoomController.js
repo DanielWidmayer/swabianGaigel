@@ -423,6 +423,7 @@ async function handleEmptyRoom(roomID) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
                 sails.sockets.broadcast(human.socket, "adminchange", {});
             }
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });

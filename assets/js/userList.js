@@ -15,10 +15,65 @@ io.socket.on("userevent", function (data) {
             if (user.ready) readyicon = '<i class="bi bi-check-circle-fill text-success px-1"></i>';
             else readyicon = '<i class="bi bi-x-circle-fill text-warning px-1"></i>';
         } else readyicon = "";
-        ul.append(`${readyicon}${playericon}${playername}<br>`);
+        console.log(admin);
+        if (admin) {
+            kickbutton = `<button class="btn btn-danger" title="Kick Player" onclick="kickPlayer(${user.hashID});">
+                <i class="bi bi-x-square"></i></button>`;
+        } else kickbutton = "";
+        ul.append(`${readyicon}${playericon}${playername}${kickbutton}<br>`); //<---- JBHR ---- end
     });
     if (admin) {
         if (data.users.length >= data.max) $("#bAddBot").hide();
         else $("#bAddBot").show();
     }
 });
+
+io.socket.on("adminchange", function (data) {
+    ul.after(`<div>
+        <button id="bshuffle" class="btn btn-primary" title="Shuffle players" onclick="shuffle();">
+        <i class="bi bi-dice-4"></i> Randomize</button>
+        <button id="bAddBot" class="btn btn-warning" title="Add Bot" onclick="addBot();">
+        <i class="bi bi-person-square"></i> add Bot</button>
+    </div>`);
+    admin = true;
+});
+
+function shuffle() {
+    io.socket.post("/randomOrder", function (res, jres) {
+        if (jres.statusCode != 200) {
+            console.log(jres);
+        } else {
+            console.log(res);
+        }
+    });
+}
+
+function addBot() {
+    io.socket.post("/addBot", function (res, jres) {
+        if (jres.statusCode != 200) {
+            console.log(jres);
+        } else {
+            console.log(res);
+        }
+    });
+}
+
+function kickPlayer(userhash) {
+    io.socket.post("/kickPlayer", { target: userhash }, function (res, jres) {
+        if (jres.statusCode != 200) {
+            console.log(jres);
+        } else {
+            console.log(res);
+        }
+    });
+}
+
+function switchTeam() {
+    io.socket.post("/switchTeam", function (res, jres) {
+        if (jres.statusCode != 200) {
+            console.log(jres);
+        } else {
+            console.log(res);
+        }
+    });
+}

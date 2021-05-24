@@ -178,9 +178,9 @@ module.exports = {
 
             let users = [];
             for (const pl of players) {
-                players.push(await User.getNameAndHash(pl.playerID));
-                players[players.length - 1].ready = pl.ready;
-                players[players.length - 1].team = pl.team;
+                users.push(await User.getNameAndHash(pl.playerID));
+                users[users.length - 1].ready = pl.ready;
+                users[users.length - 1].team = pl.team;
             }
             sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
             ChatController.botmsg(bot.botname, room.hashID, 1);
@@ -205,7 +205,8 @@ module.exports = {
         try {
             let players = [],
                 t_index;
-            let target = req.body.hash;
+            let target = req.body.target;
+
             // check authentication
             if (req.session.roomid && req.session.userid) {
                 room = await Room.findOne({ id: req.session.roomid }).populate("admin");
