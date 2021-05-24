@@ -17,7 +17,7 @@ module.exports = {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let players = [], temp = [];
+            let players = [], temp = [], t_player;
 
             // check authentication
             if (req.session.roomid && req.session.userid) {
@@ -33,10 +33,13 @@ module.exports = {
             // check if user is admin
             if (user.id != room.admin.id) throw error(104, "You are not allowed to do this!");
 
+            // check if game has already started
+            if (room.status == "game") throw error(104, "The game has already started!");
+
             // shuffle
             temp = room.jsonplayers;
             let j, m;
-            for (i = temp.length - 1; i > 0; i--) {
+            for (let i = temp.length - 1; i > 0; i--) {
                 j = Math.floor(Math.random() * (i + 1));
                 m = temp[i];
                 temp[i] = temp[j];
@@ -44,22 +47,25 @@ module.exports = {
             }
 
             if (temp.length == 4) {
-                for (i = 0; i < temp.length; i++) {
-                    temp[i].ready = false;
+                for (let i = 0; i < temp.length; i++) {
                     temp[i].team = (i % 2) + 1;
                 }
             } else if (temp.length == 6) {
-                for (i = 0; i < temp.length; i++) {
-                    temp[i].ready = false;
+                for (let i = 0; i < temp.length; i++) {
                     temp[i].team = (i % 3) + 1;
                 }
             }
 
+            for (let pl of temp) {
+                t_player = await User.getNameAndHash(pl.playerID);
+                if (t_player.bot) pl.ready = true;
+                else pl.ready = false;
+            }
+
             room.jsonplayers = temp;
-            for (pl of room.jsonplayers) {
-                pl.ready = false;
+            for (const pl of room.jsonplayers) {
                 players.push(await User.getNameAndHash(pl.playerID));
-                players[players.length - 1].ready = false;
+                players[players.length - 1].ready = pl.ready;
                 players[players.length - 1].team = pl.team;
             }
 
@@ -364,6 +370,8 @@ module.exports = {
                 ChatController.firstturnmsg(user, room.hashID);
                 sails.log("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "firstturn", { user: user });
+
+                if (user.bot) setTimeout(botPlay, 1000, { roomid: room.id, botid: room.jsonplayers[0].playerID });
 
                 return res.ok();
             } catch (err) {
@@ -790,7 +798,7 @@ async function botPlay(args) {
     if (pcards.length <= 0) pcards = hand;
     // pick random card out of possible cards
     c_index = Math.floor(Math.random() * pcards.length);
-    card = hand[c_index];
+    card = pcards[c_index];
 
     c_index = bot.hand.findIndex((el) => el == card.id);
     bot.hand.splice(c_index, 1);
@@ -807,7 +815,7 @@ async function botPlay(args) {
         if (card.symbol == room.trump.symbol) room.startoff = "Trump";
         else if (card.value == 11) room.startoff = "Second Ace";
         else room.startoff = "Higher wins";
-        await Room.updateOne({ id: roomid }).set({ startoff: room.startoff });
+        await Room.updateOne({ id: room.id }).set({ startoff: room.startoff });
         ChatController.firstcardtypemsg(t_user, room.startoff, room.hashID);
         //sails.log.info("bot firstplay");
     }
