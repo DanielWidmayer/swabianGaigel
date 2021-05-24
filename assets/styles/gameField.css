@@ -106,6 +106,15 @@ img.preload {
     color: white;
 }
 
+.chaterrmsg{       
+    margin: 0.2rem 0;
+    padding: 0.05rem 0 0.15rem 0;
+    border-radius: 5px;
+    word-break: break-word;
+    background-color: rgba(255, 45, 45, 0.3);
+    color: white;
+}
+
 
 footer {
     font-size: 12px;
