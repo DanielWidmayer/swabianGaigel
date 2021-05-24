@@ -223,6 +223,8 @@ io.socket.on("roundwin", function (data) {
 });
 
 io.socket.on("dealcard", function (data) {
+    console.log("dealcard received");
+    console.log(data.card[0]);
     let card = data.card[0];
     let fCard = findCertainCard(card["value"], card["symbol"]);
     setTimeout(() => {
@@ -368,6 +370,10 @@ io.socket.on("gameover", function (data) {
         $(".gameover-img").animate({ opacity: 1.0 });
     }
     $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
+});
+
+io.socket.on("kicked", function (data) {            // <--- JBHR ---
+    location.reload();
 });
 
 function getRandomArbitrary(min, max) {

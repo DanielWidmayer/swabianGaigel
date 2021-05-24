@@ -56,8 +56,8 @@ io.socket.on("replacemsg", function (data) {
 });
 // ------------ JBHR ----------- end
 
-io.socket.on("controllermsg", function (data) {
-    appendMessage(`<p><i class="bi bi-controller text-info"></i>${data.msg}</p>`, gamef);
+io.socket.on("errorermsg", function (data) {
+    appendMessage(`<p><i class="bi bi-exclamantion-diamond-fill text-danger"></i>${data.text}</p>`, chf);
 });
 
 io.socket.on("chatmsg", function (data) {
@@ -89,7 +89,7 @@ io.socket.on("firstturnmsg", function (data) {
     if (userHash == data.user.hashID) {
         text = '<p><i class="bi bi-hourglass-split text-warning"></i>You start the game.</p>';
     } else {
-        text = `<p><i class="bi bi-hourglass-split"></i>${data.user.name} start's the game.</p>`;
+        text = `<p><i class="bi bi-hourglass-split"></i>${data.user.name} starts the game.</p>`;
     }
     appendMessage(`${text}`, gamef);
 });
