@@ -6,12 +6,14 @@
  */
 
 module.exports = {
-    joinmsg: (username, roomhash, trigger = 0) => {             // trigger: 0=normal, 1=rejoin
+    joinmsg: (username, roomhash, trigger = 0) => {
+        // trigger: 0=normal, 1=rejoin
         sails.sockets.broadcast(roomhash, "joinmsg", { user: username, trigger: trigger });
         sails.log(`${username} joined room ${roomhash}`);
     },
 
-    leavemsg: (username, roomhash, trigger = 0) => {            // trigger: 0=normal, 1=timeout, 2=kick
+    leavemsg: (username, roomhash, trigger = 0) => {
+        // trigger: 0=normal, 1=timeout, 2=kick
         sails.sockets.broadcast(roomhash, "leavemsg", { user: username, trigger: trigger });
         sails.log(`${username} left room ${roomhash}`);
     },
@@ -29,6 +31,8 @@ module.exports = {
     },
 
     cardplayedmsg: (user, card, roomhash) => {
+        sails.log.info(user);
+        sails.log.info(card);
         sails.sockets.broadcast(roomhash, "cardplayedmsg", { user: user, card: card });
     },
 
@@ -48,12 +52,14 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "firstcardtypemsg", { user: user, first_type: first_type });
     },
 
-    botmsg: (bot, roomhash, type = 0) => {      // type: -1 = leave, 1 = join
+    botmsg: (bot, roomhash, type = 0) => {
+        // type: -1 = leave, 1 = join
         sails.sockets.broadcast(roomhash, "botmsg", { bot: bot, trigger: type });
     },
 
-    replacemsg: (user, bot, roomhash, trigger) => {     // trigger: -1=player replaced by bot, 1=bot replaced by player
-        sails.sockets.broadcast(roomhash, "replacemsg", { bot: bot, user:user, trigger: trigger });
+    replacemsg: (user, bot, roomhash, trigger) => {
+        // trigger: -1=player replaced by bot, 1=bot replaced by player
+        sails.sockets.broadcast(roomhash, "replacemsg", { bot: bot, user: user, trigger: trigger });
     },
 
     chatpost: async (req, res) => {

@@ -7,9 +7,9 @@
                     <sup><a type="button" class="btn text-white" onclick="togglecolUI();" style="position: absolute;"><i class="bi bi-pencil"></i></a></sup>
 
             </p>
-            <div class="collapse" id="colUI">
-                <form method="POST" id="changeUsernameForm" action="/username">
-                    <div class="form-row mx-3">
+            <div class="collapse card card-light-transparent m-2" id="colUI">
+                <form method="POST" id="changeUsernameForm" action="/username" class="p-2">
+                    <div class="form-row">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="NiG">Name</span>
@@ -17,6 +17,7 @@
                             <input type="text" name="uname" id="unameinput" class="form-control input-transparent" aria-describedby="NiG" placeholder="enter new username ...">
                         </div>
                     </div>
+                    <button type="button" class="btn btn-secondary" onclick="$('#changeUsernameForm').submit(); ">Save</button>
                 </form>
             </div>
             <div id="userid" class="mt-3">
@@ -26,5 +27,3 @@
         </h3>
     </div>
 </div>
-
-<!--$('#changeUsernameModal').modal('show');-->

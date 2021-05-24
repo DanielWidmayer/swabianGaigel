@@ -44,12 +44,12 @@ module.exports = {
                     uname = p_user.name;
                     uhash = p_user.hashID;
                 } else {
-                    uname = User.getRandomName(req.cookies.username != 'undefined' ? req.cookies.username : null);
-                    uhash = await User.getUniqueHash(req.cookies.userhash != 'undefined' ? req.cookies.userhash : null);
+                    uname = User.getRandomName(req.cookies.username != "undefined" ? req.cookies.username : null);
+                    uhash = await User.getUniqueHash(req.cookies.userhash != "undefined" ? req.cookies.userhash : null);
                 }
             } else {
-                uname = User.getRandomName(req.cookies.username != 'undefined' ? req.cookies.username : null);
-                uhash = await User.getUniqueHash(req.cookies.userhash != 'undefined' ? req.cookies.userhash : null);
+                uname = User.getRandomName(req.cookies.username != "undefined" ? req.cookies.username : null);
+                uhash = await User.getUniqueHash(req.cookies.userhash != "undefined" ? req.cookies.userhash : null);
             }
 
             res.cookie("username", uname);
@@ -194,8 +194,8 @@ module.exports = {
                         ChatController.joinmsg(user.name, room.hashID, 1);
                         ChatController.replacemsg(user.name, user.botname, room.hashID, 1);
                     }
-                    
-                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID , admin: req.session.userid == room.admin.id ? true : false });
+
+                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: req.session.userid == room.admin.id ? true : false });
                 } else if (req.session.roomid) {
                     await leavehandler({ userid: req.session.userid, roomid: req.session.roomid, trigger: 0 });
                 }
@@ -250,7 +250,7 @@ module.exports = {
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             let room = await Room.findOne({ id: req.session.roomid });
 
-            for (let el of room.jsonplayers) {
+            for (const el of room.jsonplayers) {
                 players.push(await User.getNameAndHash(el.playerID));
                 players[players.length - 1].team = el.team;
                 if (room.status == "lobby") players[players.length - 1].ready = el.ready;
@@ -267,14 +267,25 @@ module.exports = {
                 room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump").populate("called");
                 let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == req.session.userid);
                 let hand = await Card.find().where({ id: room.jsonplayers[p_index].hand });
-                let played = await Card.find();
-                let temp;
-                for (el of room.deck) {
-                    temp = played.findIndex((c) => c.id == el.id);
-                    played.splice(temp, 1);
+                let allCards = new Array(48);
+                for (let i = 0; i < 48; i++) allCards[i] = i + 1;
+                let unplayedcards = [];
+                for (const pl of room.jsonplayers) {
+                    unplayedcards = unplayedcards.concat(pl.hand);
                 }
+                //sails.log.info(unplayedcards);
+                if (room.trump) unplayedcards.push(room.trump.id);
+                for (const cl of room.deck) {
+                    unplayedcards.push(cl.id);
+                }
+                //sails.log.info(unplayedcards);
+                allCards = allCards.filter(function (val) {
+                    return unplayedcards.indexOf(val) == -1;
+                });
+                unplayedcards = await Card.find({ id: allCards });
+                let p_temp;
                 let stack = [];
-                for (i = 0; i < room.stack; i++) {
+                for (let i = 0; i < room.stack.length; i++) {
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
                     stack.push({
                         uhash: p_temp.hashID,
@@ -298,7 +309,7 @@ module.exports = {
                     acPl: room.activePlayer,
                     robbed: room.robbed,
                     called: room.called,
-                    played: played,
+                    played: unplayedcards,
                     stack: stack,
                     status: room.status,
                 };
@@ -358,7 +369,7 @@ module.exports = {
                 room = await Room.findOne({ id: req.session.roomid });
                 user = await User.findOne({ id: userid });
             } else throw error(101, "Invalid Session!");
-            
+
             if (!room) throw error(102, "Room does not exist!");
             if (!user) throw error(101, "User does not exist!");
             let roomid = room.id;
@@ -392,13 +403,13 @@ async function handleEmptyRoom(roomID) {
     let room = await Room.findOne({ id: roomID }).populate("admin");
     // check if room is empty
     if (room.jsonplayers.length > 0) {
-        for (pl of room.jsonplayers) pids.push(pl.playerID);
+        for (const pl of room.jsonplayers) pids.push(pl.playerID);
         bots = await User.find().where({ id: pids });
         let human = bots.find((el) => el.bot == false);
         if (human) {
             // still at least one human player
             let users = [];
-            for (pl of room.jsonplayers) {
+            for (const pl of room.jsonplayers) {
                 users.push(await User.getNameAndHash(pl.playerID));
                 users[users.length - 1].team = pl.team;
                 if (room.status == "lobby") users[users.length - 1].ready = false;
@@ -411,7 +422,6 @@ async function handleEmptyRoom(roomID) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
                 sails.sockets.broadcast(human.socket, "promoted", {});
             }
-
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });
@@ -426,7 +436,7 @@ async function handleEmptyRoom(roomID) {
         sails.log("destroy room " + room.hashID);
         await Room.destroyOne({ id: roomID });
     }
-    
+
     return room;
 }
 

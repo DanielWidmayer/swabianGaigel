@@ -79,3 +79,10 @@ tr:hover {
     display: none;
 }
 
+.posterr{
+    font-size: 1.0rem!important;
+}
+
+.modal-dark{
+    background-color: rgba(0, 0, 0, 0.8)!important;
+}
