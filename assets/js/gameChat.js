@@ -21,7 +21,7 @@ function appendMessage(text, field) {
 // Chat Socket Events
 // ------------ JBHR ----------- begin
 io.socket.on("joinmsg", function (data) {
-    switch(data.trigger) {
+    switch (data.trigger) {
         case 0:
             appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-plus-fill text-success"></i>${data.user} joined the room</p>`, chf);
             break;
@@ -95,6 +95,7 @@ io.socket.on("firstturnmsg", function (data) {
 });
 
 io.socket.on("cardplayedmsg", function (data) {
+    console.log(data);
     let icon = getHtmlSymbol(data.card.symbol);
     let cardletter = getCardLetter(data.card.value);
     let text;

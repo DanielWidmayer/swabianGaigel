@@ -435,6 +435,16 @@ var cards = (function () {
         toString: function () {
             return "Hand";
         },
+
+        findCardByID: function (id) {
+            for (let i = 0; i < this.length; i++) {
+                let card = this[i];
+                if (id == card.id) {
+                    return card;
+                }
+            }
+            return null;
+        },
     });
 
     function Pile(options) {

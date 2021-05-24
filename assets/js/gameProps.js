@@ -18,6 +18,63 @@ io.socket.post("/socketconnect", function (res, jres) {
             console.log(res);
             if (res.room.status == "game") {
                 initialize(res);
+                // check for already melded cards in users hand
+                if (res.room.called.length) {
+                    res.room.called.forEach((card) => {
+                        let fCard = userhands[userHash].hand.findCardByID(card.id);
+                        if (fCard != null) {
+                            fCard.melded = true;
+                        }
+                    });
+                }
+                // get played cards
+                let pCards = [];
+                if (res.room.played.length) {
+                    res.room.played.forEach((card) => {
+                        let fCard = deck.findCard(card.value, card.symbol);
+                        pCards.push(fCard);
+                    });
+                }
+                // get & render stack
+                if (res.room.stack.length) {
+                    let activePlayer = res.room.acPl;
+                    for (let i = res.room.stack.length - 1; i > -1; i--) {
+                        let card = res.room.stack[i];
+                        let fCard = deck.findCard(card.value, card.symbol);
+                        userhand[users[activePlayer].hashID].playingpile.addCard(fCard);
+                        activePlayer--;
+                        if (activePlayer < 0) {
+                            activePlayer = res.users.length - 1;
+                        }
+                    }
+                }
+
+                // render played cards & check hands
+                let c_ctr = 0;
+                for (let i = 0; i < res.users.length; i++) {
+                    for (let j = 0; j < res.users[i].wins; j++) {
+                        for (let k = 0; k < 2; k++) {
+                            userhands[res.users[i].hashID].trickdeck.addCard(pCards[c_ctr]);
+                            c_ctr++;
+                        }
+                    }
+                    userhands[res.users[i].hashID].trickdeck.render({ immediate: true });
+                    // check if each user has the expected amount of cards
+                    if (res.users[i].hand > userhands[res.users[i].hashID].hand.length) {
+                        userhands[res.users[i].hashID].hand.addCard(deck.topCard());
+                        userhands[res.users[i].hashID].hand.render({ immediate: true });
+                    } else if (res.users[i].hand < userhands[res.users[i].hashID].hand.length) {
+                        deck.addCard(userhands[res.users[i].hashID].hand.topCard());
+                        deck.render({ immediate: true });
+                    }
+                }
+                // check if it's your turn
+                if (userHash == res.users[res.room.acPl].hashID) {
+                    allowCardPlay();
+                    appendMessage('<p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>', gamef);
+                } else {
+                    appendMessage('</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + res.users[res.room.acPl].name + "'s turn.</p>");
+                }
             }
         }
     }

@@ -19,9 +19,9 @@
     </div>
 </div>
 <% if (errmsg) { %>
-    <div class="modal fade in" id="errModal" tabindex="-1" role="dialog">
+    <div class="modal fade" id="errModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
+            <div class="modal-content modal-dark">
                 <div class="modal-body">
                     <div id="errmsg" style="color: red; font-size: 1.2rem; font-weight: 600;" class="mb-1">
                         <%= errmsg %>
@@ -33,7 +33,6 @@
     </div>
     <% } %>
 
-        <!--<%- include ../list/modal_change_username.ejs %> -->
 
         <%- include ../list/modal_password.ejs %>
 
