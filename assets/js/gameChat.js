@@ -68,11 +68,9 @@ io.socket.on("turnmsg", function (data) {
         text =
             '<p><i class="bi bi-trophy"></i>' +
             data.user.name +
-            ' has won the trick.</p><p><i class="bi bi-trophy-fill"></i>' +
-            data.user.name +
-            "'s score is now " +
-            data.user.score +
-            '</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' +
+            ' has won the trick.</p><p><i class="bi bi-trophy-fill"></i>';
+        if (data.user.score) text += `${data.user.name}'s score is now ${data.user.score}`;
+        text = text + '</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' +
             data.user.name +
             "'s turn.</p>";
     }
