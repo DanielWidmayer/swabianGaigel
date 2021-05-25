@@ -45,8 +45,6 @@ module.exports.routes = {
 
     "/chatpost": "ChatController.chatpost",
 
-    "/userlist": "RoomController.userlist",
-
     "/startGame": "GameController.startGame",
 
     "/randomOrder": "GameController.randomOrder",

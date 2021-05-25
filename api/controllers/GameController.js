@@ -656,7 +656,6 @@ module.exports = {
     // -------------------------------------------------------------------------------------- robTrump
 
     robTrump: async (req, res) => {
-        let room, user;
         if (!req.isSocket) {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
@@ -721,6 +720,8 @@ module.exports = {
             } else return res.serverError(err);
         }
     },
+
+
 
     triggerBot: async (roomid, botid) => {
         let room = await Room.findOne({ id: roomid });
@@ -1068,7 +1069,7 @@ async function applyWin(roomid, firstround, winnerID) {
             }
             players[winner].wins += 1;
             user = await User.getNameAndHash(players[winner].playerID);
-            user.score = players[winner].score;
+            if (room.showscore) user.score = players[winner].score;
             user.wins = players[winner].wins;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
             ChatController.turnmsg(user, room.hashID);
@@ -1191,6 +1192,7 @@ async function gameover(roomid) {
                 startoff: "",
                 trump: null,
                 robbed: false,
+                showscore: room.showscore,
                 stack: [],
             });
             await Room.replaceCollection(room.id, "deck").members([]);

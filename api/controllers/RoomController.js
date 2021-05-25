@@ -89,12 +89,14 @@ module.exports = {
                 sails.log("hashID already in use, creating new one ...");
                 hash = crypto.randomBytes(10).toString("hex");
             }
+
             await Room.create({
                 hashID: hash,
                 name: data.roomname,
                 password: pw,
                 maxplayers: mp,
                 jsonplayers: [],
+                showscore: data.score ? true : false,
                 stack: [],
             });
             let room = await Room.findOne({ hashID: hash });

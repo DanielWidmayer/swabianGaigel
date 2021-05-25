@@ -81,6 +81,11 @@ module.exports = {
             collection: "card",
         },
 
+        showscore: {
+            type="boolean",
+            defaultsTo: true
+        },
+
         /*
       stack: [
         { playerID: Integer, card: Card }
