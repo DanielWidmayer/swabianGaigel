@@ -47,7 +47,7 @@ module.exports = {
                 temp[i] = temp[j];
                 temp[j] = m;
             }
-            
+
             if (room.maxplayers >= 4) {
                 let div = Math.floor(room.maxplayers / 2);
                 for (let i = 0; i < temp.length; i++) {
@@ -314,12 +314,12 @@ module.exports = {
                             hand: [],
                             score: 0,
                             wins: 0,
-                            team: 0
+                            team: 0,
                         });
                         newbot = await User.getNameAndHash(newbot.id);
                         ChatController.botmsg(newbot.name, room.hashID, 1);
                     }
-                    
+
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
                     //sails.sockets.broadcast(room.hashID, "userevent", { users: t_players, max: room.maxplayers });
                 }
