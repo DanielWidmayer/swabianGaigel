@@ -59,6 +59,7 @@ io.socket.on("chatmsg", function (data) {
 });
 
 io.socket.on("turnmsg", function (data) {
+    console.log(data);
     let text;
     if (userHash == data.user.hashID) {
         text =

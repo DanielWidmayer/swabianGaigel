@@ -80,9 +80,14 @@ tr:hover {
 }
 
 .posterr{
-    font-size: 1.0rem!important;
+    font-size: 0.9rem!important;
 }
 
 .modal-dark{
-    background-color: rgba(0, 0, 0, 0.8)!important;
+    background-color: #00000099!important;
+}
+
+.col-inverse{
+    background: #292b2c!important;
+    color: white!important;
 }
