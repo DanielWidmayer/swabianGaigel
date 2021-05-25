@@ -259,7 +259,7 @@ module.exports = {
             sails.sockets.join(req, room.hashID);
             // check if user is admin
             if (req.session.userid == room.admin.id) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
 
             // save socket ID in user obj
             await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req), unload: false });
@@ -306,6 +306,9 @@ module.exports = {
                         team: el.team,
                     });
                 }
+                let round = 1;
+                if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
+                else if (room.deck.length <= 0) round = 2;
                 let r_temp = {
                     deck: room.deck.length,
                     acPl: room.activePlayer,
@@ -316,7 +319,7 @@ module.exports = {
                     status: room.status,
                 };
 
-                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump });
+                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump, round: round });
             }
 
             return res.ok();
@@ -423,7 +426,7 @@ async function handleEmptyRoom(roomID) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
                 sails.sockets.broadcast(human.socket, "adminchange", {});
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });

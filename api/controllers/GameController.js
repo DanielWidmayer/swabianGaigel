@@ -69,7 +69,7 @@ module.exports = {
             await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
 
             // userevent
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
 
             return res.ok();
         } catch (err) {
@@ -128,7 +128,7 @@ module.exports = {
                 players[players.length - 1].team = el.team;
             }
 
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
 
             return res.status(200).json({ team: room.jsonplayers[p_index].team });
         } catch (err) {
@@ -186,7 +186,7 @@ module.exports = {
                 users[users.length - 1].ready = pl.ready;
                 users[users.length - 1].team = pl.team;
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: false });
             ChatController.botmsg(bot.botname, room.hashID, 1);
 
             return res.ok();
@@ -241,7 +241,7 @@ module.exports = {
                         players[players.length - 1].ready = el.ready;
                         players[players.length - 1].team = el.team;
                     }
-                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
                 }
             } else {
                 // server can't force a player to refresh page or redirect on a socket request, this has to be done on client side
@@ -301,7 +301,7 @@ module.exports = {
                         players[players.length - 1].team = pl.team;
                     }
 
-                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
                     return res.status(200).json({ ready: room.jsonplayers[u_index].ready });
                 }
 
@@ -371,7 +371,7 @@ module.exports = {
                     players.push(await User.getNameAndHash(pl.playerID));
                     players[players.length - 1].team = pl.team;
                 }
-                sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: true });
 
                 for (const el of room.jsonplayers) {
                     sails.log("deal 5 cards to player " + el.playerID);
@@ -700,7 +700,7 @@ module.exports = {
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
                 sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
-                ChatController.cardrobmsg(user, room.trump, room.hashID);
+                ChatController.cardrobmsg(user, card, room.hashID);
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
                 sails.log(`${user.name} robbed the trump (${temp}) with card ${card.id}`);
             } else throw error(104, "You are not allowed to do that yet!");
@@ -1087,7 +1087,6 @@ async function applyWin(roomid, firstround, winnerID) {
             user.wins = players[winner].wins;
 
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-            ChatController.turnmsg(user, room.hashID);
 
             if (p_win[0] == acPl) acPl = p_win[1];
             else acPl = p_win[0];
