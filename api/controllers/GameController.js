@@ -67,7 +67,7 @@ module.exports = {
             await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
 
             // userevent
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
 
             return res.ok();
         } catch (err) {
@@ -126,7 +126,7 @@ module.exports = {
                 players[players.length - 1].team = el.team;
             }
 
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
 
             return res.status(200).json({ team: room.jsonplayers[p_index].team });
         } catch (err) {
@@ -184,7 +184,7 @@ module.exports = {
                 users[users.length - 1].ready = pl.ready;
                 users[users.length - 1].team = pl.team;
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: false });
             ChatController.botmsg(bot.botname, room.hashID, 1);
 
             return res.ok();
@@ -239,7 +239,7 @@ module.exports = {
                         players[players.length - 1].ready = el.ready;
                         players[players.length - 1].team = el.team;
                     }
-                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
                 }
             } else {
                 // server can't force a player to refresh page or redirect on a socket request, this has to be done on client side
@@ -299,7 +299,7 @@ module.exports = {
                         players[players.length - 1].team = pl.team;
                     }
 
-                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                    sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: false });
                     return res.status(200).json({ ready: room.jsonplayers[u_index].ready });
                 }
 
@@ -369,7 +369,7 @@ module.exports = {
                     players.push(await User.getNameAndHash(pl.playerID));
                     players[players.length - 1].team = pl.team;
                 }
-                sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+                sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: true });
 
                 for (const el of room.jsonplayers) {
                     sails.log("deal 5 cards to player " + el.playerID);

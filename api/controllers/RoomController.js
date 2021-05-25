@@ -259,7 +259,7 @@ module.exports = {
             sails.sockets.join(req, room.hashID);
             // check if user is admin
             if (req.session.userid == room.admin.id) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
 
             // save socket ID in user obj
             await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req), unload: false });
@@ -423,7 +423,7 @@ async function handleEmptyRoom(roomID) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
                 sails.sockets.broadcast(human.socket, "adminchange", {});
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });

@@ -1,16 +1,18 @@
 const ul = $("#userlist");
 var admin = false;
+var game = false;
 const userhash = parseInt(getCookie("userhash"));
 const teamcolors = ["rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)"];
 const teambackground = ["rgba(255,255,0,0.2)","rgba(0,0,255,0.2)","rgba(0,255,0,0.2)"];
 
 io.socket.on("userevent", function (data) {
     console.log(data);
+    game = data.ingame;
     ul.empty();
     if (data.max >= 4) {
         for (let i = 0; i < data.max / 2; i++) {
             let hover = "", click = "";
-            if (data.users && data.users[0].ready != undefined) {
+            if (!data.ingame) {
                 hover = "teamhover";
                 click = `onclick="switchTeam(${i + 1});"`;
             }
@@ -32,16 +34,20 @@ io.socket.on("userevent", function (data) {
     if (admin) {
         if (data.users.length >= data.max) $("#bAddBot").hide();
         else $("#bAddBot").show();
+
+        if (data.ingame) $('#adminbar').remove();
     }
 });
 
 io.socket.on("adminchange", function (data) {
-    ul.after(`<div class="p-2">
+    if (!game) {
+        ul.after(`<div class="p-2" id="adminbar">
         <button id="bshuffle" class="btn btn-primary adminbutton" title="Shuffle players" onclick="shuffle();">
         <i class="bi bi-dice-4"></i> Randomize</button>
         <button id="bAddBot" class="btn btn-warning adminbutton mx-2" title="Add Bot" onclick="addBot();">
         <i class="bi bi-person-square"></i> add Bot</button>
-    </div>`);
+        </div>`);
+    }
     admin = true;
 });
 
@@ -49,7 +55,7 @@ function userElement(user) {
     let playericon, playername, readyicon, kickbutton;
     let el = document.createElement('span');
 
-    if (user.ready != undefined) {
+    if (!game) {
         if (user.ready) readyicon = '<i class="bi bi-check-circle-fill text-success px-1"></i>';
         else readyicon = '<i class="bi bi-x-circle-fill text-warning px-1"></i>';
     } else readyicon = "";
@@ -67,7 +73,7 @@ function userElement(user) {
 
     playername = `${user.name}<span style="font-size: 0.85rem" class="px-2 text-secondary">#${user.hashID}</span>`;
     
-    if (admin) {
+    if (admin && user.hashID != userhash) {
         kickbutton = `<button class="btn btn-danger px-1 py-0" title="Kick Player" onclick="kickPlayer(${user.hashID});">
             <i class="bi bi-x-square"></i></button>`;
     } else kickbutton = "";
