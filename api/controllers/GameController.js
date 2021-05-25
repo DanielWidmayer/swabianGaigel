@@ -670,7 +670,7 @@ module.exports = {
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
                 sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
-                ChatController.cardrobmsg(user, card, room.hashID);
+                ChatController.cardrobmsg(user, room.trump, room.hashID);
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
                 sails.log(`${user.name} robbed the trump (${temp}) with card ${card.id}`);
             } else throw error(104, "You are not allowed to do that yet!");
@@ -1040,19 +1040,16 @@ async function applyWin(roomid, firstround, winnerID) {
             // get winner team
             for (let i = 0; i < players.length; i++) {
                 if (players[i].team == p_team) {
-                    p_win.push(players[i].playerID);
-                    p_win[p_win.length - 1].index = i;
+                    p_win.push(i);
                 }
             }
-            sails.log.info(p_win);
-            sails.log.info(players);
+
             for (const el of p_win) {
-                sails.log.info(el);
                 for (let i = 0; i < stack.length; i++) {
                     // gesamten Stich als Score hochzählen
-                    players[el.index].score += stack[i].card.value;
+                    players[el].score += stack[i].card.value;
                 }
-                players[el.index].wins += 1;
+                players[el].wins += 1;
             }
 
             user = await User.getNameAndHash(players[winner].playerID);
@@ -1060,9 +1057,10 @@ async function applyWin(roomid, firstround, winnerID) {
             user.wins = players[winner].wins;
 
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
+            ChatController.turnmsg(user, room.hashID);
 
-            if (p_win[0].index == acPl) acPl = p_win[1].index;
-            else acPl = p_win[0].index;
+            if (p_win[0] == acPl) acPl = p_win[1];
+            else acPl = p_win[0];
         }
         sails.log(user.name + " won!");
 

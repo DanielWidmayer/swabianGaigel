@@ -14,12 +14,7 @@ function appendMessage(text, field) {
     }
 }
 
-// function ScrollDown(field) {
-//     field.animate({ scrollTop: field[0].scrollHeight }, 700);
-// }
-
 // Chat Socket Events
-// ------------ JBHR ----------- begin
 io.socket.on("joinmsg", function (data) {
     switch (data.trigger) {
         case 0:
@@ -46,22 +41,21 @@ io.socket.on("leavemsg", function (data) {
 });
 
 io.socket.on("botmsg", function (data) {
-    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-success"></i>Bot ${data.bot} added</p>`, chf);
-    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-danger"></i>Bot ${data.bot} removed</p>`, chf);
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-success"></i>Bot ${data.bot} added</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-danger"></i>Bot ${data.bot} removed</p>`, chf);
 });
 
 io.socket.on("replacemsg", function (data) {
-    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>${data.user} replaced Bot ${data.bot}</p>`, chf);
-    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-person-square text-warning"></i>Bot ${data.bot} replaced ${data.user}</p>`, chf);
+    if (data.trigger > 0) appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-warning"></i>${data.user} replaced Bot ${data.bot}</p>`, chf);
+    else appendMessage(`<p style="font-weigth: bold;"><i class="bi bi-cpu text-warning"></i>Bot ${data.bot} replaced ${data.user}</p>`, chf);
 });
-// ------------ JBHR ----------- end
 
 io.socket.on("errormsg", function (data) {
-    appendMessage(`<p class="chaterrmsg"><i class="bi bi-exclamation-diamond text-danger"></i>${data.text}</p>`, chf);
+    appendMessage(`<p class="chatmsg chatmsg-err"><i class="bi bi-exclamation-diamond text-danger"></i>${data.text}</p>`, chf);
 });
 
 io.socket.on("chatmsg", function (data) {
-    appendMessage(`<div class="chatmsg"><b>${data.user}:&nbsp;</b>${data.text}</div>`, chf);
+    appendMessage(`<div class="chatmsg chatmsg-user"><b>${data.user}:&nbsp;</b>${data.text}</div>`, chf);
 });
 
 io.socket.on("turnmsg", function (data) {
@@ -95,7 +89,6 @@ io.socket.on("firstturnmsg", function (data) {
 });
 
 io.socket.on("cardplayedmsg", function (data) {
-    console.log(data);
     let icon = getHtmlSymbol(data.card.symbol);
     let cardletter = getCardLetter(data.card.value);
     let text;

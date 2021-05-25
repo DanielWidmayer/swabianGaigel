@@ -125,11 +125,8 @@ io.socket.on("start", function (data) {
 io.socket.on("turn", function (data) {
     $("#currentUserIcon").animate({ left: userhands[data.user.hashID].hand.x + 30, top: userhands[data.user.hashID].hand.y + 150 });
     if (userHash == data.user.hashID) {
-        console.log("Its your turn.");
         // allow card click to play a card
         allowCardPlay();
-    } else {
-        console.log("Its " + data.user.name + "'s turn.");
     }
 });
 
@@ -155,21 +152,23 @@ function findAndChangeCard(value, symbol, id, hashID, cardToReplace) {
         fCard = userhands[hashID].hand.findCard(value, symbol);
         if (fCard == null) {
             for (const key in userhands) {
-                fCard = userhands[key].hand.findCard(value, symbol);
-                if (fCard != null) {
-                    userhands[key].hand.addCard(cardToReplace);
-                    userhands[hashID].hand.addCard(fCard, id);
-                    userhands[key].hand.render({ immediate: true });
-                    userhands[hashID].hand.render({ immediate: true });
-                    return fCard;
+                if (key != userHash) {
+                    fCard = userhands[key].hand.findCard(value, symbol);
+                    if (fCard != null) {
+                        userhands[key].hand.addCard(cardToReplace);
+                        userhands[hashID].hand.addCard(fCard, id);
+                        userhands[key].hand.render({ immediate: true });
+                        userhands[hashID].hand.render({ immediate: true });
+                        return fCard;
+                    }
                 }
             }
         }
     } else {
         deck.addCard(cardToReplace);
+        deck.render({ immediate: true });
         userhands[hashID].hand.addCard(fCard, id);
         userhands[hashID].hand.render({ immediate: true });
-        deck.render({ immediate: true });
     }
     return fCard;
 }
@@ -206,11 +205,9 @@ io.socket.on("roundwin", function (data) {
     setTimeout(() => {
         for (const key in userhands) {
             winningTrickDeck.addCard(userhands[key].playingpile.bottomCard());
-            winningTrickDeck.topCard().rotate(90);
         }
         winningTrickDeck.render();
     }, 2500);
-    console.log(data.user.name + " now has a score of: " + data.user.score);
 });
 
 io.socket.on("dealcard", function (data) {
@@ -228,15 +225,18 @@ io.socket.on("dealcard", function (data) {
                 userhands[key].hand.render();
             }
         }
+        // get unmelded cards
         let pair = userhands[userHash].hand.getPair();
+        // check if user has pair and can meld
         if (pair.length > 0 && ownScore > -1) {
-            console.log("Has Pair & Can Meld & Neither one of the cards was melded already!");
+            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can meld</p>`, chf);
             $("#bmeld").prop("disabled", false);
         } else {
             $("#bmeld").prop("disabled", true);
         }
-        if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 7) {
-            console.log("Has Seven & Can Rob & Seven hasn't been robbed already!");
+        // check if user can rob
+        if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 0) {
+            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can rob</p>`, chf);
             $("#bsteal").prop("disabled", false);
         } else {
             $("#bsteal").prop("disabled", true);
@@ -270,11 +270,9 @@ io.socket.on("firstturn", function (data) {
                     }
                 });
             } else {
-                console.log("You're not allowed to play a trump card.");
+                appendMessage(`<p class="chatmsg chatmsg-warning"><i class="bi bi-exclamation-diamond text-warning"></i>You're not allowed to play a trump card.</p>`, chf);
             }
         });
-    } else {
-        console.log(data.user.name + " begins the game.");
     }
 });
 
@@ -288,25 +286,31 @@ io.socket.on("firstcard", function (data) {
     } else {
         let fCard = userhands[userHash].hand.findCard(data.card.value, data.card.symbol);
         userhands[userHash].playingpile.addCard(fCard, data.card.id);
-        userhands[userHash].playingpile.render({
-            callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)),
-        });
-        userhands[userHash].hand.render();
+        userhands[userHash].playingpile.render({ callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)) });
+        userhands[userHash].hand.render({ immediate: true });
         userhands[userHash].hand._click = null;
     }
 });
 
-io.socket.on("firstwin", function (data) {
-    let udata = data.data;
-    for (const key in udata) {
-        if (userHash != key) {
-            let playingpile = userhands[key].playingpile;
-            let fCard = findAndChangeCard(udata[key].value, udata[key].symbol, udata[key].id, key, playingpile.bottomCard());
-            playingpile.addCard(fCard, udata[key].id);
-            playingpile.faceUp = true;
-            playingpile.render({ immediate: true });
+io.socket.on("firstwin", async function (data) {
+    setTimeout(() => {
+        let udata = data.data;
+        for (const key in udata) {
+            if (userHash != key) {
+                userhands[key].hand.addCard(userhands[key].playingpile.bottomCard());
+                userhands[key].hand.render({ immediate: true });
+            }
         }
-    }
+        for (const key in udata) {
+            if (userHash != key) {
+                let playingpile = userhands[key].playingpile;
+                let fCard = findAndChangeCard(udata[key].value, udata[key].symbol, udata[key].id, key, userhands[key].hand.topCard());
+                playingpile.addCard(fCard, udata[key].id);
+                playingpile.faceUp = true;
+                playingpile.render({ immediate: true });
+            }
+        }
+    }, 1000);
 });
 
 io.socket.on("paircalled", function (data) {
@@ -362,7 +366,6 @@ io.socket.on("gameover", function (data) {
 });
 
 io.socket.on("kicked", function (data) {
-    // <--- JBHR ---
     location.reload();
 });
 
