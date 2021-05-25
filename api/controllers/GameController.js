@@ -461,11 +461,15 @@ module.exports = {
 
             // check for empty deck
             if (!room.trump && room.stack.length > 0) {
+                sails.log.info(room.jsonplayers[acPl].hand);
                 let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
                 c_index = hand.findIndex((el) => el.id == card.id);
                 hand.splice(c_index, 1);
                 // check if user could have played symbol
                 if (card.symbol != room.stack[0].symbol) {
+                    sails.log.info(card);
+                    sails.log.info(hand);
+                    sails.log.info(room.stack);
                     if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same suit!");
                 } else {
                     if (hand.find((el) => el.value > room.stack[0].card.value)) throw error(104, "You have to play a higher card if you own one!");

@@ -91,3 +91,15 @@ tr:hover {
     background: #292b2c!important;
     color: white!important;
 }
+
+.col-inverse:hover{
+    background-color: #202122!important;
+}
+
+.btn:focus{
+    box-shadow: 0 0 0 0.25rem #292b2c44!important;
+}
+
+input:focus{
+    box-shadow: 0 0 0 0.25rem #292b2c44!important;
+}
