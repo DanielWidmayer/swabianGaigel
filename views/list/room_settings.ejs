@@ -5,7 +5,7 @@
         <div class="card card-light-transparent mb-3">
             <div class="input-group m-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text" id="ba1">Room Name</span>
+                    <span class="input-group-text col-inverse" id="ba1">Room Name</span>
                 </div>
                 <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="ba1" value="<%= roomname %>">
             </div>
@@ -15,7 +15,7 @@
                 <div class="card card-light-transparent mb-3">
                     <div class="input-group m-3">
                         <div class="input-group-prepend">
-                            <label class="input-group-text" for="playerSelect">Players</label>
+                            <label class="input-group-text col-inverse" for="playerSelect">Players</label>
                         </div>
                         <select class="custom-select" name="maxplayers" id="playerSelect">
                             <option selected>Choose...</option>
@@ -65,7 +65,7 @@
                 <div id="pwfield" class="col">
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Password</span>
+                            <span class="input-group-text col-inverse">Password</span>
                         </div>
                         <input type="password" class="form-control input-transparent" name="passwd" placeholder="password" aria-label="Password">
                     </div>
@@ -73,7 +73,7 @@
             </div>
 
         </div>
-        <button type="button" class="btn btn-secondary" onclick="$('#createRoomForm').submit();">Create Room</button>
+        <button type="button" class="btn col-inverse" onclick="$('#createRoomForm').submit();">Create Room</button>
     </form>
 
 </div>

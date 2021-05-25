@@ -12,7 +12,7 @@
 
                 </div>
                 <div class="card card-transparent mt-3 p-3">
-                    <a type="button" class="btn btn-primary m-2" href="/create"><i class="bi bi-plus-lg text-white"></i>Create new Room</a>
+                    <a type="button" class="btn col-inverse m-2" href="/create"><i class="bi bi-plus-lg text-white"></i>Create new Room</a>
                 </div>
 
         </div>
@@ -22,11 +22,16 @@
     <div class="modal fade" id="errModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content modal-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white"><i class="bi bi-exclamation-diamond-fill text-danger"></i> Error</h5>
+                    <button type="button" class="btn btn-danger close" onclick="$('#errModal').modal('hide')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <div class="modal-body">
-                    <div id="errmsg" style="color: red; font-size: 1.2rem; font-weight: 600;" class="mb-1">
+                    <div id="errmsg" class="mb-1 text-white">
                         <%= errmsg %>
                     </div>
-                    <small class="text-muted">Click anywhere outside this box to close it.</small>
                 </div>
             </div>
         </div>
