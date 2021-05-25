@@ -82,8 +82,8 @@ module.exports = {
         },
 
         showscore: {
-            type="boolean",
-            defaultsTo: true
+            type: "boolean",
+            defaultsTo: true,
         },
 
         /*
@@ -110,14 +110,15 @@ module.exports = {
                 return null;
             }
         } catch (err) {
-            throw (err);
+            throw err;
         }
     },
 
     getList: async () => {
         try {
             let rooms = await Room.find();
-            let lrooms = [], players = [];
+            let lrooms = [],
+                players = [];
             for (const el of rooms) {
                 players = el.jsonplayers.map((pl) => pl.playerID);
                 players = await User.find({ id: players });
@@ -127,7 +128,7 @@ module.exports = {
 
             return lrooms;
         } catch (err) {
-            throw (err);
+            throw err;
         }
-    }
+    },
 };
