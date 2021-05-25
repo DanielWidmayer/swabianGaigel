@@ -98,23 +98,32 @@ img.preload {
 }
 
 .chatmsg{
-    margin-bottom: .25rem;
-    padding: 0 .5rem;
-    border-radius: 5px;
-    word-break: break-word;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.chaterrmsg{       
     margin: 0.2rem 0;
-    padding: 0.05rem 0 0.15rem 0;
     border-radius: 5px;
     word-break: break-word;
-    background-color: rgba(255, 45, 45, 0.3);
     color: white;
 }
 
+
+.chatmsg-user{
+    padding: 0 .5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.chatmsg-err{       
+    padding: 0.05rem 0 0.15rem 0;
+    background-color: rgba(255, 45, 45, 0.3);
+}
+
+.chatmsg-info{
+    padding: 0.05rem 0 0.15rem 0;       
+    background-color: #5bc0de50;
+}
+
+.chatmsg-warning{
+    padding: 0.05rem 0 0.15rem 0;
+    background-color: #f0ac4e44;
+}
 
 footer {
     font-size: 12px;

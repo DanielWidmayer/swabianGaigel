@@ -10,7 +10,7 @@ const crypto = require("crypto");
 const ChatController = require("./ChatController");
 const GameController = require("./GameController");
 
-const { uniqueNamesGenerator, countries } = require("unique-names-generator");
+const { uniqueNamesGenerator, adjectives, colors, countries } = require("unique-names-generator");
 
 const error = sails.helpers.errors;
 
@@ -71,16 +71,16 @@ module.exports = {
             let data = req.body;
             let re = /^([A-Za-z0-9]+\s?)+$/;
             // sanity checking of post data
-            if (data.roomname.length <= 0 || data.roomname.length > 21) throw error(103, "Please provide a Room Name between 1 and 25 characters");
-            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces");
+            if (data.roomname.length <= 0 || data.roomname.length > 21) throw error(103, "Room Name must have 1-25 characters.");
+            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces.");
 
             let mp = parseInt(data.maxplayers);
-            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Please provide a valid count of max players");
+            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Provide a valid count of max players.");
 
             re = /^[A-Za-z0-9._/\-:\\+#=()&%$§@,;]{5,15}$/;
             let pw = data.passwd;
             if (data.pwcb) {
-                if (!re.test(pw)) throw error(103, "Please provide a valid password between 5 and 15 characters");
+                if (!re.test(pw)) throw error(103, "Provide a valid password with 5-15 characters.");
             } else pw = "";
             // all good
 
@@ -119,7 +119,7 @@ module.exports = {
             // create random roomname
             do {
                 rname = uniqueNamesGenerator({
-                    dictionaries: [countries],
+                    dictionaries: [adjectives, colors, countries],
                     length: 1,
                     style: "capital",
                 });
