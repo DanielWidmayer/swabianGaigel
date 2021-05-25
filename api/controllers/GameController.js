@@ -716,7 +716,7 @@ module.exports = {
         }
     },
 
-    
+
 
     triggerBot: async (roomid, botid) => {
         let room = await Room.findOne({ id: roomid });
@@ -1184,7 +1184,6 @@ async function gameover(roomid) {
                 trump: null,
                 robbed: false,
                 showscore: room.showscore,
-                geelfen: room.geelfen,
                 stack: [],
             });
             await Room.replaceCollection(room.id, "deck").members([]);
