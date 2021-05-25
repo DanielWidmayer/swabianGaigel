@@ -426,6 +426,8 @@ module.exports = {
             else throw error(101, "Invalid Session!");
             if (!room) throw error(101, "This room could not be found!");
 
+            for (const el of room.jsonplayers) sails.log.info(el.hand);
+
             acPl = room.activePlayer;
             let first_type = room.startoff;
 
@@ -461,18 +463,18 @@ module.exports = {
 
             // check for empty deck
             if (!room.trump && room.stack.length > 0) {
-                sails.log.info(room.jsonplayers[acPl].hand);
                 let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
-                c_index = hand.findIndex((el) => el.id == card.id);
-                hand.splice(c_index, 1);
+                let tc = hand.findIndex((el) => el.id == card.id);
+                hand.splice(tc, 1);
                 // check if user could have played symbol
-                if (card.symbol != room.stack[0].symbol) {
-                    sails.log.info(card);
-                    sails.log.info(hand);
-                    sails.log.info(room.stack);
+                if (card.symbol != room.stack[0].card.symbol) {
                     if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same suit!");
                 } else {
-                    if (hand.find((el) => el.value > room.stack[0].card.value)) throw error(104, "You have to play a higher card if you own one!");
+                    let t_val = -1;
+                    for (const el of room.stack) {
+                        if (el.card.value > t_val && el.card.symbol == room.stack[0].card.symbol) t_val = el.card.value;
+                    }
+                    if (card.value <= t_val && hand.find((el) => el.value > t_val && el.symbol == card.symbol)) throw error(104, "You have to play a higher card if you own one!");
                 }
             }
 
@@ -520,9 +522,12 @@ module.exports = {
                         if (card.length) {
                             sails.sockets.broadcast(user.socket, "dealcard", { card: card });
                         } else {
+                            let t_rp = await Room.findOne({ id: room.id });
+                            t_rp = t_rp.jsonplayers;
+                            t_rp[t_rp.findIndex((tp) => tp.playerID == el.playerID)].hand.push(room.trump.id);
                             user = await User.getNameAndHash(el.playerID);
                             sails.sockets.broadcast(room.hashID, "dealTrump", { user: user, card: room.trump });
-                            await Room.updateOne({ id: room.id }).set({ trump: null });
+                            await Room.updateOne({ id: room.id }).set({ jsonplayers: t_rp, trump: null });
                         }
                     }
                 }
@@ -807,6 +812,7 @@ async function botPlay(args) {
             }
         }
     }
+
     // if no card has been picked, select all
     if (pcards.length <= 0) pcards = hand;
     // pick random card out of possible cards
@@ -863,9 +869,12 @@ async function botPlay(args) {
                 if (dealcard.length) {
                     if (!t_user.bot) sails.sockets.broadcast(t_user.socket, "dealcard", { card: dealcard });
                 } else {
+                    let t_rp = await Room.findOne({ id: room.id });
+                    t_rp = t_rp.jsonplayers;
+                    t_rp[t_rp.findIndex((tp) => tp.playerID == el.playerID)].hand.push(room.trump.id);
                     t_user = await User.getNameAndHash(el.playerID);
                     sails.sockets.broadcast(room.hashID, "dealTrump", { user: t_user, card: room.trump });
-                    await Room.updateOne({ id: room.id }).set({ trump: null });
+                    await Room.updateOne({ id: room.id }).set({ jsonplayers: t_rp, trump: null });
                 }
             }
         }
@@ -1085,8 +1094,9 @@ async function applyWin(roomid, firstround, winnerID) {
             user = await User.getNameAndHash(players[winner].playerID);
             user.score = players[winner].score;
             user.wins = players[winner].wins;
-
+            user.team = players[winner].team;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
+            ChatController.turnmsg(user, room.hashID);
 
             if (p_win[0] == acPl) acPl = p_win[1];
             else acPl = p_win[0];
@@ -1109,8 +1119,7 @@ async function gameover(roomid) {
         // if there are no cards on hand left, game is finished, win by most points
         if (!room.jsonplayers.find((el) => el.hand.length > 0)) {
             let w_score = room.jsonplayers[0].score;
-            let ut;
-            let winners = [];
+
             // Game Finished
             for (const el of room.jsonplayers) {
                 if (el.score >= w_score) w_score = el.score;

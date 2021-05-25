@@ -66,15 +66,23 @@ img.preload {
 }
 
 #chatfield{
-    height: 20vh;
+    min-height: 12vh;
+    height: 20%;
+    max-height: 20vh;
     overflow-y: scroll;
 }
 
 #gamehistoryfield{
-    height: 30vh;
+    min-height: 20vh;
+    height: 40%;
+    max-height: 30vh;
     padding-left: 7px!important;
     overflow-y: scroll;
     color: white;
+}
+.col-fit{
+    max-height: 90vh;
+    height: 80%;
 }
 
 #userlist{
@@ -206,4 +214,21 @@ footer {
 .pow{
     font-size: 1.3rem!important; 
     vertical-align: top;
+}
+
+.team-yellow{
+    border-color:rgb(255,255,0);
+    background-color:rgba(255,255,0,0.2);
+
+}
+
+.team-blue{
+    border-color:rgb(0,0,255);
+    background-color:rgba(0,0,255,0.2);
+
+}
+
+.team-green{
+    border-color:#007f00;
+    background-color:#007f0040;
 }

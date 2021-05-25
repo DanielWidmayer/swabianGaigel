@@ -37,21 +37,8 @@ $(function () {
                             pCards.push(fCard);
                         });
                     }
-                    // get & render stack
-                    if (res.room.stack.length) {
-                        let activePlayer = res.room.acPl;
-                        for (let i = res.room.stack.length - 1; i > -1; i--) {
-                            let card = res.room.stack[i].card;
-                            let fCard = findCertainCard(card.value, card.symbol);
-                            userhands[res.users[activePlayer].hashID].playingpile.addCard(fCard);
-                            activePlayer--;
-                            if (activePlayer < 0) {
-                                activePlayer = res.users.length - 1;
-                            }
-                        }
-                    }
 
-                    // render played cards & check hands
+                    // render played cards
                     let c_ctr = 0;
                     for (let i = 0; i < res.users.length; i++) {
                         for (let j = 0; j < res.users[i].wins; j++) {
@@ -61,6 +48,54 @@ $(function () {
                             }
                         }
                         userhands[res.users[i].hashID].trickdeck.render({ immediate: true });
+                    }
+
+                    // get & render stack
+                    if (res.round > 0) {
+                        if (res.room.stack.length) {
+                            let activePlayer = res.room.acPl - 1;
+                            if (activePlayer < 0) activePlayer = res.users.length - 1;
+                            for (let i = res.room.stack.length - 1; i > -1; i--) {
+                                let card = res.room.stack[i].card;
+                                let fCard = findCertainCard(card.value, card.symbol);
+                                console.log(res.users);
+                                console.log(activePlayer);
+                                let uid = res.users[activePlayer].hashID;
+                                userhands[uid].playingpile.addCard(fCard);
+                                userhands[uid].playingpile.render();
+                                activePlayer--;
+                                if (activePlayer < 0) {
+                                    activePlayer = res.users.length - 1;
+                                }
+                            }
+                        }
+                    } else if (res.round == 0) {
+                        if (res.room.stack.length) {
+                            let activePlayer = res.room.acPl - 1;
+                            for (let i = res.room.stack.length - 1; i > -1; i--) {
+                                let uid = res.users[activePlayer].hashID;
+                                console.log(uid);
+                                console.log(userHash);
+                                if (userHash != uid) {
+                                    userhands[uid].playingpile.addCard(userhands[uid].hand.topCard());
+                                    userhands[uid].playingpile.faceUp = false;
+                                    userhands[uid].playingpile.render();
+                                } else {
+                                    let card = res.playedcard;
+                                    let fCard = findCertainCard(card.value, card.symbol);
+                                    userhands[uid].playingpile.addCard(fCard);
+                                    userhands[uid].playingpile.render();
+                                }
+                                activePlayer--;
+                                if (activePlayer < 0) {
+                                    activePlayer = res.users.length - 1;
+                                }
+                            }
+                        }
+                    }
+
+                    // check hands
+                    for (let i = 0; i < res.users.length; i++) {
                         // check if each user has the expected amount of cards
                         if (res.users[i].hand > userhands[res.users[i].hashID].hand.length) {
                             userhands[res.users[i].hashID].hand.addCard(deck.topCard());
@@ -75,8 +110,9 @@ $(function () {
                         allowCardPlay();
                         appendMessage('<p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>', gamef);
                     } else {
-                        appendMessage('</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + res.users[res.room.acPl].name + "'s turn.</p>");
+                        appendMessage('</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + res.users[res.room.acPl].name + "'s turn.</p>", gamef);
                     }
+                    $("#currentUserIcon").animate({ left: userhands[res.users[res.room.acPl].hashID].hand.x + 30, top: userhands[res.users[res.room.acPl].hashID].hand.y + 150, opacity: 1.0 });
                 }
             }
         }

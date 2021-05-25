@@ -2,8 +2,7 @@ const ul = $("#userlist");
 var admin = false;
 var game = false;
 const userhash = parseInt(getCookie("userhash"));
-const teamcolors = ["rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)"];
-const teambackground = ["rgba(255,255,0,0.2)","rgba(0,0,255,0.2)","rgba(0,255,0,0.2)"];
+const teamcolors = ["team-yellow", "team-blue", "team-green"];
 
 io.socket.on("userevent", function (data) {
     console.log(data);
@@ -11,31 +10,37 @@ io.socket.on("userevent", function (data) {
     ul.empty();
     if (data.max >= 4) {
         for (let i = 0; i < data.max / 2; i++) {
-            let hover = "", click = "";
+            let hover = "",
+                click = "";
             if (!data.ingame) {
                 hover = "teamhover";
                 click = `onclick="switchTeam(${i + 1});"`;
             }
-            let el_team = `<ul class="teambanner ${hover}" style="border-color: ${teamcolors[i]}; background-color: ${teambackground[i]};" ${click}></ul>`;
+            let el_team = `<ul class="teambanner ${hover} ${teamcolors[i]}" ${click}></ul>`;
 
             ul.append(el_team);
         }
     }
     data.users.forEach((user) => {
         let element = userElement(user);
-        if (user.team) ul.children('ul').eq(user.team - 1).append(element);
-        else ul.append(element); 
+        if (user.team)
+            ul.children("ul")
+                .eq(user.team - 1)
+                .append(element);
+        else ul.append(element);
     });
     for (let i = 0; i < data.max / 2; i++) {
-        if (ul.children('ul').eq(i).children().length < 2) {
-            ul.children('ul').eq(i).append(`<span class="teamjoin"><i class="bi bi-plus-square" style="color: ${teamcolors[i]}"></i> click to join Team #${i + 1}</span>`);
+        if (ul.children("ul").eq(i).children().length < 2) {
+            ul.children("ul")
+                .eq(i)
+                .append(`<span class="teamjoin"><i class="bi bi-plus-square ${teamcolors[i]}"></i> click to join Team #${i + 1}</span>`);
         }
     }
     if (admin) {
         if (data.users.length >= data.max) $("#bAddBot").hide();
         else $("#bAddBot").show();
 
-        if (data.ingame) $('#adminbar').remove();
+        if (data.ingame) $("#adminbar").remove();
     }
 });
 
@@ -53,27 +58,24 @@ io.socket.on("adminchange", function (data) {
 
 function userElement(user) {
     let playericon, playername, readyicon, kickbutton;
-    let el = document.createElement('span');
+    let el = document.createElement("span");
 
     if (!game) {
         if (user.ready) readyicon = '<i class="bi bi-check-circle-fill text-success px-1"></i>';
         else readyicon = '<i class="bi bi-x-circle-fill text-warning px-1"></i>';
     } else readyicon = "";
-   
 
     if (user.bot) {
         playericon = '<i class="bi bi-cpu px-2"></i>';
-    } 
-    else if (user.hashID == userhash) {
-        playericon = `<i class="bi bi-person-circle px-2"></i>`
-    }
-    else {
+    } else if (user.hashID == userhash) {
+        playericon = `<i class="bi bi-person-circle px-2"></i>`;
+    } else {
         playericon = '<i class="bi bi-person-fill px-2"></i>';
     }
 
     playername = `${user.name}<span style="font-size: 0.85rem" class="px-2 text-secondary">#${user.hashID}</span>`;
-    
-    if (admin && user.hashID != userhash) {
+
+    if (admin && user.hashID != userhash && !user.bot) {
         kickbutton = `<button class="btn btn-danger px-1 py-0" title="Kick Player" onclick="kickPlayer(${user.hashID});">
             <i class="bi bi-x-square"></i></button>`;
     } else kickbutton = "";
@@ -122,7 +124,6 @@ function switchTeam(team) {
         }
     });
 }
-
 
 function getCookie(cname) {
     var name = cname + "=";

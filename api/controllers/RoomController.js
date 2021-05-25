@@ -120,7 +120,8 @@ module.exports = {
             do {
                 rname = uniqueNamesGenerator({
                     dictionaries: [adjectives, colors, countries],
-                    length: 1,
+                    separator: " ",
+                    length: 3,
                     style: "capital",
                 });
             } while (!re.test(rname) || rname.length > 21);
@@ -259,7 +260,7 @@ module.exports = {
             sails.sockets.join(req, room.hashID);
             // check if user is admin
             if (req.session.userid == room.admin.id) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: room.status == "game" ? true : false });
 
             // save socket ID in user obj
             await User.updateOne({ id: req.session.userid }).set({ socket: sails.sockets.getId(req), unload: false });
@@ -272,6 +273,12 @@ module.exports = {
                 let allCards = new Array(48);
                 for (let i = 0; i < 48; i++) allCards[i] = i + 1;
                 let unplayedcards = [];
+                let playedcard;
+
+                let round = 1;
+                if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
+                else if (room.deck.length <= 0) round = 2;
+
                 for (const pl of room.jsonplayers) {
                     unplayedcards = unplayedcards.concat(pl.hand);
                 }
@@ -287,12 +294,12 @@ module.exports = {
                 unplayedcards = await Card.find({ id: allCards });
                 let p_temp;
                 let stack = [];
+
                 for (let i = 0; i < room.stack.length; i++) {
+                    if (room.stack[i].playerID == req.session.userid) playedcard = room.stack[i].card;
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
-                    stack.push({
-                        uhash: p_temp.hashID,
-                        card: room.stack[i].card,
-                    });
+                    stack[i] = { uhash: p_temp.hashID };
+                    if (round > 0) stack[i].card = room.stack[i].card;
                 }
                 players = [];
                 for (let el of room.jsonplayers) {
@@ -306,9 +313,7 @@ module.exports = {
                         team: el.team,
                     });
                 }
-                let round = 1;
-                if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
-                else if (room.deck.length <= 0) round = 2;
+
                 let r_temp = {
                     deck: room.deck.length,
                     acPl: room.activePlayer,
@@ -319,7 +324,7 @@ module.exports = {
                     status: room.status,
                 };
 
-                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump, round: round });
+                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump, round: round, playedcard: playedcard });
             }
 
             return res.ok();
@@ -426,7 +431,7 @@ async function handleEmptyRoom(roomID) {
                 await Room.updateOne({ id: room.id }).set({ admin: human.id });
                 sails.sockets.broadcast(human.socket, "adminchange", {});
             }
-            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: (room.status == "game" ? true : false) });
+            sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: room.status == "game" ? true : false });
         } else {
             // no human player left, destroy bots
             await User.destroy({ id: pids });

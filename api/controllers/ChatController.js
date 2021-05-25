@@ -31,8 +31,6 @@ module.exports = {
     },
 
     cardplayedmsg: (user, card, roomhash) => {
-        sails.log.info(user);
-        sails.log.info(card);
         sails.sockets.broadcast(roomhash, "cardplayedmsg", { user: user, card: card });
     },
 

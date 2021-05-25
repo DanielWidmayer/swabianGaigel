@@ -29,8 +29,14 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card card-light-transparent mb-3">
-                    <div class="form-check m-2">
+                <div class="card card-light-transparent mb-3 p-1 pb-2">
+                    <div class="form-check m-3">
+                        <input class="form-check-input" type="checkbox" name="score" checked>
+                        <label class="form-check-label" style="float: left;">
+                            Show Scores
+                        </label>
+                    </div>
+                    <!-- <div class="form-check m-2">
                         Game Mode:
                         <div id="carouselGamevariants" class="carousel slide" data-interval="false" data-ride="carousel" data-pause="hover">
                             <div class="carousel-inner mb-1">
@@ -50,15 +56,15 @@
                                 <span class="visually-hidden">Next</span>
                             </button>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
         <div class="card card-light-transparent mb-3">
             <div class="row m-3">
                 <div class="col form-check my-2">
-                    <input class="form-check-input" type="checkbox" name="pwcb" value="1" id="flexCheckDefault" onclick="$('#pwfield').toggle('hidden');">
-                    <label class="form-check-label" style="float: left;" for="flexCheckDefault">
+                    <input class="form-check-input" type="checkbox" name="pwcb" value="1" id="flexCheckPw" onclick="$('#pwfield').toggle('hidden');">
+                    <label class="form-check-label" style="float: left;" for="flexCheckPw">
                         Private Game
                     </label>
                 </div>
@@ -73,7 +79,7 @@
             </div>
 
         </div>
-        <button type="button" class="btn col-inverse" onclick="$('#createRoomForm').submit();">Create Room</button>
+        <button type="button" class="btn btn-primary" onclick="$('#createRoomForm').submit();">Create Room</button>
     </form>
 
 </div>

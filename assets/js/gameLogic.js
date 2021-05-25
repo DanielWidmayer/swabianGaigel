@@ -92,10 +92,12 @@ function initialize(data) {
     $(".bi-x-circle-fill").remove();
 
     ownScore = -1;
-    let cardTrump = data.trump;
-    trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), cardTrump.id);
-    trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
-    trumpCard.topCard().moveToBack();
+    if (data.trump != null) {
+        let cardTrump = data.trump;
+        trumpCard.addCard(deck.findCard(cardTrump["value"], cardTrump["symbol"]), cardTrump.id);
+        trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+        trumpCard.topCard().moveToBack();
+    }
 
     let cardHand = data.hand;
     for (let i = 0; i < cardHand.length; i++) {
@@ -217,39 +219,53 @@ io.socket.on("dealcard", function (data) {
         userhands[userHash].hand.addCard(fCard, card.id);
         userhands[userHash].hand.sortHand();
         userhands[userHash].hand.render();
-        for (const key in userhands) {
-            if (key != userHash) {
-                userhands[key].hand.addCard(deck.topCard());
-                userhands[key].hand.render();
+        if (trumpCard != null) {
+            for (const key in userhands) {
+                if (key != userHash) {
+                    userhands[key].hand.addCard(deck.topCard());
+                    userhands[key].hand.render();
+                }
+            }
+        } else {
+            for (const key in userhands) {
+                if (key != userHash && userhands[key].hand.length != 5) {
+                    userhands[key].hand.addCard(deck.topCard());
+                    userhands[key].hand.render();
+                }
             }
         }
-        // get unmelded cards
-        let pair = userhands[userHash].hand.getPair();
-        // check if user has pair and can meld
-        if (pair.length > 0 && ownScore > -1) {
-            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can meld</p>`, chf);
-            $("#bmeld").prop("disabled", false);
-        } else {
-            $("#bmeld").prop("disabled", true);
-        }
-        // check if user can rob
-        if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 0) {
-            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can rob</p>`, chf);
-            $("#bsteal").prop("disabled", false);
-        } else {
-            $("#bsteal").prop("disabled", true);
+        if (trumpCard != null) {
+            // get unmelded cards
+            let pair = userhands[userHash].hand.getPair();
+            // check if user has pair and can meld
+            if (pair.length > 0 && ownScore > -1) {
+                appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can meld</p>`, chf);
+                $("#bmeld").prop("disabled", false);
+            } else {
+                $("#bmeld").prop("disabled", true);
+            }
+            // check if user can rob
+            if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 0) {
+                appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can rob</p>`, chf);
+                $("#bsteal").prop("disabled", false);
+            } else {
+                $("#bsteal").prop("disabled", true);
+            }
         }
     }, 2500);
 });
 
 io.socket.on("dealTrump", function (data) {
-    console.log(data); // data.user, data.card
     let uhand = userhands[data.user.hashID].hand;
-    uhand.addCard(trumpCard.bottomCard());
-    uhand.render();
+    uhand.addCard(trumpCard.bottomCard(), data.card.id);
     trumpCard = null;
     $("#bmeld").prop("disabled", true);
     $("#bsteal").prop("disabled", true);
+    setTimeout(() => {
+        let tCard = uhand.findCardByID(data.card.id);
+        tCard.rotate(0);
+        uhand.render();
+    }, 2500);
 });
 
 io.socket.on("firstturn", function (data) {
@@ -282,7 +298,7 @@ io.socket.on("firstcard", function (data) {
         playingpile.addCard(userhands[playerHash].hand.topCard());
         playingpile.render();
     } else {
-        let fCard = userhands[userHash].hand.findCard(data.card.value, data.card.symbol);
+        let fCard = userhands[userHash].hand.findCardByID(data.card.id);
         userhands[userHash].playingpile.addCard(fCard, data.card.id);
         userhands[userHash].playingpile.render({ callback: userhands[userHash].playingpile.topCard().rotate(getRandomArbitrary(-20, 20)) });
         userhands[userHash].hand.render({ immediate: true });
