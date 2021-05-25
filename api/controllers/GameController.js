@@ -694,7 +694,7 @@ module.exports = {
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
                 sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
-                ChatController.cardrobmsg(user, room.trump, room.hashID);
+                ChatController.cardrobmsg(user, card, room.hashID);
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
                 sails.log(`${user.name} robbed the trump (${temp}) with card ${card.id}`);
             } else throw error(104, "You are not allowed to do that yet!");
@@ -1081,7 +1081,6 @@ async function applyWin(roomid, firstround, winnerID) {
             user.wins = players[winner].wins;
 
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-            ChatController.turnmsg(user, room.hashID);
 
             if (p_win[0] == acPl) acPl = p_win[1];
             else acPl = p_win[0];
