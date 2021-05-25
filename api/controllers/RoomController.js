@@ -90,9 +90,6 @@ module.exports = {
                 hash = crypto.randomBytes(10).toString("hex");
             }
 
-            let geelfen = true;
-            if (data.gamemode == "standard") geelfen = true;
-
             await Room.create({
                 hashID: hash,
                 name: data.roomname,
@@ -100,7 +97,6 @@ module.exports = {
                 maxplayers: mp,
                 jsonplayers: [],
                 showscore: data.score ? true : false,
-                geelfen: geelfen,
                 stack: [],
             });
             let room = await Room.findOne({ hashID: hash });
