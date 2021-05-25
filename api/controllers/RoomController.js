@@ -306,6 +306,9 @@ module.exports = {
                         team: el.team,
                     });
                 }
+                let round = 1;
+                if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
+                else if (room.deck.length <= 0) round = 2;
                 let r_temp = {
                     deck: room.deck.length,
                     acPl: room.activePlayer,
@@ -316,7 +319,7 @@ module.exports = {
                     status: room.status,
                 };
 
-                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump });
+                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump, round: round });
             }
 
             return res.ok();
