@@ -59,14 +59,19 @@ io.socket.on("chatmsg", function (data) {
 });
 
 io.socket.on("turnmsg", function (data) {
-    console.log(data);
+    console.log(data); // data.user.team
     let text;
+    let col = "";
+    if (data.user.team) {
+        col = teamcolors[data.user.team];
+    }
     if (userHash == data.user.hashID) {
-        text =
-            '<p><i class="bi bi-trophy"></i>You have won the trick.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ' + data.user.score + '</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>';
+        text = `<p class="${col}"><i class="bi bi-trophy"></i>You have won the trick.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ${data.user.score} </p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>`;
     } else {
         text =
-            '<p><i class="bi bi-trophy"></i>' +
+            '<p class="' +
+            col +
+            '"><i class="bi bi-trophy"></i>' +
             data.user.name +
             ' has won the trick.</p><p><i class="bi bi-trophy-fill"></i>';
         if (data.user.score) text += `${data.user.name}'s score is now ${data.user.score}`;

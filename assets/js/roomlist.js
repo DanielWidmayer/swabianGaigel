@@ -80,7 +80,7 @@ io.socket.on("listevent", function (data) {
 
 // ---render active room---
 function renderActive(room) {
-    activecard.html(`<h4 class="text-center">${room.name}</h4><a type="button" class="btn btn-info m-2" href="/room/${room.hashID}">Reconnect</a>`);
+    activecard.html(`<h4 class="text-center text-white">${room.name}</h4><button type="button" class="btn btn-primary m-2" href="/room/${room.hashID}">Reconnect</button>`);
     activecard.show();
 }
 
