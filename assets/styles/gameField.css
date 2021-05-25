@@ -137,8 +137,23 @@ footer {
     right: 0;
 }
 
+.teamjoin{
+    font-size: medium;
+}
+
+
 .adminbutton{
-    
+    padding: 0.35rem 0.6rem 0.35rem 0.5rem !important;
+}
+
+.teambanner{
+    padding: 2px;
+    border: 3px solid;
+    border-radius: 4px;
+    margin-bottom: 0.3rem;
+}
+.teamhover:hover{
+    cursor: pointer;
 }
 
 .btn-game{

@@ -17,8 +17,7 @@ module.exports = {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let players = [],
-                temp = [];
+            let players = [], temp = [], t_player;
 
             // check authentication
             if (req.session.roomid && req.session.userid) {
@@ -34,6 +33,9 @@ module.exports = {
             // check if user is admin
             if (user.id != room.admin.id) throw error(104, "You are not allowed to do this!");
 
+            // check if game has already started
+            if (room.status == "game") throw error(104, "The game has already started!");
+
             // shuffle
             temp = room.jsonplayers;
             let j, m;
@@ -43,24 +45,21 @@ module.exports = {
                 temp[i] = temp[j];
                 temp[j] = m;
             }
-
-            if (temp.length == 4) {
+            
+            if (room.maxplayers >= 4) {
+                let div = Math.floor(room.maxplayers / 2);
                 for (let i = 0; i < temp.length; i++) {
-                    temp[i].ready = false;
-                    temp[i].team = (i % 2) + 1;
-                }
-            } else if (temp.length == 6) {
-                for (let i = 0; i < temp.length; i++) {
-                    temp[i].ready = false;
-                    temp[i].team = (i % 3) + 1;
+                    temp[i].team = (i % div) + 1;
                 }
             }
 
             room.jsonplayers = temp;
             for (let pl of room.jsonplayers) {
-                pl.ready = false;
-                players.push(await User.getNameAndHash(pl.playerID));
-                players[players.length - 1].ready = false;
+                t_player = await User.getNameAndHash(pl.playerID);
+                if (t_player.bot) pl.ready = true;
+                else pl.ready = false;
+                players.push(t_player);
+                players[players.length - 1].ready = pl.ready;
                 players[players.length - 1].team = pl.team;
             }
 
@@ -97,6 +96,9 @@ module.exports = {
             if (!room) throw error(101, "This Room could not be found!");
             if (!user) throw error(101, "This User could not be found!");
 
+            // check if game is already running
+            if (room.status == "game") throw error(104, "The game has already started!");
+
             // check if user is in room
             let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == user.id);
             if (p_index < 0) throw error(101, "User is not in this room!");
@@ -105,7 +107,7 @@ module.exports = {
             let t_team = req.body.team;
             if (t_team < 0 || t_team > 3) throw error(104, "This Team does not exist!");
 
-            if (room.jsonplayers.length < 4) throw error(104, "No Teams allowed for less than 4 players!");
+            if (room.maxplayers < 4) throw error(104, "No Teams allowed for less than 4 players!");
 
             for (const pl of room.jsonplayers) {
                 teams[pl.team] += 1;
@@ -124,7 +126,7 @@ module.exports = {
                 players[players.length - 1].team = el.team;
             }
 
-            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers }, req);
+            sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
 
             return res.status(200).json({ team: room.jsonplayers[p_index].team });
         } catch (err) {
@@ -300,7 +302,25 @@ module.exports = {
                     sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
                     return res.status(200).json({ ready: room.jsonplayers[u_index].ready });
                 }
-                if ([2, 3, 4, 6].includes(room.jsonplayers.length) == false) throw error(102, `Can't start a game with ${room.jsonplayers.length} players!`);
+
+                if (room.jsonplayers.length < room.maxplayers) {
+                    // fill up with Bots
+                    for (let i = room.jsonplayers.length; i < room.maxplayers; i++) {
+                        let newbot = await User.newBot();
+                        room.jsonplayers.push({
+                            playerID: newbot.id,
+                            hand: [],
+                            score: 0,
+                            wins: 0,
+                            team: 0
+                        });
+                        newbot = await User.getNameAndHash(newbot.id);
+                        ChatController.botmsg(newbot.name, room.hashID, 1);
+                    }
+                    
+                    await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+                    //sails.sockets.broadcast(room.hashID, "userevent", { users: t_players, max: room.maxplayers });
+                }
 
                 // update room status, reject if already ingame
                 if (room.status == "game") throw error(104, "Game is already running!");
@@ -349,6 +369,8 @@ module.exports = {
                     players.push(await User.getNameAndHash(pl.playerID));
                     players[players.length - 1].team = pl.team;
                 }
+                sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers });
+
                 for (const el of room.jsonplayers) {
                     sails.log("deal 5 cards to player " + el.playerID);
                     hand = await Card.dealCard(5, el.playerID, room.id);
@@ -361,6 +383,8 @@ module.exports = {
                 ChatController.firstturnmsg(user, room.hashID);
                 sails.log("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "firstturn", { user: user });
+
+                if (user.bot) setTimeout(botPlay, 1000, { roomid: room.id, botid: room.jsonplayers[0].playerID });
 
                 return res.ok();
             } catch (err) {
@@ -781,7 +805,7 @@ async function botPlay(args) {
     if (pcards.length <= 0) pcards = hand;
     // pick random card out of possible cards
     c_index = Math.floor(Math.random() * pcards.length);
-    card = hand[c_index];
+    card = pcards[c_index];
 
     c_index = bot.hand.findIndex((el) => el == card.id);
     bot.hand.splice(c_index, 1);
@@ -798,7 +822,7 @@ async function botPlay(args) {
         if (card.symbol == room.trump.symbol) room.startoff = "Trump";
         else if (card.value == 11) room.startoff = "Second Ace";
         else room.startoff = "Higher wins";
-        await Room.updateOne({ id: roomid }).set({ startoff: room.startoff });
+        await Room.updateOne({ id: room.id }).set({ startoff: room.startoff });
         ChatController.firstcardtypemsg(t_user, room.startoff, room.hashID);
         //sails.log.info("bot firstplay");
     }

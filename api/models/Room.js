@@ -113,7 +113,7 @@ module.exports = {
         try {
             let rooms = await Room.find();
             let lrooms = [], players = [];
-            for (el of rooms) {
+            for (const el of rooms) {
                 players = el.jsonplayers.map((pl) => pl.playerID);
                 players = await User.find({ id: players });
                 players = players.map((pl) => pl.hashID);
