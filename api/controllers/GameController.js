@@ -17,7 +17,9 @@ module.exports = {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
         try {
-            let players = [], temp = [], t_player;
+            let players = [],
+                temp = [],
+                t_player;
 
             // check authentication
             if (req.session.roomid && req.session.userid) {
@@ -45,7 +47,7 @@ module.exports = {
                 temp[i] = temp[j];
                 temp[j] = m;
             }
-            
+
             if (room.maxplayers >= 4) {
                 let div = Math.floor(room.maxplayers / 2);
                 for (let i = 0; i < temp.length; i++) {
@@ -312,12 +314,12 @@ module.exports = {
                             hand: [],
                             score: 0,
                             wins: 0,
-                            team: 0
+                            team: 0,
                         });
                         newbot = await User.getNameAndHash(newbot.id);
                         ChatController.botmsg(newbot.name, room.hashID, 1);
                     }
-                    
+
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
                     //sails.sockets.broadcast(room.hashID, "userevent", { users: t_players, max: room.maxplayers });
                 }
@@ -459,11 +461,15 @@ module.exports = {
 
             // check for empty deck
             if (!room.trump && room.stack.length > 0) {
+                sails.log.info(room.jsonplayers[acPl].hand);
                 let hand = await Card.find({ id: room.jsonplayers[acPl].hand });
                 c_index = hand.findIndex((el) => el.id == card.id);
                 hand.splice(c_index, 1);
                 // check if user could have played symbol
                 if (card.symbol != room.stack[0].symbol) {
+                    sails.log.info(card);
+                    sails.log.info(hand);
+                    sails.log.info(room.stack);
                     if (hand.find((el) => el.symbol == room.stack[0].card.symbol)) throw error(104, "You have to play the same suit!");
                 } else {
                     if (hand.find((el) => el.value > room.stack[0].card.value)) throw error(104, "You have to play a higher card if you own one!");
