@@ -68,7 +68,7 @@ section {
         left: auto;
     }
     .features-device-mockup .device-wrapper {
-        max-width: 15rem;
+        max-width: 20rem;
     }
 }
 @media (min-width: 992px) {
@@ -127,6 +127,17 @@ footer a:focus {
     font-size: 4rem;
 }
 
+.img-rules{
+    max-height: 90px;
+}
+
+.justify-text{
+    text-align: justify;
+    -moz-text-align-last: justify;
+    text-align-last: justify;   
+}
+
+
 #mainNav {
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -152,7 +163,7 @@ footer a:focus {
     position: absolute;
     fill: url(#circleGradient);
     width: 70%;
-    display: none;
+    display: block;
 }
 .masthead .masthead-device-mockup .circle .gradient-start-color {
     stop-color: #007f00;
