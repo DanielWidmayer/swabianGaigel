@@ -509,7 +509,7 @@ module.exports = {
                 sails.log("Full stack, eval winner");
                 winner = evalStack(temp_stack, room.trump, firstround ? first_type : "");
 
-                acPl = await applyWin(room.id, firstround, winner);
+                acPl = await applyWin(room.id, firstround, winner, user.id);
 
                 // check for win condition
                 if (await gameover(room.id)) return res.ok();
@@ -720,8 +720,6 @@ module.exports = {
             } else return res.serverError(err);
         }
     },
-
-
 
     triggerBot: async (roomid, botid) => {
         let room = await Room.findOne({ id: roomid });
@@ -1041,12 +1039,11 @@ function evalStack(stack, trump, type) {
     }
 }
 
-async function applyWin(roomid, firstround, winnerID) {
+async function applyWin(roomid, firstround, winnerID, ownID = 0) {
     try {
         let room = await Room.findOne({ id: roomid });
         let players = room.jsonplayers;
         let stack = room.stack;
-        let acPl = room.activePlayer;
         let winner = players.findIndex((el) => el.playerID == winnerID);
         let user;
 
@@ -1069,11 +1066,10 @@ async function applyWin(roomid, firstround, winnerID) {
             }
             players[winner].wins += 1;
             user = await User.getNameAndHash(players[winner].playerID);
-            if (room.showscore) user.score = players[winner].score;
+            if (room.showscore || players[winner].playerID == ownID) user.score = players[winner].score;
             user.wins = players[winner].wins;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
             ChatController.turnmsg(user, room.hashID);
-            acPl = winner;
         } else {
             let p_win = [];
             let p_team = players[winner].team;
@@ -1093,20 +1089,17 @@ async function applyWin(roomid, firstround, winnerID) {
             }
 
             user = await User.getNameAndHash(players[winner].playerID);
-            user.score = players[winner].score;
+            if (room.showscore || players[winner].playerID == ownID) user.score = players[winner].score;
             user.wins = players[winner].wins;
             user.team = players[winner].team;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
             ChatController.turnmsg(user, room.hashID);
-
-            if (p_win[0] == acPl) acPl = p_win[1];
-            else acPl = p_win[0];
         }
         sails.log(user.name + " won!");
 
         await Room.updateOne({ id: room.id }).set({ jsonplayers: players, stack: [] });
 
-        return acPl;
+        return winner;
     } catch (err) {
         throw err;
     }
@@ -1140,7 +1133,7 @@ async function gameover(roomid) {
             }
         }
         // win by point limit
-        if (room.jsonplayers.find((el) => el.score >= 101)) {
+        else if (room.jsonplayers.find((el) => el.score >= 101)) {
             for (const el of room.jsonplayers) {
                 if (el.score >= 101) {
                     ut = await User.getNameAndHash(el.playerID);
