@@ -1066,10 +1066,10 @@ async function applyWin(roomid, firstround, winnerID, ownID = 0) {
             }
             players[winner].wins += 1;
             user = await User.getNameAndHash(players[winner].playerID);
-            if (room.showscore || players[winner].playerID == ownID) user.score = players[winner].score;
+            user.score = players[winner].score;
             user.wins = players[winner].wins;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-            ChatController.turnmsg(user, room.hashID);
+            ChatController.turnmsg(user, room.showscore, room.hashID);
         } else {
             let p_win = [];
             let p_team = players[winner].team;
@@ -1089,11 +1089,11 @@ async function applyWin(roomid, firstround, winnerID, ownID = 0) {
             }
 
             user = await User.getNameAndHash(players[winner].playerID);
-            if (room.showscore || players[winner].playerID == ownID) user.score = players[winner].score;
+            sser.score = players[winner].score;
             user.wins = players[winner].wins;
             user.team = players[winner].team;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
-            ChatController.turnmsg(user, room.hashID);
+            ChatController.turnmsg(user, room.showscore, room.hashID);
         }
         sails.log(user.name + " won!");
 
