@@ -11,33 +11,33 @@
         <li class="nav-item"><a class="nav-link me-lg-3" href="#about">About</a></li>
         <li class="nav-item"><a class="nav-link me-lg-3" href="#rules">Game Rules</a></li>
       </ul>
-      <button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" href="/list">
+      <a class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" href="/list">
         <span class="d-flex align-items-center">
           <i class="bi bi-play-fill me-2"></i>
           <span class="small">Play Now</span>
         </span>
-      </button>
+      </a>
     </div>
   </div>
 </nav>
 <!-- Mashead header-->
 <header class="masthead">
-  <div class="container px-5">
+  <div class="container">
     <div class="row gx-5 align-items-center">
-      <div class="col-lg-6">
+      <div class="col-sm-6">
         <!-- Mashead text and app badges-->
         <div class="mb-5 mb-lg-0 text-center text-lg-start">
           <h1 class="display-1 lh-1 mb-3">Play Gaigel with your friends online!</h1>
           <p class="lead fw-normal text-muted mb-5">Play for free and without registration!</p>
           <div class="d-flex flex-column flex-lg-row align-items-center">
-            <button class="btn btn-primary" href="/list"><i class="bi bi-play-fill me-2"></i>Play Now</button>
+            <a class="btn btn-primary" href="/list"><i class="bi bi-play-fill me-2"></i>Play Now</a>
           </div>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-sm-6">
         <!-- Masthead device mockup feature-->
         <div class="masthead-device-mockup">
-          <img src="/images/headLogo.png" style="z-index: 20; position:absolute; width:100%">
+          <img src="/images/headLogo.png" class="m-3" style="z-index: 20; width:100%">
           <svg class="circle" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="50"></circle>
           </svg>
@@ -52,7 +52,7 @@
     <div class="row gx-5 justify-content-center">
       <div class="col-xl-8">
         <div class="h2 fs-1 text-white mb-4">"Create a room and invite your friends to play now!"</div>
-        <button class="btn btn-primary" href="/create"><i class="bi bi-plus me-2"></i>Create a Room</button>
+        <a class="btn btn-primary" href="/create"><i class="bi bi-plus me-2"></i>Create a Room</a>
 
       </div>
     </div>
@@ -60,12 +60,12 @@
 </aside>
 <!-- App about section-->
 <section id="about">
-  <div class="container px-5">
+  <div class="container-sm">
     <div class="row gx-5 align-items-center">
-      <div class="col-lg-8 order-lg-1 mb-5 mb-lg-0">
-        <div class="container-fluid px-5">
+      <div class="col-sm-8 order-sm-1 mb-5 mb-sm-0">
+        <div class="container-sm p-0">
           <div class="row gx-5">
-            <div class="col-md-6 mb-5">
+            <div class="col-sm-6 mb-5">
               <!-- Feature item-->
               <div class="text-center">
                 <i class="bi-people icon-feature text-gradient d-block mb-3"></i>
@@ -73,7 +73,7 @@
                 <p class="text-muted mb-0">Invite Friends to private rooms or join any public room!</p>
               </div>
             </div>
-            <div class="col-md-6 mb-5">
+            <div class="col-sm-6 mb-5">
               <!-- Feature item-->
               <div class="text-center">
                 <i class="bi-cloud-check icon-feature text-gradient d-block mb-3"></i>
@@ -83,7 +83,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-md-6 mb-5 mb-md-0">
+            <div class="col-sm-6 mb-5 mb-sm-0">
               <!-- Feature item-->
               <div class="text-center">
                 <i class="bi-controller icon-feature text-gradient d-block mb-3"></i>
@@ -91,7 +91,7 @@
                 <p class="text-muted mb-0">This app is totally free to play!</p>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-sm-6">
               <!-- Feature item-->
               <div class="text-center">
                 <i class="bi-patch-check icon-feature text-gradient d-block mb-3"></i>
@@ -102,7 +102,7 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 order-lg-0">
+      <div class="col-sm-4 order-sm-0">
         <!-- Features section device mockup-->
         <div class="features-device-mockup">
           <svg class="circle" viewBox="0 0 100 100">
@@ -113,7 +113,7 @@
               </linearGradient>
             </defs>
             <circle cx="50" cy="50" r="50"></circle>
-          </svg><img src="/images/headLogo.png" style="z-index: 20; position:absolute; width:100% ;">
+          </svg><img src="/images/headLogo.png" style="z-index: 20; width:100% ;">
         </div>
       </div>
     </div>
@@ -123,11 +123,11 @@
 <section class="bg-light">
   <div class="container px-5">
     <div class="row gx-5 align-items-center justify-content-center justify-content-lg-between">
-      <div class="col-12 col-lg-5">
+      <div class="col-md-6">
         <h2 class="display-4 lh-1 mb-4">About the project</h2>
         <p class="lead fw-normal text-muted mb-5 mb-lg-0">This app was developed in a student project at the university DHBW Stuttgart. It is based on Sails.js and Bootstrap.</p>
       </div>
-      <div class="col-sm-8 col-md-6">
+      <div class="col-md-6">
         <div class="px-5 px-sm-0"><img class="img-fluid" src="/images/dhbw.gif" alt="DHBW Logo" /></div>
       </div>
     </div>
@@ -148,9 +148,9 @@
 </section>
 <!-- App badge section-->
 <section class="bg-light" id="rules">
-  <div class="container text-center ">
-    <h2 class="font-alt mb-4">Game Rules</h2>
-    <div class="align-items-center justify-content-center px-5 mb-2">
+  <div class="container">
+    <div class="align-items-center justify-content-center mx-5 mb-2">
+      <h2 class="font-alt mb-4">Game Rules</h2>
       In Gaigel one deck contains 48 playing cards. Each playing card exists twice. The description of the suits are typically called Eichel (Acorns), Schippen (Spades), Herz (Hearts) and Bollen (Bells).
       Within the four suits the precedence of cards is always the same: <br>
       Deuce (Ace, Ass, Alte) → Ten (Zehner) → King (König) → Ober (Queen) → Unter (Jack) → Seven (Dissle).
@@ -158,13 +158,12 @@
   </div>
   <div>
     <aside class="text-center bg-gradient-primary-to-secondary">
-      <img src="/images/rules/deck.png" height="90px"></img>
-      <img src="/images/rules/cards1.png" height="90px"></img>
+      <img src="/images/rules/cards1.png" class="img-fluid img-rules"></img>
     </aside>
   </div>
-  <div class="container text-center ">
-    <h4 class="font-alt mt-4">Card values</h4>
+  <div class="container">
     <div class="align-items-center justify-content-center px-5 mb-2">
+      <h4 class="font-alt mt-4">Card values</h4>
       The following values (card points) are assigned to the individual cards:
       <table class="table table-bordered table-hover mt-2">
         <thead>
@@ -217,13 +216,15 @@
     </div>
   </div>
   <div class="container">
-    <div class="align-items-center justify-content-center px-5 mb-2 text-center">
+    <div class="align-items-center justify-content-center px-5 mb-2  ">
       <h4 class=" font-alt mt-4">Aim</h4>
       The aim of the game is to score 101 points. As soon as a player has 101 points or more he wins the round. If all cards are played and no player has reached 101 points, the player with the most points wins.
       <br>
-      <i class="bi bi-trophy icon-feature"></i>
-      <i class="bi bi-trophy icon-feature"></i>
-      <i class="bi bi-trophy icon-feature"></i>
+      <div class="text-center">
+        <i class="bi bi-trophy icon-feature"></i>
+        <i class="bi bi-trophy icon-feature"></i>
+        <i class="bi bi-trophy icon-feature"></i>
+      </div>
       <h4 class="font-alt mt-4">Trump</h4>
       The dealer takes a card, which is used to determine the trump suit, and places it face up in the centre of the table. The deck is then placed crosswise on top of the trump card
       in the middle of the table so that latter remains partly visible.
@@ -235,37 +236,38 @@
     </aside>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
       <h4 class="font-alt mt-4">Playing</h4>
       Gaigel is played in anti-clockwise fashion (colloquially described as "rechtsherum haut man an die Backe").
       Games of two or three players are played singly: each player is on his own.
       In games with four or six players, it is usual to play "crosswise" ("über Kreuz"): the players sitting opposite one another form teams of two whose tricks are counted together. Because of their seating
       arrangement, a game of four players is a so-called "Kreuzgaigel" ("Cross Gaigel"). In Kreuzgaigel, the playing partners remain the same during a games night.
       <br>
-      <i class="bi bi-arrow-counterclockwise icon-feature" id="icon-cc"></i>
-      <i class="bi bi-arrows-fullscreen icon-feature" id="icon-cc"></i>
+      <div class="text-center align-middle">
+        <i class="bi bi-arrow-counterclockwise icon-feature" id="icon-cc"></i>
+        <i class="bi bi-arrows-fullscreen icon-feature" id="icon-cc"></i>
+      </div>
     </div>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
       <h4 class="font-alt mt-4">Opening</h4>
       The beginning player is called the forehand (Vorhand) or eldest hand and leads to the first trick.
-      In opening the play, he has to choose one of several options and announce it to the other player(s). For the first trick, the rule is that there is no trump suit or that trumps may not be played:
+      In opening the play, he has to choose one of several options and announce it to the other player(s). For the first trick, the rule is that trumps may not be played:
       <ul class="list-group mt-2">
-        <li class="list-group-item">Andere Alte/Zweites Ass ("Other Old Man" / "Second Ace"): the forehand plays an ace (not from the trump suit) face down. When all the others have played their cards, also face down, the cards are turned over. If
-          another player has
-          played the same ace, he wins the trick. Otherwise the trick belongs to the forehand.</li>
-        <li class="list-group-item"> Höher hat or Tauchen ("Higher wins" or "Diving"): the forehand plays a card of his choice, except that it must not be an ace or a trump card, face down. The others do the same. As soon as everyone has played
-          their
+        <li class="list-group-item">Andere Alte/Zweites Ass ("Other Old Man" / "Second Ace"): <br>
+          The forehand plays an ace face down. When all the others have played their cards, also face down, the cards are turned over. If another player has played the same ace, he wins the trick. Otherwise the trick belongs to the forehand.</li>
+        <li class="list-group-item"> Höher hat ("Higher wins"): <br>
+          The forehand plays a card of his choice face down. The card can't be an Ace or of trump siut. The others do the same. As soon as everyone has played their
           cards face down, the forehand turns his card over and then all the others do the same with their cards. If one of the other players has a higher card of the same suit, they win the trick; otherwise the forehand wins it.</li>
       </ul>
     </div>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
 
       <h4 class="font-alt mt-4">Winning a trick</h4>
-      After each round, every player draws a card from the deck. The player who won the last trick leads to the next (kommt heraus). Of his five cards he may play one of his choice. The rest of the players follow in anti-clockwise
+      After each round, every player draws a card from the deck. The player who won the last trick leads to the next. Of his five cards he may play one of his choice. The rest of the players follow in anti-clockwise
       order without any compulsion to play a trump, follow suit or win the trick.
 
       In determining who wins the trick: trumps beat plain suited cards; the higher card wins if cards are of the same suit; the playing going first wins if both cards are the same value and suit. The winner of the trick draws another card
@@ -273,14 +275,11 @@
     </div>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
       <h4 class="font-alt mt-4">Melding</h4>
-      Once a player (or his team in the partnership game) has won a trick, he may meld at any time in the game i.e. announce that he has a pair comprising a King and Ober/Queen of the same suit. A trump pair is worth 40 points, plain suit
-      pairs are worth 20 points. To do this the player simply announces "Forty" or "Twenty". The matched pair is always presented and one of the two cards in the pair is played to the next trick.
-
-      A card already used in a meld may not be used a second time for by the same player. It follows that if a player wants to claim a pair of the same suit, he must show all four cards of the two pairs at once. If he has already played one
-      (or both) card(s) of the first pair, he may not claim a meld of the same suit again.
-
+      Once a player (or his team in the partnership game) has won a trick, he may meld at any time in the game. He then announces that he has a pair comprising a King and Ober of the same suit. A trump pair is worth 40 points, plain suit
+      pairs are worth 20 points. To do this the player simply announces "Forty" or "Twenty".
+      A card already used in a meld may not be used a second time for by the same player.
       So that a meld is not forgotten, the player claiming it may slide one of his trick cards of the same suite with the face up under his trick card pile.
     </div>
   </div>
@@ -290,11 +289,10 @@
     </aside>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
       <h4 class="font-alt mt-4">Robbing (Rauben)</h4>
-      The player who has (or draws) a 7 of trumps and is the first to turn it over can exchange it for the trump card under the deck, provided that he already has a trick. The Diß robbery is usually announced by putting the Diß under the
-      trump card and thus acquiring the right to steal the trump card. Thus, his partner is offered the opportunity to rob, in case he should get the second Diß. However, if the second Diß falls in a trick, the trump may be robbed without
-      regard to the player's partner. However, as soon as a Diß has been placed under the trump card, it is no longer possible for the opposing party to rob the trump card in the current game.
+      The player who has (or draws) a 7 of trumps and is the first to turn it over can exchange it for the trump card under the deck, provided that he already has a trick. The Diss robbery is announced by putting the Diss under the
+      trump card and thus acquiring the right to steal the trump card.
     </div>
   </div>
   <div>
@@ -303,9 +301,9 @@
     </aside>
   </div>
   <div class="container">
-    <div class="text-center align-items-center justify-content-center px-5 mb-2">
+    <div class="  align-items-center justify-content-center px-5 mb-2">
       <h4 class="font-alt mt-4">Game after deck is used up</h4>
-      As soon as the deck is exhausted, players must follow suit if possible and try to win the trick.
+      As soon as the deck is empty, players must follow suit if possible and have to win the trick if they can.
     </div>
   </div>
 
