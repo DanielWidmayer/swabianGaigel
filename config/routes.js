@@ -21,12 +21,12 @@ module.exports.routes = {
     "/": {
         view: "basic/index",
         locals: {
-            layout: "basic_layout",
+            layout: "index_layout",
         },
     },
 
     "/list": "RoomController.accessList",
-    
+
     "/roomList": "RoomController.roomList",
 
     "POST /protect": "RoomController.protectRoom",

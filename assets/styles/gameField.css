@@ -1,33 +1,33 @@
 html {
-    background-image: url("/images/Gaigel_Wallpaper.jpg")!important;
-    background-size: cover;    
+    background-image: url("/images/Gaigel_Wallpaper.jpg") !important;
+    background-size: cover;
     background-repeat: no-repeat;
     height: 100vh;
 }
 
-body{
-    background-color: transparent!important;
+body {
+    background-color: transparent !important;
 }
 
-p{
+p {
     color: white;
-    margin-bottom: 0!important;;
+    margin-bottom: 0 !important;
 }
-i{
-    padding-left: .25rem;
-    padding-right: .25rem;
-}
-
-footer{
-    margin: 0!important;
+i {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
 }
 
-.card-transparent{
-    background-color: rgba(0, 0, 0, 0.5)!important;
+footer {
+    margin: 0 !important;
 }
 
-.card-light-transparent{
-    background-color: rgba(255, 255, 255, 0.1)!important;
+.card-transparent {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.card-light-transparent {
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .fieldcontainer {
@@ -42,7 +42,7 @@ footer{
     left: 50%;
     height: 70px;
     width: 130px;
-}   
+}
 img.preload {
     display: none;
 }
@@ -60,39 +60,38 @@ img.preload {
     box-shadow: #111 1px 1px 2px;
 }
 
-
 #chat {
     position: relative;
 }
 
-#chatfield{
+#chatfield {
     min-height: 12vh;
     height: 20%;
     max-height: 20vh;
     overflow-y: scroll;
 }
 
-#gamehistoryfield{
+#gamehistoryfield {
     min-height: 20vh;
     height: 40%;
     max-height: 30vh;
-    padding-left: 7px!important;
+    padding-left: 7px !important;
     overflow-y: scroll;
     color: white;
 }
-.col-fit{
+.col-fit {
     max-height: 90vh;
     height: 80%;
 }
 
-#userlist{
-    padding: 7px!important;
-    margin-bottom: 0px!important;
+#userlist {
+    padding: 7px !important;
+    margin-bottom: 0px !important;
     color: white;
-    font-size:larger;
+    font-size: larger;
 }
 
-#currentUserIcon{
+#currentUserIcon {
     position: absolute;
     font-size: xx-large;
     color: white;
@@ -100,35 +99,34 @@ img.preload {
     opacity: 0;
 }
 
-.chatmsgsend{
+.chatmsgsend {
     position: relative !important;
     bottom: 0;
 }
 
-.chatmsg{
+.chatmsg {
     margin: 0.2rem 0;
     border-radius: 5px;
     word-break: break-word;
     color: white;
 }
 
-
-.chatmsg-user{
-    padding: 0 .5rem;
+.chatmsg-user {
+    padding: 0 0.5rem;
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.chatmsg-err{       
+.chatmsg-err {
     padding: 0.05rem 0 0.15rem 0;
     background-color: rgba(255, 45, 45, 0.3);
 }
 
-.chatmsg-info{
-    padding: 0.05rem 0 0.15rem 0;       
+.chatmsg-info {
+    padding: 0.05rem 0 0.15rem 0;
     background-color: #5bc0de50;
 }
 
-.chatmsg-warning{
+.chatmsg-warning {
     padding: 0.05rem 0 0.15rem 0;
     background-color: #f0ac4e44;
 }
@@ -139,33 +137,32 @@ footer {
     margin: 10px;
 }
 
-.game-utils{
-    position: absolute; 
-    bottom: 0; 
+.game-utils {
+    position: absolute;
+    bottom: 0;
     right: 0;
 }
 
-.teamjoin{
+.teamjoin {
     font-size: medium;
 }
 
-
-.adminbutton{
+.adminbutton {
     padding: 0.35rem 0.6rem 0.35rem 0.5rem !important;
 }
 
-.teambanner{
+.teambanner {
     padding: 2px;
     border: 3px solid;
     border-radius: 4px;
     margin-bottom: 0.3rem;
 }
-.teamhover:hover{
+.teamhover:hover {
     cursor: pointer;
 }
 
-.btn-game{
-    font-size: 2rem!important;
+.btn-game {
+    font-size: 2rem !important;
 }
 
 .scrollbar {
@@ -177,24 +174,24 @@ footer {
 }
 
 .scrollbar-primary::-webkit-scrollbar {
-    width: 15px;
+    width: 15px;    
 }
-    
+
 .scrollbar-primary::-webkit-scrollbar-thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px #00102ab4;
-    background-color: #005ff8; 
+    background-color: #005ff8;
 }
 
 .scrollbar-primary {
-    scrollbar-color: #005ff8 ;
+    scrollbar-color: #005ff8;
 }
 
-.img-icon{
+.img-icon {
     height: 20px;
     width: 20px;
 }
-.img-icon-thin{
+.img-icon-thin {
     height: 20px;
     width: 12px;
 }
@@ -207,28 +204,26 @@ footer {
     z-index: 7777;
 }
 
-.hr-thick{
-    height: 3px!important;
+.hr-thick {
+    height: 3px !important;
 }
 
-.pow{
-    font-size: 1.3rem!important; 
+.pow {
+    font-size: 1.3rem !important;
     vertical-align: top;
 }
 
-.team-yellow{
-    border-color:rgb(255,255,0);
-    background-color:rgba(255,255,0,0.2);
-
+.team-yellow {
+    border-color: rgb(255, 255, 0);
+    background-color: rgba(255, 255, 0, 0.2);
 }
 
-.team-blue{
-    border-color:rgb(0,0,255);
-    background-color:rgba(0,0,255,0.2);
-
+.team-blue {
+    border-color: rgb(0, 0, 255);
+    background-color: rgba(0, 0, 255, 0.2);
 }
 
-.team-green{
-    border-color:#007f00;
-    background-color:#007f0040;
+.team-green {
+    border-color: #007f00;
+    background-color: #007f0040;
 }

@@ -1,33 +1,31 @@
 body {
-    background-image: url("/images/Gaigel_Wallpaper.jpg")!important;
-    background-size: cover;
+    background-image: url("/images/Gaigel_Wallpaper.jpg") !important;
     background-repeat: no-repeat;
+    background-size: cover;
     height: 100vh;
 }
-.card-transparent{
-    background-color: rgba(0, 0, 0, 0.5)!important;
+.card-transparent {
+    background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-.card-light-transparent{
-    background-color: rgba(255, 255, 255, 0.1)!important;
+.card-light-transparent {
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.input-transparent
-{
-    background: rgba(0, 0, 0, 0.2)!important;
-    border: none!important;
-    color: white!important;
-    padding: .375rem .75rem;
+.input-transparent {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: none !important;
+    color: white !important;
+    padding: 0.375rem 0.75rem;
     width: 70%;
 }
 
-.input-transparent:focus
-{
-    outline: none!important;
+.input-transparent:focus {
+    outline: none !important;
 }
 
-.input-transparent::placeholder{
-    color: rgba(255, 255, 255, 0.7)!important;
+.input-transparent::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* .input-transparent:
@@ -35,8 +33,8 @@ body {
     outline: none!important;
 } */
 
-.table{
-    color: #fff!important; 
+.table {
+    color: #fff !important;
 }
 thead {
     position: -webkit-sticky;
@@ -44,34 +42,34 @@ thead {
 }
 
 tr:hover {
-    background-color: rgba(200, 200, 200, 0.2)!important;
+    background-color: rgba(200, 200, 200, 0.2) !important;
     cursor: pointer;
 }
 
 .scrollbar {
     float: left;
-    overflow-y: scroll;
-    scrollbar-width: thin;
-    scrollbar-color: #005ff8;
     height: 100%;
+    overflow-y: scroll;
     padding-left: 12px;
+    scrollbar-color: #005ff8;
+    scrollbar-width: thin;
 }
 
 .scrollbar-primary::-webkit-scrollbar {
     width: 15px;
 }
-    
+
 .scrollbar-primary::-webkit-scrollbar-thumb {
+    background-color: #005ff8;
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px #00102ab4;
-    background-color: #005ff8; 
 }
 
 .scrollbar-primary {
-    scrollbar-color: #005ff8 ;
+    scrollbar-color: #005ff8;
 }
 
-.maincard{
+.maincard {
     height: 60vh;
 }
 
@@ -79,27 +77,27 @@ tr:hover {
     display: none;
 }
 
-.posterr{
-    font-size: 0.9rem!important;
+.posterr {
+    font-size: 0.9rem !important;
 }
 
-.modal-dark{
-    background-color: #00000099!important;
+.modal-dark {
+    background-color: #00000099 !important;
 }
 
-.col-inverse{
-    background: #292b2c!important;
-    color: white!important;
+.col-inverse {
+    background: #292b2c !important;
+    color: white !important;
 }
 
-.col-inverse:hover{
-    background-color: #202122!important;
+.col-inverse:hover {
+    background-color: #202122 !important;
 }
 
-.btn:focus{
-    box-shadow: 0 0 0 0.25rem #292b2c44!important;
+.btn:focus {
+    box-shadow: 0 0 0 0.25rem #292b2c44 !important;
 }
 
-input:focus{
-    box-shadow: 0 0 0 0.25rem #292b2c44!important;
+input:focus {
+    box-shadow: 0 0 0 0.25rem #292b2c44 !important;
 }
