@@ -1089,7 +1089,7 @@ async function applyWin(roomid, firstround, winnerID, ownID = 0) {
             }
 
             user = await User.getNameAndHash(players[winner].playerID);
-            sser.score = players[winner].score;
+            user.score = players[winner].score;
             user.wins = players[winner].wins;
             user.team = players[winner].team;
             sails.sockets.broadcast(room.hashID, "roundwin", { user: user });
