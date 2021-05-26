@@ -22,8 +22,8 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "errormsg", { text: msg });
     },
 
-    turnmsg: (user, roomhash) => {
-        sails.sockets.broadcast(roomhash, "turnmsg", { user: user });
+    turnmsg: (user, showscore, roomhash) => {
+        sails.sockets.broadcast(roomhash, "turnmsg", { user: user, show: showscore });
     },
 
     firstturnmsg: (user, roomhash) => {

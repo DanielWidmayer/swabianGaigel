@@ -69,7 +69,7 @@ io.socket.on("turnmsg", function (data) {
         text = `<p class="${col}"><i class="bi bi-trophy"></i>You have won the trick.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ${data.user.score} </p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>`;
     } else {
         text = '<p class="' + col + '"><i class="bi bi-trophy"></i>' + data.user.name + " has won the trick.</p>";
-        if (data.user.score) text += `<p><i class="bi bi-trophy-fill"></i>${data.user.name}'s score is now ${data.user.score}</p>`;
+        if (data.show) text += `<p><i class="bi bi-trophy-fill"></i>${data.user.name}'s score is now ${data.user.score}</p>`;
         text = text + '<hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + data.user.name + "'s turn.</p>";
     }
     appendMessage(`${text}`, gamef);
