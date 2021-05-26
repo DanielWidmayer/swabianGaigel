@@ -137,6 +137,8 @@ footer a:focus {
     text-align-last: justify;   
 }
 
+.nk-cookie-banner { position: fixed!important; bottom: 0px; left: 0px; width: 100%; z-index: 999; border-radius: 0px; display: none; }
+
 
 #mainNav {
     padding-top: 1rem;
