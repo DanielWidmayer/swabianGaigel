@@ -311,16 +311,18 @@
 </section>
 <!-- Footer-->
 <footer class="bg-black text-center py-5">
-  <div class="container px-5">
-    <div class="text-white-50 small">
-      <div class="mb-2">&copy; Gaigel 2021. All Rights Reserved.</div>
-      <a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal">Cookies Policy</a>
-      <span class="mx-1">&middot;</span>
-      <a href="mailto:inf18157@lehre.dhbw-stuttgart.de">Contact</a>
-      <span class="mx-1">&middot;</span>
-      <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+  <section id="cookiepol">
+    <div class="container px-5">
+      <div class="text-white-50 small">
+        <div class="mb-2">&copy; Gaigel 2021. All Rights Reserved.</div>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal">Cookies Policy</a>
+        <span class="mx-1">&middot;</span>
+        <a href="mailto:inf18157@lehre.dhbw-stuttgart.de">Contact</a>
+        <span class="mx-1">&middot;</span>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+      </div>
     </div>
-  </div>
+  </section>
 </footer>
 
 <!-- Cookie Banner -->
@@ -334,8 +336,8 @@
 <!-- End of Cookie Banner -->
 
 <!-- Cookie Policy modal-->
-<div class="modal fade" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade bd-example-modal-lg" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-gradient-primary-to-secondary p-4">
         <h5 class="modal-title font-alt text-white" id="cookieModalLabel">Cookies Policy</h5>
@@ -417,8 +419,8 @@
 
 
 <!-- Privacy Policy modal-->
-<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade bd-example-modal-lg" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-gradient-primary-to-secondary p-4">
         <h5 class="modal-title font-alt text-white" id="privacyModalLabel">Privacy Policy</h5>
@@ -648,6 +650,13 @@
         }
       });
     });
+
+    // get query
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('cp');
+    if (myParam != null) {
+      $("#cookieModal").modal('show');
+    }
 
   });
 
