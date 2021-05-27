@@ -12,7 +12,7 @@ var containerHeight,
 $(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
     containerWidth = document.getElementById("card-table").offsetWidth;
-    //console.log(containerWidth + " x " + containerHeight);
+    console.log(containerWidth + " x " + containerHeight);
     //Tell the library which element to use for the table
     cards.init({ table: "#card-table", type: GAIGEL });
 
@@ -211,8 +211,6 @@ io.socket.on("roundwin", function (data) {
 });
 
 io.socket.on("dealcard", function (data) {
-    console.log("dealcard received");
-    console.log(data.card[0]);
     let card = data.card[0];
     let fCard = findCertainCard(card["value"], card["symbol"]);
     setTimeout(() => {
@@ -271,16 +269,13 @@ io.socket.on("dealTrump", function (data) {
 io.socket.on("firstturn", function (data) {
     $("#currentUserIcon").animate({ left: userhands[data.user.hashID].hand.x + 30, top: userhands[data.user.hashID].hand.y + 150, opacity: 1.0 });
     if (userHash == data.user.hashID) {
-        //console.log("You begin the game");
         userhands[userHash].hand.click(function (card) {
             let hand = userhands[userHash].hand;
             if (card.symbol != trumpCard.bottomCard().symbol || !hand.find((el) => el.symbol != trumpCard.bottomCard().symbol)) {
                 let bCard = { id: card.id, value: card.value, symbol: card.symbol };
                 io.socket.post("/playCard", { card: bCard }, function (res, jres) {
                     if (jres.statusCode != 200) {
-                        //console.log(jres);
-                    } else {
-                        //console.log(res);
+                        console.log(jres);
                     }
                 });
             } else {
@@ -328,7 +323,6 @@ io.socket.on("firstwin", async function (data) {
 });
 
 io.socket.on("paircalled", function (data) {
-    //console.log(data);
     let cards = data.cards;
     let fCards = [];
     let userhand = userhands[data.user.hashID].hand;
@@ -355,7 +349,6 @@ io.socket.on("paircalled", function (data) {
 });
 
 io.socket.on("cardrob", function (data) {
-    //console.log(data);
     let card = data.card;
     let userhand = userhands[data.user.hashID].hand;
     let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
@@ -367,7 +360,6 @@ io.socket.on("cardrob", function (data) {
 });
 
 io.socket.on("gameover", function (data) {
-    //console.log(data);
     // array data.winners
     if (data.winners.find((el) => el.hashID == userHash)) {
         $("body").append('<img class="gameover-img" src="/images/font_victory.png"></img>');
@@ -389,8 +381,6 @@ function allowCardPlay() {
         io.socket.post("/playCard", { card: bCard }, function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(jres);
-            } else {
-                console.log(res);
             }
         });
     });
