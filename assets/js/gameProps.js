@@ -15,8 +15,6 @@ $(function () {
             } else console.log(jres);
         } else {
             if (res != "OK") {
-                console.log("socketconnect data: ");
-                console.log(res);
                 if (res.room.status == "game") {
                     initialize(res);
                     // check for already melded cards in users hand
@@ -58,8 +56,6 @@ $(function () {
                             for (let i = res.room.stack.length - 1; i > -1; i--) {
                                 let card = res.room.stack[i].card;
                                 let fCard = findCertainCard(card.value, card.symbol);
-                                console.log(res.users);
-                                console.log(activePlayer);
                                 let uid = res.users[activePlayer].hashID;
                                 userhands[uid].playingpile.addCard(fCard);
                                 userhands[uid].playingpile.render();
@@ -74,8 +70,6 @@ $(function () {
                             let activePlayer = res.room.acPl - 1;
                             for (let i = res.room.stack.length - 1; i > -1; i--) {
                                 let uid = res.users[activePlayer].hashID;
-                                console.log(uid);
-                                console.log(userHash);
                                 if (userHash != uid) {
                                     userhands[uid].playingpile.addCard(userhands[uid].hand.topCard());
                                     userhands[uid].playingpile.faceUp = false;
@@ -131,7 +125,7 @@ function quitPage() {
 function socketleave() {
     io.socket.delete("/leave", function (res, jres) {
         if (jres.statusCode != 200) {
-            //console.log(res);
+            console.log(jres);
         } else {
             userLeft = true;
             window.location.href = "/list";
@@ -143,15 +137,13 @@ function startGame() {
     // ready animation
     io.socket.post("/startGame", function (res, jres) {
         if (jres.statusCode != 200) {
-            //console.log(res);
+            console.log(jres);
         } else {
             if (!ready) {
-                //console.log("ready");
                 ready = true;
                 bstart.children().removeClass("bi-check");
                 bstart.children().addClass("bi-check-square-fill");
             } else {
-                //console.log("unready");
                 ready = false;
                 bstart.children().removeClass("bi-check-square-fill");
                 bstart.children().addClass("bi-check");
@@ -209,7 +201,6 @@ function stealTrumpCard() {
                 if (jres.statusCode != 200) {
                     console.log(jres);
                 } else {
-                    console.log(res);
                     let userhand = userhands[userHash].hand;
                     bsteal.prop("disabled", true);
                     trumpCard.bottomCard().rotate(0);
@@ -231,9 +222,7 @@ function userUnloaded() {
     if (!userLeft) {
         io.socket.post("/unloadUser", function (res, jres) {
             if (jres.statusCode != 200) {
-                //console.log(res);
-            } else {
-                //console.log("User Unloaded");
+                console.log(jres);
             }
         });
     }
