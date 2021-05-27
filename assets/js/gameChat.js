@@ -59,7 +59,6 @@ io.socket.on("chatmsg", function (data) {
 });
 
 io.socket.on("turnmsg", function (data) {
-    console.log(data); // data.user.team
     let text;
     let col = "";
     if (data.user.team) {
@@ -204,15 +203,24 @@ fpost.keypress(function (e) {
 
 function postmsg() {
     if (fpost.val().length > 0) {
-        console.log("posting");
         io.socket.post("/chatpost", { text: fpost.val() }, function (res, jres) {
             if (jres.statusCode != 200) {
                 console.log(jres);
-                console.log(res);
             } else {
-                console.log(res);
+                fpost.val("");
             }
-            fpost.val("");
         });
     }
+}
+
+function copyHrefToClipboard() {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(window.location.href).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $("#binvite").popover("show");
+    setTimeout(() => {
+        $("#binvite").popover("hide");
+    }, 1000);
 }
