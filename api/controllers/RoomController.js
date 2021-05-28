@@ -142,7 +142,7 @@ module.exports = {
 
     joinRoom: async (req, res) => {
         try {
-            let room = await Room.findOne({ hashID: req.param("roomid") });
+            let room = await Room.findOne({ hashID: req.param("roomID") });
             req.session.roomid = room.id;
             return res.redirect(`/room/${room.hashID}`);
         } catch (err) {
