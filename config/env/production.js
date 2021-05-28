@@ -44,12 +44,8 @@ module.exports = {
      *                                                                          *
      ***************************************************************************/
     default: {
-      adapter: 'sails-mongo',
-      user: process.env.MONGO_INITDB_ROOT_USERNAME,
-      password: process.env.MONGO_INITDB_ROOT_PASSWORD,
-      host: 'mongodb',
-      port: 27017,
-      database: 'admin'
+      // adapter: 'sails-mysql',
+      // url: 'mysql://user:password@host:port/database',
       //--------------------------------------------------------------------------
       //  /\   To avoid checking it in to version control, you might opt to set
       //  ||   sensitive credentials like `url` using an environment variable.
@@ -169,9 +165,8 @@ module.exports = {
      * > (For a full list, see https://sailsjs.com/plugins/sessions)            *
      *                                                                          *
      ***************************************************************************/
-    adapter: '@sailshq/connect-redis',
-    host: 'redis',
-
+    // adapter: '@sailshq/connect-redis',
+    // url: 'redis://user:password@localhost:6379/databasenumber',
     //--------------------------------------------------------------------------
     // /\   OR, to avoid checking it in to version control, you might opt to
     // ||   set sensitive credentials like this using an environment variable.
@@ -205,7 +200,7 @@ module.exports = {
      *                                                                          *
      ***************************************************************************/
     cookie: {
-      //secure: true,
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   },
@@ -230,9 +225,9 @@ module.exports = {
      * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
      *                                                                          *
      ***************************************************************************/
-    onlyAllowOrigins: [
-      'http://localhost'
-    ],
+    // onlyAllowOrigins: [
+    //    'https://gaigelapp.herokuapp.com'
+    // ],
     /***************************************************************************
      *                                                                          *
      * If you are deploying a cluster of multiple servers and/or processes,     *
@@ -308,7 +303,7 @@ module.exports = {
    * this, just try deploying without setting it and see if it works.)       *
    *                                                                         *
    ***************************************************************************/
-  port: 80,
+  // port: 80,
 
   /**************************************************************************
    *                                                                         *
@@ -338,6 +333,8 @@ module.exports = {
    *                                                                         *
    ***************************************************************************/
   custom: {
+    baseUrl: "https://example.com",
+    internalEmailAddress: "support@example.com",
 
     // sendgridSecret: 'SG.fake.3e0Bn0qSQVnwb1E4qNPz9JZP5vLZYqjh7sn8S93oSHU',
     // stripeSecret: 'sk_prod__fake_Nfgh82401348jaDa3lkZ0d9Hm',

@@ -11,29 +11,19 @@
 
 
 module.exports.bootstrap = async function() {
-  let db = sails.getDatastore().manager;
-  let collections = ["card", "user", "room"];
-  for (const ns of collections) {
-    try {
-      await db.collection(ns).drop();
-    } catch (err) {
-      if (err.code === 26) {
-        sails.log.debug(`Namespace for Collection '${ns}' not found, no need to drop.`);
-      }
-      else throw err;
-    }
-  }
-  
-  
+
   let values = [0, 2, 3, 4, 10, 11];
+  let ctr = 1;
 
   for (deck_ctr = 0; deck_ctr < 2; deck_ctr++) {
     for (let sym = 0; sym < 4; sym++) {
       for (let val of values) {
         await Card.create({
+          id: ctr,
           value: val,
           symbol: sym
         });
+        ctr += 1;
       }
     }
   }

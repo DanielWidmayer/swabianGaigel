@@ -19,6 +19,7 @@ window.onload = function () {
 function getAllRooms() {
     rooms = [];
     $.get("/roomList", function (data) {
+        console.log(data);
         data.rooms.forEach((room) => {
             rooms.push(room);
             renderRoom(room);
@@ -32,6 +33,7 @@ function getAllRooms() {
 }
 
 function renderRoom(room) {
+    console.log(room);
     let target = $(`#${room.hashID}`);
     if (room.empty) {
         target.remove();
@@ -68,6 +70,7 @@ function renderRoom(room) {
 }
 
 io.socket.on("listevent", function (data) {
+    console.log(data.room);
     renderRoom(data.room);
     if (activeRoom.hashID == data.room.hashID && !data.room.players.includes(activeHash)) {
         activecard.html("");
