@@ -71,16 +71,16 @@ module.exports = {
             let data = req.body;
             let re = /^([A-Za-z0-9]+\s?)+$/;
             // sanity checking of post data
-            if (data.roomname.length <= 0 || data.roomname.length > 21) throw error(103, "Room Name must have 1-25 characters.");
-            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces.");
+            if (data.roomname.length <= 4 || data.roomname.length > 21) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces with at least 5 and max 20 characters.#name");
+            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces with at least 5 and max 20 characters.#name");
 
             let mp = parseInt(data.maxplayers);
-            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Provide a valid count of max players.");
+            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Please provide a valid count of max players.#players");
 
             re = /^[A-Za-z0-9._/\-:\\+#=()&%$§@,;]{5,15}$/;
             let pw = data.passwd;
             if (data.pwcb) {
-                if (!re.test(pw)) throw error(103, "Provide a valid password with 5-15 characters.");
+                if (!re.test(pw)) throw error(103, "Please provide a valid password with 5-15 characters.#password");
             } else pw = "";
             // all good
 
