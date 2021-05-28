@@ -77,7 +77,7 @@ function userElement(user) {
 
     playername = `${user.name}<span style="font-size: 0.85rem" class="px-2 text-secondary">#${user.hashID}</span>`;
 
-    if (admin && user.hashID != userhash && !user.bot) {
+    if (admin && user.hashID != userhash) {
         playerbtn = `<a class="btn-transparent text-white p-0 m-0 align-baseline" type="button" id="userdropdown${user.hashID}" data-bs-toggle="dropdown" aria-expanded="false">
           ${playericon}${playername}</a>
         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="userdropdown${user.hashID}">

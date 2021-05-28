@@ -368,11 +368,11 @@ io.socket.on("gameover", function (data) {
         $("body").append('<img class="gameover-img" src="/images/font_gameover.png"></img>');
         $(".gameover-img").animate({ opacity: 1.0 });
     }
-    $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
+    $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="reloadLocation();;"><i class="bi bi-arrow-clockwise"></i></button>');
 });
 
-io.socket.on("kicked", function (data) {
-    location.reload();
+io.socket.on("kicked", function () {
+    reloadLocation();
 });
 
 function allowCardPlay() {
@@ -404,4 +404,12 @@ function getCookie(cname) {
         }
     }
     return "";
+}
+
+function reloadLocation() {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = location.href;
+    document.body.appendChild(form);
+    form.submit();
 }
