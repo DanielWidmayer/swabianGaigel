@@ -39,6 +39,8 @@ module.exports.routes = {
 
     "POST /create": "RoomController.newRoom",
 
+    "/join/:roomID": "RoomController.joinRoom",
+
     "/room/:roomID": "RoomController.roomAccess",
 
     "/socketconnect": "RoomController.socketconnect",
