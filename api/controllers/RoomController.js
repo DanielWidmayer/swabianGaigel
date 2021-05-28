@@ -158,8 +158,7 @@ module.exports = {
         try {
             let hash = req.param("roomID");
             let user = null,
-                room,
-                players = [];
+                room = null;
 
             // check if room exists
             room = await Room.findOne({ hashID: hash }).populate("admin");
@@ -190,17 +189,11 @@ module.exports = {
                         delete req.session.roomid;
                         throw error(101, "You have been kicked!");
                     }
-                    // check if user was already replaced by bot
-                    if (user.bot) {
-                        sails.log("User " + user.name + " reconnected, replace Bot");
-                        await User.updateOne({ id: req.session.userid }).set({ bot: false });
-                        ChatController.joinmsg(user.name, room.hashID, 1);
-                        ChatController.replacemsg(user.name, user.botname, room.hashID, 1);
-                    }
 
                     return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: req.session.userid == room.admin.id ? true : false });
                 } else if (req.session.roomid) {
                     await leavehandler({ userid: req.session.userid, roomid: req.session.roomid, trigger: 0 });
+                    delete req.session.userid;
                 }
             }
 
@@ -209,30 +202,9 @@ module.exports = {
             if (room.status == "game") throw error(102, "Sorry, but this game is already running!");
             if (room.jsonplayers.length >= room.maxplayers) throw error(102, "Sorry, but this game is already full!");
 
-            // create new user
-            user = await User.newUser(req, res);
-
-            // make user admin if he is the first one to join
-            let admin_flag = false;
-            if (room.jsonplayers.length == 0) {
-                await Room.updateOne({ id: room.id }).set({ admin: user.id });
-                admin_flag = true;
-            }
-
-            // add user to player list
-            players = room.jsonplayers;
-            players.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0, team: 0 });
-            await Room.updateOne({ id: room.id }).set({ jsonplayers: players });
-
-            sails.sockets.blast("listevent", { room: await Room.getListRoom({ id: room.id }) });
-
-            // validate session
             req.session.roomid = room.id;
-            req.session.userid = user.id;
 
-            // join message
-            ChatController.joinmsg(user.name, room.hashID);
-            return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: admin_flag });
+            return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: false });
         } catch (err) {
             sails.log(err);
             if (err.code) {
@@ -247,11 +219,42 @@ module.exports = {
             return res.badRequest(new Error("socket request expected, got http instead."));
         }
 
+        let room, user;
         try {
             let players = [],
-                p_temp;
+                admin_flag = false;
+
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
-            let room = await Room.findOne({ id: req.session.roomid }).populate("admin");
+            room = await Room.findOne({ id: req.session.roomid }).populate("admin");
+
+            if (req.session.userid) {
+                user = await User.findOne({ id: req.session.userid });
+                // check if user was already replaced by bot
+                if (user.bot) {
+                    sails.log("User " + user.name + " reconnected, replace Bot");
+                    await User.updateOne({ id: req.session.userid }).set({ bot: false });
+                    ChatController.joinmsg(user.name, room.hashID, 1);
+                    ChatController.replacemsg(user.name, user.botname, room.hashID, 1);
+                }
+            } else {
+                // create new user
+                user = await User.newUser(req, res);
+
+                // make user admin if he is the first one to join
+                if (room.jsonplayers.length == 0) {
+                    await Room.updateOne({ id: room.id }).set({ admin: user.id });
+                    admin_flag = true;
+                }
+
+                // join message
+                ChatController.joinmsg(user.name, room.hashID);
+
+                // add user to player list
+                room.jsonplayers.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0, team: 0 });
+                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+
+                sails.sockets.blast("listevent", { room: await Room.getListRoom({ id: room.id }) });
+            }
 
             for (const el of room.jsonplayers) {
                 players.push(await User.getNameAndHash(el.playerID));
@@ -261,7 +264,7 @@ module.exports = {
 
             sails.sockets.join(req, room.hashID);
             // check if user is admin
-            if (req.session.userid == room.admin.id) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
+            if (req.session.userid == room.admin.id || admin_flag) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
             sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: room.status == "game" ? true : false });
 
             // save socket ID in user obj
