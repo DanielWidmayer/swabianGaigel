@@ -15,6 +15,7 @@ $(function () {
             } else console.log(jres);
         } else {
             if (res != "OK") {
+                console.log(res);
                 if (res.room.status == "game") {
                     initialize(res);
                     // check for already melded cards in users hand
@@ -99,10 +100,18 @@ $(function () {
                             deck.render({ immediate: true });
                         }
                     }
+                    // set score
+                    for (let i = 0; i < res.users.length; i++) {
+                        if (userHash == res.users[i].hashID) {
+                            ownScore = !res.users[i].score && !res.users[i].wins ? -1 : res.users[i].score;
+                        }
+                    }
                     // check if it's your turn
                     if (userHash == res.users[res.room.acPl].hashID) {
                         allowCardPlay();
                         appendMessage('<p><i class="bi bi-hourglass-split text-warning"></i>It\'s your turn.</p>', gamef);
+                        // check for meld/rob
+                        checkMeldAndRob();
                     } else {
                         appendMessage('</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + res.users[res.room.acPl].name + "'s turn.</p>", gamef);
                     }
@@ -167,6 +176,7 @@ function meldOnePair() {
             if (jres.statusCode != 200) {
                 //console.log(jres);
             } else {
+                bmeld.prop("disabled", true);
                 meldCards.forEach((card) => {
                     card.melded = true;
                 });
