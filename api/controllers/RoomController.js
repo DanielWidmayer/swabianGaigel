@@ -223,7 +223,7 @@ module.exports = {
         try {
             let players = [],
                 admin_flag = false;
-
+            sails.log(req.cookies.username);
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             room = await Room.findOne({ id: req.session.roomid }).populate("admin");
 
@@ -238,7 +238,8 @@ module.exports = {
                 }
             } else {
                 // create new user
-                user = await User.newUser(req, res);
+                user = await User.newUser(req.cookies.userhash, req.cookies.username);
+                req.session.userid = user.id;
 
                 // make user admin if he is the first one to join
                 if (room.jsonplayers.length == 0) {
@@ -264,7 +265,7 @@ module.exports = {
 
             sails.sockets.join(req, room.hashID);
             // check if user is admin
-            if (req.session.userid == room.admin.id || admin_flag) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
+            if ((room.admin && req.session.userid == room.admin.id) || admin_flag) sails.sockets.broadcast(sails.sockets.getId(req), "adminchange", {});
             sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: room.status == "game" ? true : false });
 
             // save socket ID in user obj
@@ -279,6 +280,7 @@ module.exports = {
                 for (let i = 0; i < 48; i++) allCards[i] = i + 1;
                 let unplayedcards = [];
                 let playedcard;
+                let req_user = {};
 
                 let round = 1;
                 if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
@@ -317,6 +319,10 @@ module.exports = {
                         wins: el.wins,
                         team: el.team,
                     });
+                    if (el.playerID == req.session.userid) {
+                        req_user.username = p_temp.name;
+                        req_user.userhash = p_temp.hashID;
+                    }
                 }
 
                 let r_temp = {
@@ -329,10 +335,10 @@ module.exports = {
                     status: room.status,
                 };
 
-                return res.status(200).json({ users: players, room: r_temp, hand: hand, trump: room.trump, round: round, playedcard: playedcard });
+                return res.status(200).json({ username: req_user.username, userhash: req_user.userhash, users: players, room: r_temp, hand: hand, trump: room.trump, round: round, playedcard: playedcard });
             }
 
-            return res.ok();
+            return res.status(200).json({ username: user.name, userhash: user.hashID });
         } catch (err) {
             sails.log(err);
             if (err.code) return res.badRequest(err);

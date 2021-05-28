@@ -36,28 +36,24 @@ module.exports = {
 
         unload: {
             type: "boolean",
-            defaultsTo: false
+            defaultsTo: false,
         },
 
         kicked: {
             type: "boolean",
-            defaultsTo: false
-        }
+            defaultsTo: false,
+        },
     },
 
-    newUser: async (req, res) => {
+    newUser: async (uhash, uname) => {
         // get Name and Hash or use stored values
-        let hash = await sails.models.user.getUniqueHash(req.cookies.userhash);
-        let name = sails.models.user.getRandomName(req.cookies.username);
+        let hash = await sails.models.user.getUniqueHash(uhash);
+        let name = sails.models.user.getRandomName(uname);
         let bot = uniqueNamesGenerator({
             dictionaries: [colors],
             length: 1,
             style: "capital",
         });
-
-        // store values on cookies
-        res.cookie("username", name);
-        res.cookie("userhash", hash);
 
         // create User
         await User.create({
@@ -106,7 +102,7 @@ module.exports = {
     getUniqueHash: async (c_hash) => {
         try {
             let uhash;
-            if (c_hash) uhash = c_hash
+            if (c_hash) uhash = c_hash;
             else uhash = Math.floor(Math.random() * (999 - 100) + 100);
             // unique hash
             while (await User.findOne({ hashID: uhash })) {
@@ -148,7 +144,7 @@ module.exports = {
                 hashID: hash,
                 name: "bot",
                 botname: bot,
-                bot: true
+                bot: true,
             });
 
             bot = await User.findOne({ hashID: hash });
