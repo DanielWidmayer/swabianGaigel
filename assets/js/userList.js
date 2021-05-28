@@ -5,7 +5,6 @@ const userhash = parseInt(getCookie("userhash"));
 const teamcolors = ["team-yellow", "team-blue", "team-green"];
 
 io.socket.on("userevent", function (data) {
-    console.log(data);
     game = data.ingame;
     ul.empty();
     if (data.max >= 4) {
@@ -48,16 +47,19 @@ io.socket.on("adminchange", function (data) {
     if (!game) {
         ul.after(`<div class="p-2" id="adminbar">
         <button id="bshuffle" class="btn btn-primary adminbutton" title="Shuffle players" onclick="shuffle();">
-        <i class="bi bi-dice-4"></i> Randomize</button>
-        <button id="bAddBot" class="btn btn-warning adminbutton mx-2" title="Add Bot" onclick="addBot();">
-        <i class="bi bi-person-square"></i> add Bot</button>
+        <i class="bi bi-dice-4"></i> Shuffle</button>
+        <button id="bAddBot" class="btn btn-primary adminbutton mx-2" title="Add Bot" onclick="addBot();">
+        <i class="bi bi-cpu"></i> Add Bot</button>
+        <a id="binvite" class="btn btn-primary" onclick="copyHrefToClipboard();">
+        <i class="bi bi-person-plus-fill"></i> Invite</a>
         </div>`);
     }
+    $("#binvite").popover({ trigger: "manual", placement: "bottom", content: "Link copied!", animation: true });
     admin = true;
 });
 
 function userElement(user) {
-    let playericon, playername, readyicon, kickbutton;
+    let playericon, playerbtn, playername, readyicon, kickbutton;
     let el = document.createElement("span");
 
     if (!game) {
@@ -76,11 +78,16 @@ function userElement(user) {
     playername = `${user.name}<span style="font-size: 0.85rem" class="px-2 text-secondary">#${user.hashID}</span>`;
 
     if (admin && user.hashID != userhash && !user.bot) {
-        kickbutton = `<button class="btn btn-danger px-1 py-0" title="Kick Player" onclick="kickPlayer(${user.hashID});">
-            <i class="bi bi-x-square"></i></button>`;
-    } else kickbutton = "";
+        playerbtn = `<a class="btn-transparent text-white p-0 m-0 align-baseline" type="button" id="userdropdown${user.hashID}" data-bs-toggle="dropdown" aria-expanded="false">
+          ${playericon}${playername}</a>
+        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="userdropdown${user.hashID}">
+          <li><a class="dropdown-item" onclick="kickPlayer(${user.hashID});" href="#">Kick Player</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Cancel</a></li>
+        </ul>`;
+    } else playerbtn = playericon + playername;
 
-    el.innerHTML = readyicon + playericon + playername + kickbutton + "<br>";
+    el.innerHTML = readyicon + playerbtn + "<br>";
 
     return el;
 }
@@ -89,8 +96,6 @@ function shuffle() {
     io.socket.post("/randomOrder", function (res, jres) {
         if (jres.statusCode != 200) {
             console.log(jres);
-        } else {
-            console.log(res);
         }
     });
 }
@@ -99,8 +104,6 @@ function addBot() {
     io.socket.post("/addBot", function (res, jres) {
         if (jres.statusCode != 200) {
             console.log(jres);
-        } else {
-            console.log(res);
         }
     });
 }
@@ -109,8 +112,6 @@ function kickPlayer(userhash) {
     io.socket.post("/kickPlayer", { target: userhash }, function (res, jres) {
         if (jres.statusCode != 200) {
             console.log(jres);
-        } else {
-            console.log(res);
         }
     });
 }
@@ -119,8 +120,6 @@ function switchTeam(team) {
     io.socket.post("/switchTeam", { team: team }, function (res, jres) {
         if (jres.statusCode != 200) {
             console.log(jres);
-        } else {
-            console.log(res);
         }
     });
 }

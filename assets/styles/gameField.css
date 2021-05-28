@@ -227,3 +227,5 @@ footer {
     border-color: #007f00;
     background-color: #007f0040;
 }
+
+.btn-transparent{ text-decoration: none; }

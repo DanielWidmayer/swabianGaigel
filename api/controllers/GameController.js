@@ -1178,6 +1178,7 @@ async function gameover(roomid) {
                 let temp = players.shift();
                 players.push(temp);
             }
+  
             await Room.updateOne({ id: room.id }).set({
                 jsonplayers: players,
                 admin: room.admin,
