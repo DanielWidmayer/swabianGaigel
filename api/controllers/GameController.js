@@ -873,6 +873,7 @@ async function botPlay(args) {
                     t_rp[t_rp.findIndex((tp) => tp.playerID == el.playerID)].hand.push(room.trump.id);
                     t_user = await User.getNameAndHash(el.playerID);
                     sails.sockets.broadcast(room.hashID, "dealTrump", { user: t_user, card: room.trump });
+                    ChatController.deckemptymsg(room.hashID);
                     await Room.updateOne({ id: room.id }).set({ jsonplayers: t_rp, trump: null });
                 }
             }
@@ -1181,7 +1182,7 @@ async function gameover(roomid) {
 
             await Room.updateOne({ id: room.id }).set({
                 jsonplayers: players,
-                admin: room.admin,
+                admin: room.admin.id,
                 activePlayer: 0,
                 startoff: "",
                 trump: null,
