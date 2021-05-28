@@ -12,11 +12,22 @@ var activeHash = 0;
 window.onload = function () {
     $("#errModal").modal("show");
     activecard.hide();
-    getAllRooms();
+    getAllRooms(() => {
+        // check query
+        const urlParams = new URLSearchParams(window.location.search);
+        const pRoom = urlParams.get("room");
+        console.log(pRoom);
+        if (pRoom != null) {
+            let fRoom = rooms.find((room) => room.hashID == pRoom);
+            $("#passwordModalLabel").html(`Password for ${fRoom.name}`);
+            $("#hiddenhash").val(pRoom);
+            pwmodal.modal("show");
+        }
+    });
 };
 
 // ---Listelement related functions (getAllRooms, renderRoom, socket[listevent])---
-function getAllRooms() {
+function getAllRooms(callback) {
     rooms = [];
     $.get("/roomList", function (data) {
         data.rooms.forEach((room) => {
@@ -28,6 +39,7 @@ function getAllRooms() {
             renderActive(data.active);
         }
         if (data.ahash) activeHash = data.ahash;
+        callback();
     });
 }
 

@@ -58,7 +58,10 @@ module.exports = {
             let errmsg = req.cookies.errmsg;
             if (errmsg) res.clearCookie("errmsg");
 
-            return res.view("basic/roomlist", { layout: "basic_layout", username: uname, userhash: uhash, errmsg: errmsg });
+            let pwprotect = req.cookies.protected;
+            if (pwprotect) res.clearCookie("protected");
+
+            return res.view("basic/roomlist", { layout: "basic_layout", username: uname, userhash: uhash, errmsg: errmsg, protected: pwprotect });
         } catch (err) {
             sails.log(err);
             return res.serverError(err);
@@ -169,7 +172,7 @@ module.exports = {
 
             // check if room is password protected
             if (room.password.length > 0) {
-                if (req.session.roomid != room.id) throw error(102, "This Room is password protected!");
+                if (req.session.roomid != room.id) return res.redirect(`/list?room=${err.roomID}`);
             }
 
             // check if user object still exists somewhere
@@ -209,7 +212,7 @@ module.exports = {
         } catch (err) {
             sails.log(err);
             if (err.code) {
-                res.cookie("errmsg", err.msg);
+                if (err.msg) res.cookie("errmsg", err.msg);
                 return res.redirect("/list");
             } else return res.serverError(err);
         }
