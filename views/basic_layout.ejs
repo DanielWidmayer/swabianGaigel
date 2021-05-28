@@ -2,71 +2,39 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Swabian Gaigel</title>
+  <!-- Primary Meta Tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="Jens Buehler, Daniel Widmayer" />
+  <title>Gaigel Online - Free & Without Registration</title>
+  <meta name="title" content="Gaigel Online - Free & Without Registration">
+  <meta name="description" content="Play the traditional swabian game Gaigel with your friends online! Playing is totally free so stop waiting, start playing!">
 
-  <!-- Viewport mobile tag for sensible mobile support -->
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gaigel Online - Free & Without Registration">
+  <meta property="og:description" content="Play the traditional swabian game Gaigel with your friends online! Playing is totally free so stop waiting, start playing!">
+  <meta property="og:image" content="https://gaigelapp.herokuapp.com/images/headLogo.png">
+  <meta property="og:url" content="https://gaigelapp.herokuapp.com" />
 
-  <% /* If you want to discourage search engines from indexing this site, uncomment the following line: */%>
-    <% /* <meta name="robots" content="noindex" />
-    */%>
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Gaigel Online - Free & Without Registration">
+  <meta property="twitter:description" content="Play the traditional swabian game Gaigel with your friends online! Playing is totally free so stop waiting, start playing!">
+  <meta property="twitter:image" content="https://gaigelapp.herokuapp.com/images/headLogo.png">
 
-    <!--
-        Stylesheets and Preprocessors
-        ==============================
+  <link rel="stylesheet" href="/styles/roomList.css">
+  <!--STYLES-->
+  <link rel="stylesheet" href="/dependencies/bootstrap-icons-1.4.1/bootstrap-icons.css">
+  <link rel="stylesheet" href="/dependencies/bootstrap.min.css">
+  <!--STYLES END-->
 
-        You can always bring in CSS files manually with `<link>` tags, or asynchronously
-        using a solution like AMD (RequireJS).  Or, if you like, you can take advantage
-        of Sails' conventional asset pipeline (boilerplate Gruntfile).
-
-        By default, stylesheets from your `assets/styles` folder are included
-        here automatically (between STYLES and STYLES END). Both CSS (.css) and LESS (.less)
-        are supported. In production, your styles will be minified and concatenated into
-        a single file.
-
-        To customize any part of the built-in behavior, just edit `tasks/pipeline.js`.
-        For example, here are a few things you could do:
-
-            + Change the order of your CSS files
-            + Import stylesheets from other directories
-            + Use a different or additional preprocessor, like SASS, SCSS or Stylus
-    -->
-    <link rel="stylesheet" href="/styles/roomList.css">
-    <!--STYLES-->
-    <link rel="stylesheet" href="/dependencies/bootstrap-icons-1.4.1/bootstrap-icons.css">
-    <link rel="stylesheet" href="/dependencies/bootstrap.min.css">
-    <!--STYLES END-->
-    <!--
-
-    Client-side Javascript
-      ========================
-
-    You can always bring in JS files manually with `script` tags, or asynchronously
-    on the client using a solution like AMD (RequireJS).  Or, if you like, you can
-    take advantage of Sails' conventional asset pipeline (boilerplate Gruntfile).
-
-    By default, files in your `assets/js` folder are included here
-    automatically (between SCRIPTS and SCRIPTS END).  Both JavaScript (.js) and
-    CoffeeScript (.coffee) are supported. In production, your scripts will be minified
-    and concatenated into a single file.
-
-    To customize any part of the built-in behavior, just edit `tasks/pipeline.js`.
-    For example, here are a few things you could do:
-
-        + Change the order of your scripts
-        + Import scripts from other directories
-        + Use a different preprocessor, like TypeScript
-
-  -->
-
-    <!--SCRIPTS-->
-    <script src="/dependencies/sails.io.js"></script>
-    <script src="/dependencies/jquery.min.js"></script>
-    <script src="/dependencies/bootstrap.bundle.min.js"></script>
-    <!--SCRIPTS END-->
-    <script src="/js/cookies.js"></script>
-
+  <!--SCRIPTS-->
+  <script src="/dependencies/sails.io.js"></script>
+  <script src="/dependencies/jquery.min.js"></script>
+  <script src="/dependencies/bootstrap.bundle.min.js"></script>
+  <!--SCRIPTS END-->
+  <script src="/js/cookies.js"></script>
 </head>
 
 <body>
