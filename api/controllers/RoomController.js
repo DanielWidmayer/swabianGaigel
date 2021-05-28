@@ -168,7 +168,6 @@ module.exports = {
 
     roomAccess: async (req, res) => {
         try {
-            sails.log(req);
             let hash = req.param("roomID");
             let user = null,
                 room,
