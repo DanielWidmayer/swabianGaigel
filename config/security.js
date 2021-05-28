@@ -29,8 +29,8 @@ module.exports.security = {
   ***************************************************************************/
 
    cors: {
-     allRoutes: true,
-     allowOrigins: ['http://localhost:80']
+    //allRoutes: true,
+    //allowOrigins: ['http://localhost:8080']
    },
 
 
@@ -48,6 +48,6 @@ module.exports.security = {
   *                                                                           *
   ****************************************************************************/
 
-  // csrf: false
+  //csrf: true
 
 };

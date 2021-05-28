@@ -45,7 +45,11 @@ module.exports = {
      ***************************************************************************/
     default: {
       adapter: 'sails-mongo',
-      url: process.env.MONGO_URL,
+      user: process.env.MONGO_INITDB_ROOT_USERNAME,
+      password: process.env.MONGO_INITDB_ROOT_PASSWORD,
+      host: 'mongodb',
+      port: 27017,
+      database: 'admin'
       //--------------------------------------------------------------------------
       //  /\   To avoid checking it in to version control, you might opt to set
       //  ||   sensitive credentials like `url` using an environment variable.
