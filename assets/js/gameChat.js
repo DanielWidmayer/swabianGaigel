@@ -143,6 +143,11 @@ io.socket.on("firstcardtypemsg", function (data) {
     appendMessage(`${text}`, gamef);
 });
 
+io.socket.on("deckemptymsg", function () {
+    let text = `<p><i class="bi bi-controller"></i>The Deck is empty. You have to follow suit and try to win the trick now.</p>`;
+    appendMessage(`${text}`, gamef);
+});
+
 function getHtmlSymbol(symbol) {
     let icon;
     switch (symbol) {
