@@ -372,11 +372,7 @@ io.socket.on("gameover", function (data) {
 });
 
 io.socket.on("kicked", function () {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = location.href;
-    document.body.appendChild(form);
-    form.submit();
+    location.href = "";
 });
 
 function allowCardPlay() {
