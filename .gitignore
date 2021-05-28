@@ -46,7 +46,6 @@
 ################################################
 
 config/local.js
-testfile.js
 
 ################################################
 # Dependencies
@@ -131,5 +130,7 @@ lib-cov
 *.log
 *.out
 *.pid
+
+.env
 
 .prettierrc
