@@ -8,6 +8,7 @@
                     <span class="input-group-text col-inverse" id="ba1">Room Name</span>
                 </div>
                 <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="ba1" value="<%= roomname %>">
+                <% if (errmsg && errmsg.split('#').pop() == "name") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
             </div>
         </div>
         <div class="row">
@@ -24,6 +25,7 @@
                             <option value="4">Four</option>
                             <option value="6">Six</option>
                         </select>
+                        <% if (errmsg && errmsg.split('#').pop() == "players") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
                     </div>
 
                 </div>
@@ -74,6 +76,7 @@
                             <span class="input-group-text col-inverse">Password</span>
                         </div>
                         <input type="password" class="form-control input-transparent" name="passwd" placeholder="password" aria-label="Password">
+                        <% if (errmsg && errmsg.split('#').pop() == "password") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
                     </div>
                 </div>
             </div>
