@@ -60,6 +60,10 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "replacemsg", { bot: bot, user: user, trigger: trigger });
     },
 
+    deckemptymsg: (roomhash) => {
+        sails.sockets.broadcast(roomhash, "deckemptymsg", {});
+    },
+
     chatpost: async (req, res) => {
         if (!req.isSocket) {
             return res.badRequest(new Error("no socket request"));
