@@ -16,7 +16,6 @@
     "sails-hook-orm": "^3.0.1",
     "sails-hook-sockets": "^2.0.0",
     "sails-mongo": "^2.0.0",
-    "sails-postgresql": "^2.0.0",
     "unique-names-generator": "^4.5.0"
   },
   "devDependencies": {
@@ -31,10 +30,10 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/anonymous node/sails user/backend.git"
+    "url": "https://github.com/DanielWidmayer/swabianGaigel"
   },
-  "author": "anonymous node/sails user",
-  "license": "",
+  "author": "DanielWidmayer JensBuehler",
+  "license": "MIT",
   "engines": {
     "node": "^12.16"
   }
