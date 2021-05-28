@@ -14,8 +14,10 @@ $(function () {
                 window.location.href = "/list";
             } else console.log(jres);
         } else {
-            if (res != "OK") {
-                console.log(res);
+            if (res.room) {
+                userHash = res.userhash;
+                document.cookie = `userhash=${userHash}`;
+                document.cookie = `username=${res.username}`;
                 if (res.room.status == "game") {
                     initialize(res);
                     // check for already melded cards in users hand
