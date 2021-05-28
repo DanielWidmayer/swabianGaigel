@@ -129,6 +129,7 @@ var cards = (function () {
             this.showCard();
             this.moveToFront();
             this.moveToBack();
+            this.rotate(0);
         },
 
         toString: function () {
@@ -175,7 +176,7 @@ var cards = (function () {
         hideCard: function (position) {
             var y = opt.cardback == "red" ? 0 * opt.cardSize.height : -1 * opt.cardSize.height;
             $(this.el).css("background-position", "0px " + y + "px");
-            this.rotate(0);
+            // this.rotate(0);
         },
 
         moveToFront: function () {
