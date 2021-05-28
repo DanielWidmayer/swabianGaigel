@@ -79,6 +79,9 @@ function initialize(data) {
             positions.shift();
         }
         userhands[user.hashID] = tempusrobj;
+
+        // playernames
+
         j++;
         if (j >= usr_ctr) j = 0;
     }
