@@ -371,12 +371,8 @@ io.socket.on("gameover", function (data) {
     $(".game-utils").append('<button class="btn btn-game btn-secondary" title="Reload to Play again" onclick="window.location.reload();"><i class="bi bi-arrow-clockwise"></i></button>');
 });
 
-io.socket.on("kicked", function (data) {
-    setTimeout(function () {
-        location.reload();
-    });
-    // Edge
-    window.location = window.location;
+io.socket.on("kicked", function () {
+    location.reload(true);
 });
 
 function allowCardPlay() {
