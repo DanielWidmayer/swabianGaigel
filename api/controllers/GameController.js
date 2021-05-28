@@ -503,7 +503,7 @@ module.exports = {
             sails.log(`${user.name} played card ${card.id}`);
 
             // check for full stack
-            let winner = -1;
+            let winner = null;
             if (temp_stack.length >= temp_players.length) {
                 // eval win and deal
                 sails.log("Full stack, eval winner");
@@ -849,7 +849,7 @@ async function botPlay(args) {
     sails.log(`Bot ${t_user.name} has played card ${card.id}`);
 
     // check for full stack
-    let winner = -1;
+    let winner = null;
     if (stack.length >= players.length) {
         // eval win and deal
         sails.log("Full stack, eval winner");
@@ -894,7 +894,7 @@ async function botPlay(args) {
     if (t_user.bot == true) {
         await botRob(room.id, t_user.id);
         await botCall(room.id, t_user.id);
-        if (winner >= 0) delay = 4000;
+        if (winner) delay = 4000;
         setTimeout(botPlay, delay, { roomid: room.id, botid: t_user.id });
     }
 
@@ -1180,7 +1180,7 @@ async function gameover(roomid) {
             }
             await Room.updateOne({ id: room.id }).set({
                 jsonplayers: players,
-                admin: players[0].playerID,
+                admin: room.admin,
                 activePlayer: 0,
                 startoff: "",
                 trump: null,

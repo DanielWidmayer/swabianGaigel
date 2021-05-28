@@ -22,16 +22,8 @@ const crypto = require("crypto");
     [11] - Ass
 */
 
-primaryKey: "id";
-
 module.exports = {
     attributes: {
-        id: {
-            type: "number",
-            autoIncrement: false,
-            unique: true,
-            required: true,
-        },
 
         value: {
             type: "number",

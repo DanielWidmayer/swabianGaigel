@@ -19,11 +19,9 @@ module.exports.bootstrap = async function() {
     for (let sym = 0; sym < 4; sym++) {
       for (let val of values) {
         await Card.create({
-          id: ctr,
           value: val,
           symbol: sym
         });
-        ctr += 1;
       }
     }
   }
