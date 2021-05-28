@@ -372,7 +372,11 @@ io.socket.on("gameover", function (data) {
 });
 
 io.socket.on("kicked", function (data) {
-    location.reload();
+    setTimeout(function () {
+        location.reload();
+    });
+    // Edge
+    window.location = window.location;
 });
 
 function allowCardPlay() {
