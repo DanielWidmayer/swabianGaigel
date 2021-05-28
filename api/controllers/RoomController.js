@@ -140,17 +140,6 @@ module.exports = {
 
     // -------------------------------------------------------------------------------------- Join Room
 
-    joinRoom: async (req, res) => {
-        try {
-            let room = await Room.findOne({ hashID: req.param("roomID") });
-            req.session.roomid = room.id;
-            return res.redirect(`/room/${room.hashID}`);
-        } catch (err) {
-            sails.log(err);
-            return res.serverError(err);
-        }  
-    },
-
     protectRoom: async (req, res) => {
         try {
             let room = req.body.hash;
@@ -168,7 +157,6 @@ module.exports = {
 
     roomAccess: async (req, res) => {
         try {
-            sails.log(req);
             let hash = req.param("roomID");
             let user = null,
                 room,

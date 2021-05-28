@@ -60,7 +60,7 @@ function renderRoom(room) {
         } else {
             row.innerHTML += '<td class="rpw"><i class="bi bi-unlock-fill"></i></td>';
             row.onclick = function () {
-                window.location.href = `/join/${room.hashID}`;
+                window.location.href = `/room/${room.hashID}`;
             };
         }
         rl.append(row);
