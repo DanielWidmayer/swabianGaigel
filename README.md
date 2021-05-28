@@ -11,7 +11,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/DanielWidmayer/swabianGaigel">
-    <img src="assets/images/headLogo.png" alt="Logo" height="200" width="450">
+    <img src="assets/images/headLogo.png" alt="Logo" height="200" width="450>
   </a>
 
   <h3 align="center">Gaigel Webapp</h3>
