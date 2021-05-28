@@ -14,8 +14,8 @@ $(function () {
                 window.location.href = "/list";
             } else console.log(jres);
         } else {
+            userHash = res.userhash;
             if (res.room) {
-                userHash = res.userhash;
                 document.cookie = `userhash=${userHash}`;
                 document.cookie = `username=${res.username}`;
                 if (res.room.status == "game") {

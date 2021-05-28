@@ -29,8 +29,6 @@ $(function () {
 
     //No animation here, just get the deck onto the table.
     deck.render({ immediate: true });
-
-    userHash = getCookie("userhash");
 });
 
 function initialize(data) {
