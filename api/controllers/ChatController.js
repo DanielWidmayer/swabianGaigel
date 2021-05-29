@@ -34,8 +34,8 @@ module.exports = {
         sails.sockets.broadcast(roomhash, "cardplayedmsg", { user: user, card: card });
     },
 
-    paircalledmsg: (user, symbol, roomhash) => {
-        sails.sockets.broadcast(roomhash, "paircalledmsg", { user: user, symbol: symbol });
+    paircalledmsg: (user, symbol, showscore, roomhash) => {
+        sails.sockets.broadcast(roomhash, "paircalledmsg", { user: user, show: showscore, symbol: symbol });
     },
 
     cardrobmsg: (user, card, roomhash) => {
