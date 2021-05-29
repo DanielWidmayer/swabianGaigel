@@ -1,8 +1,8 @@
 html {
+    height: 100%;
+    min-height: 100vh;
     background-image: url("/images/Gaigel_Wallpaper.jpg") !important;
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 100vh;
+    background-size:cover;
 }
 
 body {
@@ -32,6 +32,7 @@ footer {
 
 .fieldcontainer {
     min-height: 80vh;
+    max-height: 88vh;
     height: 100%;
     width: 100%;
 }
@@ -64,24 +65,26 @@ img.preload {
     position: relative;
 }
 
+#chat h3{
+    font-size: 3vh!important;
+}
+
 #chatfield {
-    min-height: 12vh;
-    height: 20%;
-    max-height: 20vh;
+    height: 17vh;
+    max-height: 17vh;
     overflow-y: scroll;
 }
 
+#game-history h3{
+    font-size: 3vh!important;
+}
+
 #gamehistoryfield {
-    min-height: 20vh;
-    height: 40%;
-    max-height: 30vh;
+    height: 25vh;
+    max-height: 25vh;
     padding-left: 7px !important;
     overflow-y: scroll;
     color: white;
-}
-.col-fit {
-    max-height: 90vh;
-    height: 80%;
 }
 
 #userlist {
@@ -89,6 +92,14 @@ img.preload {
     margin-bottom: 0px !important;
     color: white;
     font-size: larger;
+    max-height: 40vh;
+    overflow-y: scroll;
+    ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+#userlist::-webkit-scrollbar {
+    display: none;
 }
 
 #currentUserIcon {
@@ -211,7 +222,7 @@ footer {
 }
 
 .pow {
-    font-size: 1.3rem !important;
+    font-size: 2vh !important;
     vertical-align: top;
 }
 
@@ -236,4 +247,8 @@ footer {
     position: absolute;
     z-index: 9000;
     color: white;
+}
+
+.gameroom-wrapper{
+    margin: 5vh 3vw 5vh 3vw;
 }

@@ -327,6 +327,7 @@ io.socket.on("cardrob", function (data) {
     let card = data.card;
     let userhand = userhands[data.user.hashID].hand;
     let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
+    trumpCard.bottomCard().rotate(0);
     userhand.addCard(trumpCard.bottomCard());
     trumpCard.addCard(fCard, card.id);
     userhand.render();
