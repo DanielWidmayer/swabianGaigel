@@ -40,10 +40,7 @@ module.exports.http = {
     //   'favicon',
     // ],
 
-    order: [
-      'forceSSL'
-    ],
-
+    
     /***************************************************************************
     *                                                                          *
     * The body parser that will handle incoming multipart HTTP requests.       *
@@ -57,18 +54,6 @@ module.exports.http = {
     //   var middlewareFn = skipper({ strict: true });
     //   return middlewareFn;
     // })(),
-
-    forceSSL: function (req, res, next) {
-      if (req.headers['x-forwarded-proto'] !== 'https') {
-        return res.redirect([
-          'https://',
-          req.get('Host'),
-          req.url
-        ].join(''));
-      } else {
-        next();
-      }
-    },
 
   },
 
