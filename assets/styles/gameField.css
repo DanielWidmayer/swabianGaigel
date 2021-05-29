@@ -141,6 +141,7 @@ footer {
     position: absolute;
     bottom: 0;
     right: 0;
+    z-index: 9500;
 }
 
 .teamjoin {
@@ -230,3 +231,9 @@ footer {
 }
 
 .btn-transparent{ text-decoration: none; }
+
+.userField{
+    position: absolute;
+    z-index: 9000;
+    color: white;
+}
