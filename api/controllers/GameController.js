@@ -642,7 +642,7 @@ module.exports = {
 
                 // socket call event
                 sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: cards }, req);
-                ChatController.paircalledmsg(user, cards[0].symbol, room.hashID);
+                ChatController.paircalledmsg(user, cards[0].symbol, room.showscore, room.hashID);
 
                 // save changes
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
@@ -976,7 +976,7 @@ async function botCall(roomid, botid) {
         user.score = bot.score;
         user.team = bot.team;
         sails.sockets.broadcast(room.hashID, "paircalled", { user: user, cards: call });
-        ChatController.paircalledmsg(user, call[0].symbol, room.hashID);
+        ChatController.paircalledmsg(user, call[0].symbol, room.showscore, room.hashID);
 
         sails.log(`Bot ${user.name} has called pair ${call[0].id} and ${call[1].id}`);
 
