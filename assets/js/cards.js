@@ -257,8 +257,10 @@ var cards = (function () {
             this.calcPosition(options);
             for (var i = 0; i < this.length; i++) {
                 var card = this[i];
-                zIndexCounter++;
-                card.moveToFront();
+                if (!options.immediate) {
+                    zIndexCounter++;
+                    card.moveToFront();
+                }
                 var top = parseInt($(card.el).css("top"));
                 var left = parseInt($(card.el).css("left"));
                 if (top != card.targetTop || left != card.targetLeft) {

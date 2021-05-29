@@ -293,15 +293,12 @@ module.exports = {
                     unplayedcards = unplayedcards.concat(pl.hand);
                 }
                 //sails.log.info(unplayedcards);
-                if (room.trump) unplayedcards.push(room.trump.id);
+                if (room.deck.length) unplayedcards.push(room.trump.id);
                 for (const cl of room.deck) {
                     unplayedcards.push(cl.id);
                 }
                 //sails.log.info(unplayedcards);
-                allCards = allCards.filter(function (val) {
-                    return unplayedcards.indexOf(val) == -1;
-                });
-                unplayedcards = await Card.find({ id: allCards });
+
                 let p_temp;
                 let stack = [];
 
@@ -310,7 +307,14 @@ module.exports = {
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
                     stack[i] = { uhash: p_temp.hashID };
                     if (round > 0) stack[i].card = room.stack[i].card;
+                    unplayedcards.push(room.stack[i].card.id);
                 }
+
+                allCards = allCards.filter(function (val) {
+                    return unplayedcards.indexOf(val) == -1;
+                });
+                unplayedcards = await Card.find({ id: allCards });
+
                 players = [];
                 for (let el of room.jsonplayers) {
                     p_temp = await User.getNameAndHash(el.playerID);
