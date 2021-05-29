@@ -34,16 +34,19 @@ $(function () {
                     if (res.room.played.length) {
                         res.room.played.forEach((card) => {
                             let fCard = findCertainCard(card.value, card.symbol);
-                            deck.findCard(card.value, card.symbol);
                             pCards.push(fCard);
                         });
                     }
+                    console.log(res);
 
                     // render played cards
                     let c_ctr = 0;
                     for (let i = 0; i < res.users.length; i++) {
                         for (let j = 0; j < res.users[i].wins; j++) {
-                            for (let k = 0; k < 2; k++) {
+                            let numCards;
+                            if (res.users.length > 3) numCards = res.users.length / 2;
+                            else numCards = res.users.length;
+                            for (let k = 0; k < numCards; k++) {
                                 userhands[res.users[i].hashID].trickdeck.addCard(pCards[c_ctr]);
                                 c_ctr++;
                             }
