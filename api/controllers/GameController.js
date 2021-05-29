@@ -558,7 +558,7 @@ module.exports = {
             if (user.bot == true) {
                 await botRob(room.id, user.id);
                 await botCall(room.id, user.id);
-                if (winner >= 0) delay = 4000;
+                if (winner) delay = 4000;
                 setTimeout(botPlay, delay, { roomid: room.id, botid: user.id });
             }
 
