@@ -16,7 +16,6 @@ window.onload = function () {
         // check query
         const urlParams = new URLSearchParams(window.location.search);
         const pRoom = urlParams.get("room");
-        console.log(pRoom);
         if (pRoom != null) {
             let fRoom = rooms.find((room) => room.hashID == pRoom);
             $("#passwordModalLabel").html(`Password for ${fRoom.name}`);
