@@ -192,8 +192,10 @@ module.exports = {
                         delete req.session.roomid;
                         throw error(101, "You have been kicked!");
                     }
+                    let admin_flag = false;
+                    if (room.admin && room.admin.id == req.session.userid) admin_flag = true;
 
-                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: req.session.userid == room.admin.id ? true : false });
+                    return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: admin_flag });
                 } else if (req.session.roomid) {
                     await leavehandler({ userid: req.session.userid, roomid: req.session.roomid, trigger: 0 });
                     delete req.session.userid;
