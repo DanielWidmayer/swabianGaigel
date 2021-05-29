@@ -712,7 +712,7 @@ module.exports = {
                 room.jsonplayers[p_index].hand[c_index] = room.trump.id;
                 user = await User.getNameAndHash(user.id);
                 sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
-                ChatController.cardrobmsg(user, card, room.hashID);
+                ChatController.cardrobmsg(user, temp, room.hashID);
                 await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: temp });
                 sails.log.info(`${user.name} robbed the trump (${temp}) with card ${card.id}`);
             } else throw error(104, "You are not allowed to do that yet!");
@@ -1001,7 +1001,7 @@ async function botRob(roomid, botid) {
             room.jsonplayers[p_index].hand[c_index] = room.trump.id;
             let user = await User.getNameAndHash(bot.playerID);
             sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card });
-            ChatController.cardrobmsg(user, card, room.hashID);
+            ChatController.cardrobmsg(user, room.trump, room.hashID);
             await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers, trump: card.id, robbed: true });
             sails.log.info(`Bot ${user.name} has robbed the trump (${room.trump.id}) with card ${card.id}`);
         }
@@ -1199,7 +1199,6 @@ async function gameover(roomid) {
                 let temp = players.shift();
                 players.push(temp);
             }
-  
             await Room.updateOne({ id: room.id }).set({
                 jsonplayers: players,
                 admin: room.admin.id,
