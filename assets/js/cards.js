@@ -149,7 +149,7 @@ var cards = (function () {
                 .css("-webkit-transform", "rotate(" + angle + "deg)")
                 .css("-moz-transform", "rotate(" + angle + "deg)")
                 .css("-ms-transform", "rotate(" + angle + "deg)")
-                .css("transform", "rotate(" + angle + "deg) scale(1.5)")
+                .css("transform", "rotate(" + angle + "deg) scale(1.4)")
                 .css("-o-transform", "rotate(" + angle + "deg)");
         },
 

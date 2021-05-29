@@ -8,11 +8,14 @@
                     <span class="input-group-text col-inverse" id="ba1">Room Name</span>
                 </div>
                 <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="ba1" value="<%= roomname %>">
-                <% if (errmsg && errmsg.split('#').pop() == "name") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
+                <% if (errmsg && errmsg.split('#').pop()=="name" ) { %><span style="color: red">
+                        <%= errmsg.split('#')[0] %>
+                    </span>
+                    <% } %>
             </div>
         </div>
         <div class="row">
-            <div class="col">
+            <div class="col-md">
                 <div class="card card-light-transparent mb-3">
                     <div class="input-group m-3">
                         <div class="input-group-prepend">
@@ -25,12 +28,15 @@
                             <option value="4">Four</option>
                             <option value="6">Six</option>
                         </select>
-                        <% if (errmsg && errmsg.split('#').pop() == "players") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
+                        <% if (errmsg && errmsg.split('#').pop()=="players" ) { %><span style="color: red">
+                                <%= errmsg.split('#')[0] %>
+                            </span>
+                            <% } %>
                     </div>
 
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md">
                 <div class="card card-light-transparent mb-3 p-1 pb-2">
                     <div class="form-check m-3">
                         <input class="form-check-input" type="checkbox" name="score" checked>
@@ -64,19 +70,22 @@
         </div>
         <div class="card card-light-transparent mb-3">
             <div class="row m-3">
-                <div class="col form-check my-2">
+                <div class="col-md form-check my-2">
                     <input class="form-check-input" type="checkbox" name="pwcb" value="1" id="flexCheckPw" onclick="$('#pwfield').toggle('hidden');">
                     <label class="form-check-label" style="float: left;" for="flexCheckPw">
                         Private Game
                     </label>
                 </div>
-                <div id="pwfield" class="col">
+                <div id="pwfield" class="col-md">
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text col-inverse">Password</span>
                         </div>
                         <input type="password" class="form-control input-transparent" name="passwd" placeholder="password" aria-label="Password">
-                        <% if (errmsg && errmsg.split('#').pop() == "password") { %><span style="color: red"><%= errmsg.split('#')[0] %></span><% } %>
+                        <% if (errmsg && errmsg.split('#').pop()=="password" ) { %><span style="color: red">
+                                <%= errmsg.split('#')[0] %>
+                            </span>
+                            <% } %>
                     </div>
                 </div>
             </div>
