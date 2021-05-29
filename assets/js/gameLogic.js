@@ -7,8 +7,7 @@ var containerHeight,
     trumpCard,
     userHash,
     ownScore,
-    firstTrick,
-    wait = false;
+    firstTrick;
 
 $(function () {
     containerHeight = document.getElementById("card-table").offsetHeight;
@@ -79,6 +78,7 @@ function initialize(data) {
         userhands[user.hashID] = tempusrobj;
 
         // playernames
+        $("#userFieldNames").append(`<div id="userField${user.hashID}" class="userField btn btn-secondary" style="top:${tempusrobj.hand.y + 140}px; left:${tempusrobj.hand.x}px;"><i class="bi bi-person-fill"></i>${user.name}</div>`);
 
         j++;
         if (j >= usr_ctr) j = 0;
@@ -125,7 +125,7 @@ io.socket.on("start", function (data) {
 });
 
 io.socket.on("turn", function (data) {
-    $("#currentUserIcon").animate({ left: userhands[data.user.hashID].hand.x + 30, top: userhands[data.user.hashID].hand.y + 150 });
+    $(`#userField${data.user.hashID}`).removeClass("btn-secondary").addClass("btn-primary");
     if (userHash == data.user.hashID) {
         // allow card click to play a card
         allowCardPlay();
@@ -133,31 +133,22 @@ io.socket.on("turn", function (data) {
 });
 
 io.socket.on("cardplayed", function (data) {
-    waitToRender(() => {
-        let card = data.card;
-        let playerHash = data.user.hashID;
-        if (userHash != playerHash) {
-            let fCard = findAndChangeCard(card.value, card.symbol, card.id, playerHash, userhands[playerHash].hand.topCard());
-            userhands[playerHash].playingpile.addCard(fCard);
-            fCard.rotate(getRandomArbitrary(-200, -160));
-            userhands[playerHash].playingpile.render({
-                callback: () => {
-                    wait = false;
-                },
-            });
-        } else {
-            let fCard = userhands[userHash].hand.findCardByID(data.card.id);
-            userhands[userHash].playingpile.addCard(fCard, data.card.id);
-            fCard.rotate(getRandomArbitrary(-20, 20));
-            userhands[userHash].playingpile.render({
-                callback: () => {
-                    wait = false;
-                },
-            });
-            //userhands[userHash].hand.render();
-            userhands[userHash].hand._click = null;
-        }
-    });
+    let card = data.card;
+    let playerHash = data.user.hashID;
+    $(`#userField${playerHash}`).removeClass("btn-primary").addClass("btn-secondary");
+    if (userHash != playerHash) {
+        let fCard = findAndChangeCard(card.value, card.symbol, card.id, playerHash, userhands[playerHash].hand.topCard());
+        userhands[playerHash].playingpile.addCard(fCard);
+        fCard.rotate(getRandomArbitrary(-200, -160));
+        userhands[playerHash].playingpile.render();
+    } else {
+        let fCard = userhands[userHash].hand.findCardByID(data.card.id);
+        userhands[userHash].playingpile.addCard(fCard, data.card.id);
+        fCard.rotate(getRandomArbitrary(-20, 20));
+        userhands[userHash].playingpile.render();
+        userhands[userHash].hand.render();
+        userhands[userHash].hand._click = null;
+    }
 });
 
 io.socket.on("roundwin", function (data) {
@@ -189,16 +180,17 @@ io.socket.on("dealcard", function (data) {
         if (trumpCard != null) {
             for (const key in userhands) {
                 if (key != userHash) {
-                    deck.topCard().rotate(0);
-                    userhands[key].hand.addCard(deck.topCard());
-                    userhands[key].hand.render();
+                    let card = deck.topCard();
+                    userhands[key].hand.addCard(card);
+                    userhands[key].hand.render({ callback: card.rotate(0) });
                 }
             }
         } else {
             for (const key in userhands) {
                 if (key != userHash && userhands[key].hand.length != 5) {
-                    userhands[key].hand.addCard(deck.topCard());
-                    userhands[key].hand.render();
+                    let card = deck.topCard();
+                    userhands[key].hand.addCard(card);
+                    userhands[key].hand.render({ callback: card.rotate(0) });
                 }
             }
         }
@@ -212,14 +204,14 @@ function checkMeldAndRob() {
         let pair = userhands[userHash].hand.getPair();
         // check if user has pair and can meld
         if (pair.length > 0 && ownScore > -1) {
-            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can meld</p>`, chf);
+            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can meld</p>`, gamef);
             $("#bmeld").prop("disabled", false);
         } else {
             $("#bmeld").prop("disabled", true);
         }
         // check if user can rob
         if (userhands[userHash].hand.getTrumpSeven(trumpCard.bottomCard().symbol) != null && ownScore > -1 && trumpCard.topCard().value != 0) {
-            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can rob</p>`, chf);
+            appendMessage(`<p class="chatmsg chatmsg-info"><i class="bi bi-info-circle text-info"></i>You can rob</p>`, gamef);
             $("#bsteal").prop("disabled", false);
         } else {
             $("#bsteal").prop("disabled", true);
@@ -241,7 +233,7 @@ io.socket.on("dealTrump", function (data) {
 });
 
 io.socket.on("firstturn", function (data) {
-    $("#currentUserIcon").animate({ left: userhands[data.user.hashID].hand.x + 30, top: userhands[data.user.hashID].hand.y + 150, opacity: 1.0 });
+    $(`#userField${data.user.hashID}`).removeClass("btn-secondary").addClass("btn-primary");
     if (userHash == data.user.hashID) {
         userhands[userHash].hand.click(function (card) {
             let hand = userhands[userHash].hand;
@@ -261,6 +253,7 @@ io.socket.on("firstturn", function (data) {
 
 io.socket.on("firstcard", function (data) {
     let playerHash = data.user.hashID;
+    $(`#userField${playerHash}`).removeClass("btn-primary").addClass("btn-secondary");
     if (userHash != playerHash) {
         let playingpile = userhands[playerHash].playingpile;
         let pCard = userhands[playerHash].hand.topCard();
@@ -283,7 +276,9 @@ io.socket.on("firstwin", async function (data) {
         let udata = data.data;
         for (const key in udata) {
             if (userHash != key) {
-                userhands[key].hand.addCard(userhands[key].playingpile.bottomCard());
+                let card = userhands[key].playingpile.bottomCard();
+                card.rotate(0);
+                userhands[key].hand.addCard(card);
                 userhands[key].hand.render({ immediate: true });
             }
         }
@@ -291,6 +286,8 @@ io.socket.on("firstwin", async function (data) {
             if (userHash != key) {
                 let playingpile = userhands[key].playingpile;
                 let fCard = findAndChangeCard(udata[key].value, udata[key].symbol, udata[key].id, key, userhands[key].hand.topCard());
+                fCard.rotate(getRandomArbitrary(-200, -160));
+                fCard.moveToFront();
                 playingpile.addCard(fCard, udata[key].id);
                 playingpile.faceUp = true;
                 playingpile.render({ immediate: true });
@@ -300,53 +297,41 @@ io.socket.on("firstwin", async function (data) {
 });
 
 io.socket.on("paircalled", function (data) {
-    waitToRender(() => {
-        let cards = data.cards;
-        let fCards = [];
-        let userhand = userhands[data.user.hashID].hand;
-        cards.forEach((card) => {
-            let fCard = userhand.topCard();
-            if (fCards.find((el) => el == fCard)) fCard = userhand.bottomCard();
-            let searchCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, fCard);
-            fCards.push(searchCard);
-        });
-        let firstpile = userhands[data.user.hashID].playingpile;
-        firstpile.addCard(fCards[0]);
-        firstpile.render();
-        let secondpile;
-        for (const key in userhands) {
-            secondpile = userhands[key].playingpile;
-            if (secondpile != firstpile) break;
-        }
-        secondpile.addCard(fCards[1]);
-        secondpile.render();
-        // let the cards be in the middle for 2s
-        setTimeout(() => {
-            userhand.addCards(fCards);
-            userhand.render({
-                callback: () => {
-                    wait = false;
-                },
-            });
-        }, 2000);
+    let cards = data.cards;
+    let fCards = [];
+    let userhand = userhands[data.user.hashID].hand;
+    cards.forEach((card) => {
+        let fCard = userhand.topCard();
+        if (fCards.find((el) => el == fCard)) fCard = userhand.bottomCard();
+        let searchCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, fCard);
+        fCards.push(searchCard);
     });
+    let firstpile = userhands[data.user.hashID].playingpile;
+    firstpile.addCard(fCards[0]);
+    firstpile.render();
+    let secondpile;
+    for (const key in userhands) {
+        secondpile = userhands[key].playingpile;
+        if (secondpile != firstpile) break;
+    }
+    secondpile.addCard(fCards[1]);
+    secondpile.render();
+    // let the cards be in the middle for 2s
+    setTimeout(() => {
+        userhand.addCards(fCards);
+        userhand.render();
+    }, 2000);
 });
 
 io.socket.on("cardrob", function (data) {
-    waitToRender(() => {
-        let card = data.card;
-        let userhand = userhands[data.user.hashID].hand;
-        let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
-        userhand.addCard(trumpCard.bottomCard());
-        trumpCard.addCard(fCard, card.id);
-        userhand.render({
-            callback: () => {
-                wait = false;
-            },
-        });
-        trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
-        trumpCard.topCard().moveToBack();
-    });
+    let card = data.card;
+    let userhand = userhands[data.user.hashID].hand;
+    let fCard = findAndChangeCard(card.value, card.symbol, card.id, data.user.hashID, userhand.bottomCard());
+    userhand.addCard(trumpCard.bottomCard());
+    trumpCard.addCard(fCard, card.id);
+    userhand.render();
+    trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
+    trumpCard.topCard().moveToBack();
 });
 
 io.socket.on("gameover", function (data) {
@@ -445,14 +430,4 @@ function reloadLocation() {
     form.action = location.href;
     document.body.appendChild(form);
     form.submit();
-}
-
-function waitToRender(callback) {
-    if (wait === true) {
-        setTimeout(doStuff, 100);
-        return;
-    } else {
-        wait = true;
-        callback();
-    }
 }

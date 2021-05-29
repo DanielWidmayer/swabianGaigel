@@ -54,12 +54,15 @@ $(function () {
                     // get & render stack
                     if (res.round > 0) {
                         if (res.room.stack.length) {
+                            console.log(res);
                             let activePlayer = res.room.acPl - 1;
                             if (activePlayer < 0) activePlayer = res.users.length - 1;
                             for (let i = res.room.stack.length - 1; i > -1; i--) {
+                                console.log(activePlayer);
                                 let card = res.room.stack[i].card;
                                 let fCard = findCertainCard(card.value, card.symbol);
                                 let uid = res.users[activePlayer].hashID;
+                                console.log(fCard);
                                 userhands[uid].playingpile.addCard(fCard);
                                 userhands[uid].playingpile.render();
                                 activePlayer--;
@@ -117,7 +120,7 @@ $(function () {
                     } else {
                         appendMessage('</p><hr class="hr-thick"/><p><i class="bi bi-hourglass-split"></i>It\'s ' + res.users[res.room.acPl].name + "'s turn.</p>", gamef);
                     }
-                    $("#currentUserIcon").animate({ left: userhands[res.users[res.room.acPl].hashID].hand.x + 30, top: userhands[res.users[res.room.acPl].hashID].hand.y + 150, opacity: 1.0 });
+                    $(`#userField${res.users[res.room.acPl].hashID}`).removeClass("btn-secondary").addClass("btn-primary");
                 }
             }
         }
