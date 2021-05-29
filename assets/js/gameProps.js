@@ -61,11 +61,9 @@ $(function () {
                             let activePlayer = res.room.acPl - 1;
                             if (activePlayer < 0) activePlayer = res.users.length - 1;
                             for (let i = res.room.stack.length - 1; i > -1; i--) {
-                                console.log(activePlayer);
                                 let card = res.room.stack[i].card;
                                 let fCard = findCertainCard(card.value, card.symbol);
                                 let uid = res.users[activePlayer].hashID;
-                                console.log(fCard);
                                 userhands[uid].playingpile.addCard(fCard);
                                 userhands[uid].playingpile.render();
                                 activePlayer--;
