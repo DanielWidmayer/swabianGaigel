@@ -102,7 +102,8 @@ io.socket.on("paircalledmsg", function (data) {
     if (userHash == data.user.hashID) {
         text = `<hr class="mb-0"/><p><i class="bi bi-people-fill text-info"></i>You have melded in ${icon}.</p><p><i class="bi bi-trophy-fill"></i>Your score is now ${data.user.score}</p><hr class="mt-0"/>`;
     } else {
-        text = `<hr class="mb-0"/><p><i class="bi bi-people-fill text-info"></i>${data.user.name} has melded in ${icon}.</p><p><i class="bi bi-trophy-fill"></i>${data.user.name}'s score is now ${data.user.score}</p><hr class="mt-0"/>`;
+        text = `<hr class="mb-0"/><p><i class="bi bi-people-fill text-info"></i>${data.user.name} has melded in ${icon}.</p>`;
+        if (data.show) text = text + `<p><i class="bi bi-trophy-fill"></i>${data.user.name}'s score is now ${data.user.score}</p><hr class="mt-0"/>`;
     }
     appendMessage(`${text}`, gamef);
 });
