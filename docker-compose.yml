@@ -9,15 +9,13 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-      - "27017:27017"
+
 
   redis:
     image: redis
     restart: always
     container_name: redis
-    ports:
-      - "6379:6379"
+
 
   app:
     container_name: gaigelapp

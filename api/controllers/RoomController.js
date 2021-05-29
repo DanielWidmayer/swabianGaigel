@@ -226,7 +226,7 @@ module.exports = {
         try {
             let players = [],
                 admin_flag = false;
-            sails.log(req.cookies.username);
+
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
             room = await Room.findOne({ id: req.session.roomid }).populate("admin");
 
