@@ -8,10 +8,16 @@
                     <span class="input-group-text col-inverse" id="ba1">Room Name</span>
                 </div>
                 <input type="text" id="roomName" name="roomname" class="input-transparent" required autocomplete="off" aria-label="Room Name" aria-describedby="ba1" value="<%= roomname %>">
-                <% if (errmsg && errmsg.split('#').pop()=="name" ) { %><span style="color: red">
+                <<<<<<< HEAD <% if (errmsg && errmsg.split('#').pop()=="name" ) { %><span style="color: red">
                         <%= errmsg.split('#')[0] %>
                     </span>
                     <% } %>
+                        =======
+                        <% if (errmsg && errmsg.split('#').pop()=="name" ) { %><span style="color: red">
+                                <%= errmsg.split('#')[0] %>
+                            </span>
+                            <% } %>
+                                >>>>>>> parent of 307bbb0 (Revert "Merge branch 'docker-deploy' of https://github.com/DanielWidmayer/swabianGaigel into docker-deploy")
             </div>
         </div>
         <div class="row">
@@ -28,10 +34,16 @@
                             <option value="4">Four</option>
                             <option value="6">Six</option>
                         </select>
-                        <% if (errmsg && errmsg.split('#').pop()=="players" ) { %><span style="color: red">
+                        <<<<<<< HEAD <% if (errmsg && errmsg.split('#').pop()=="players" ) { %><span style="color: red">
                                 <%= errmsg.split('#')[0] %>
                             </span>
                             <% } %>
+                                =======
+                                <% if (errmsg && errmsg.split('#').pop()=="players" ) { %><span style="color: red">
+                                        <%= errmsg.split('#')[0] %>
+                                    </span>
+                                    <% } %>
+                                        >>>>>>> parent of 307bbb0 (Revert "Merge branch 'docker-deploy' of https://github.com/DanielWidmayer/swabianGaigel into docker-deploy")
                     </div>
 
                 </div>

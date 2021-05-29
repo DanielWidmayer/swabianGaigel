@@ -29,7 +29,7 @@ module.exports = {
             }
             return res.json({ rooms: rooms, active: active, ahash: req.cookies.userhash });
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             return res.serverError(err);
         }
     },
@@ -63,7 +63,7 @@ module.exports = {
 
             return res.view("basic/roomlist", { layout: "basic_layout", username: uname, userhash: uhash, errmsg: errmsg, protected: pwprotect });
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             return res.serverError(err);
         }
     },
@@ -74,22 +74,22 @@ module.exports = {
             let data = req.body;
             let re = /^([A-Za-z0-9]+\s?)+$/;
             // sanity checking of post data
-            if (data.roomname.length <= 0 || data.roomname.length > 21) throw error(103, "Room Name must have 1-25 characters.");
-            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces.");
+            if (data.roomname.length <= 4 || data.roomname.length > 21) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces with at least 5 and max 20 characters.#name");
+            else if (!re.test(data.roomname)) throw error(103, "Please provide a valid Room Name only containing letters, numbers and single spaces with at least 5 and max 20 characters.#name");
 
             let mp = parseInt(data.maxplayers);
-            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Provide a valid count of max players.");
+            if (![2, 3, 4, 6].includes(mp)) throw error(103, "Please provide a valid count of max players.#players");
 
             re = /^[A-Za-z0-9._/\-:\\+#=()&%$§@,;]{5,15}$/;
             let pw = data.passwd;
             if (data.pwcb) {
-                if (!re.test(pw)) throw error(103, "Provide a valid password with 5-15 characters.");
+                if (!re.test(pw)) throw error(103, "Please provide a valid password with 5-15 characters.#password");
             } else pw = "";
             // all good
 
             let hash = crypto.randomBytes(10).toString("hex");
             while (await Room.findOne({ hashID: hash })) {
-                sails.log("hashID already in use, creating new one ...");
+                sails.log.debug("hashID already in use, creating new one ...");
                 hash = crypto.randomBytes(10).toString("hex");
             }
 
@@ -107,7 +107,7 @@ module.exports = {
             //sails.sockets.blast("listevent", { room: room });
             return res.redirect(`/room/${hash}`);
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             if (err.code) {
                 res.cookie("errmsg", err.msg);
                 return res.redirect("/create");
@@ -136,7 +136,7 @@ module.exports = {
 
             return res.view("basic/create", { layout: "basic_layout", username: user.name, userhash: user.hash, roomname: rname, errmsg: errmsg });
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             return res.serverError(err);
         }
     },
@@ -152,7 +152,7 @@ module.exports = {
             req.session.roomid = room.id;
             return res.ok();
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             return res.status(403).json({ err: err });
         }
     },
@@ -178,7 +178,7 @@ module.exports = {
             if (req.session.userid) {
                 user = await User.findOne({ id: req.session.userid });
                 if (!user) {
-                    sails.log("kill references");
+                    sails.log.info("kill references");
                     // kill references
                     delete req.session.userid;
                     delete req.session.roomid;
@@ -209,7 +209,7 @@ module.exports = {
 
             return res.view("room/gameroom", { layout: "room_layout", hash: room.hashID, admin: false });
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             if (err.code) {
                 if (err.msg) res.cookie("errmsg", err.msg);
                 return res.redirect("/list");
@@ -347,7 +347,7 @@ module.exports = {
 
             return res.status(200).json({ username: user.name, userhash: user.hashID });
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -415,7 +415,7 @@ module.exports = {
 
             return res.ok();
         } catch (err) {
-            sails.log(err);
+            sails.log.error(err);
             if (err.code) return res.badRequest(err);
             else return res.serverError(err);
         }
@@ -461,7 +461,7 @@ async function handleEmptyRoom(roomID) {
     if (empty) {
         sails.sockets.blast("listevent", { room: room });
         // destroy room
-        sails.log("destroy room " + room.hashID);
+        sails.log.debug("destroy room " + room.hashID);
         await Room.destroyOne({ id: roomID });
     }
 
@@ -473,8 +473,8 @@ async function leavehandler(args) {
     let room = await Room.findOne({ id: args.roomid });
     let trigger = args.trigger;
 
-    if (user) sails.log("leavehandler triggered for " + user.name + " " + user.id);
-    else sails.log("leavehandler triggered, but User was already destroyed");
+    if (user) sails.log.info("leavehandler triggered for " + user.name + " " + user.id);
+    else sails.log.info("leavehandler triggered, but User was already destroyed");
     // check if user reconnected within timeout
     if (!user || !room || user.unload == false) return -1;
 
@@ -484,7 +484,7 @@ async function leavehandler(args) {
     // check room status
     if (room.status == "game") {
         // replace player with Bot
-        sails.log(user.name + " disconnected, replace with Bot");
+        sails.log.info(user.name + " disconnected, replace with Bot");
         await User.updateOne({ id: user.id }).set({ bot: true, unload: false });
         ChatController.replacemsg(user.name, user.botname, room.hashID, -1);
 
@@ -507,7 +507,7 @@ async function leavehandler(args) {
         if (!room.empty) sails.sockets.blast("listevent", { room: room });
 
         // destroy user object
-        sails.log("destroy user object " + user.name + " " + user.id);
+        sails.log.debug("destroy user object " + user.name + " " + user.id);
         await User.destroyOne({ id: user.id });
         return 1;
     }

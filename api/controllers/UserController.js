@@ -13,8 +13,8 @@ module.exports = {
             let uname = req.body.uname;
             let re = /^[a-zA-Z](\s?[a-zA-Z]+)+$/;
             // perform some sanity checks on new user name
-            if (uname.length <= 3 || uname.length > 21) throw error(103, "Provide a name with 4-20 characters.");
-            else if (!re.test(uname)) throw error(103, "Usernames may only contain letters and single spaces, please try again");
+            if (uname.length <= 3 || uname.length > 21) throw error(103, "Please provide a name with 4-20 characters only containing letters and single spaces.");
+            else if (!re.test(uname)) throw error(103, "Please provide a name with 4-20 characters only containing letters and single spaces.");
             // update cookie
             res.cookie("username", uname);
 

@@ -22,16 +22,8 @@ const crypto = require("crypto");
     [11] - Ass
 */
 
-primaryKey: "id";
-
 module.exports = {
     attributes: {
-        id: {
-            type: "number",
-            autoIncrement: false,
-            unique: true,
-            required: true,
-        },
 
         value: {
             type: "number",
@@ -70,7 +62,7 @@ module.exports = {
         players[p_index].hand = players[p_index].hand.concat(cards);
         await Room.updateOne({ id: roomID }).set({ jsonplayers: players });
 
-        sails.log("deal " + cards + " to " + players[p_index].playerID);
+        sails.log.info("deal " + cards + " to " + players[p_index].playerID);
 
         return await Card.find().where({ id: cards });
     },

@@ -9,13 +9,13 @@ module.exports = {
     joinmsg: (username, roomhash, trigger = 0) => {
         // trigger: 0=normal, 1=rejoin
         sails.sockets.broadcast(roomhash, "joinmsg", { user: username, trigger: trigger });
-        sails.log(`${username} joined room ${roomhash}`);
+        sails.log.debug(`${username} joined room ${roomhash}`);
     },
 
     leavemsg: (username, roomhash, trigger = 0) => {
         // trigger: 0=normal, 1=timeout, 2=kick
         sails.sockets.broadcast(roomhash, "leavemsg", { user: username, trigger: trigger });
-        sails.log(`${username} left room ${roomhash}`);
+        sails.log.debug(`${username} left room ${roomhash}`);
     },
 
     errormsg: (roomhash, msg) => {
@@ -77,13 +77,13 @@ module.exports = {
             if (!userid || !roomid) return res.badRequest(new Error("session failure"));
 
             // get user and room
-            //let room = await Room.findOne({id: roomid}).populate('players');
             let room = await Room.findOne({ id: roomid });
             let user = await User.findOne({ id: userid });
 
             // check if user in room
-            //if (room.players.find(player => player.id == user.id)) {
             if (room.jsonplayers.find((player) => player.playerID == user.id)) {
+                // escape html or script tags
+                req.body.text = req.body.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 // broadcast message
                 sails.sockets.broadcast(room.hashID, "chatmsg", { user: user.name, text: req.body.text });
                 return res.ok();
