@@ -30,7 +30,7 @@ services:
     env_file: 
       - .env
     ports:
-      - "80:80"
+      - "${SERVED_PORT}:80"
     
 
 

@@ -205,7 +205,7 @@ module.exports = {
      *                                                                          *
      ***************************************************************************/
     cookie: {
-      //secure: true,
+      secure: (process.env.SSL_ENABLED ? true : false),
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   },
@@ -231,7 +231,8 @@ module.exports = {
      *                                                                          *
      ***************************************************************************/
     onlyAllowOrigins: [
-      'http://localhost'
+      process.env.DOMAIN_NAME,
+      // add your additional domains here as string, seperated by commas
     ],
     /***************************************************************************
      *                                                                          *
