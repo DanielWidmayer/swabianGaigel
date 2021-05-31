@@ -18,16 +18,11 @@ module.exports.routes = {
      *                                                                          *
      ***************************************************************************/
 
-    "/": {
-        view: "basic/index",
-        locals: {
-            layout: "index_layout",
-        },
-    },
+    "/": "ListController.index", 
 
-    "/list": "RoomController.accessList",
+    "/list": "ListController.accessList",
 
-    "/roomList": "RoomController.roomList",
+    "/roomList": "ListController.roomList",
 
     "POST /protect": "RoomController.protectRoom",
 
