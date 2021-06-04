@@ -45,7 +45,6 @@ module.exports = {
     },
 
     dealCard: async (ammount, userID, roomID) => {
-        // TO DO - perform some sanity checks like if room and user exist, max and min ammount of cards
         let cards = [];
 
         let room = await Room.findOne({ id: roomID }).populate("deck");
