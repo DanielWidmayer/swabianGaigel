@@ -22,7 +22,7 @@
     "eslint": "5.16.0"
   },
   "scripts": {
-    "start": "web: NODE_ENV=production node app",
+    "start": "NODE_ENV=production node app",
     "test": "npm run lint && npm run custom-tests && echo 'Done.'",
     "lint": "./node_modules/eslint/bin/eslint.js . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "custom-tests": "echo \"(No other custom tests yet.)\" && echo"
