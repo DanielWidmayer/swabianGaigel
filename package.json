@@ -33,8 +33,5 @@
     "url": "https://github.com/DanielWidmayer/swabianGaigel"
   },
   "author": "DanielWidmayer JensBuehler",
-  "license": "MIT",
-  "engines": {
-    "node": "^12.16"
-  }
+  "license": "MIT"
 }
