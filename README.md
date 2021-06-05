@@ -20,11 +20,11 @@
     An awesome way to play Gaigel with your friends online, for free & without registration!
     <br />
     <br />
-    <a href="https://github.com/DanielWidmayer/swabianGaigel">Play Now</a>
+    <a href="https://www.gaigel.club">Play Now</a>
     ·
     <a href="https://github.com/DanielWidmayer/swabianGaigel/issues">Report Bug</a>
     ·
-    <a href="https://github.com/DanielWidmayer/swabianGaigel/issues">Request Feature</a>
+    <a href="https://github.com/DanielWidmayer/swabianGaigel/pulls">Request Feature</a>
   </p>
 </p>
 
@@ -47,7 +47,7 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#usage">How to play</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -74,7 +74,6 @@ Gaigel is a traditionally swabian card game. However there is no website to play
 
 ### Built With
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 * [Bootstrap](https://getbootstrap.com)
 * [JQuery](https://jquery.com)
 * [Sails.js](https://sailsjs.com/)
@@ -84,19 +83,24 @@ This section should list any major frameworks that you built your project using.
 <!-- GETTING STARTED -->
 ## Getting Started
 
+<b>Please note:</b> This branch should only be used for local deployment and development as it's using the native sails-disk engine and in-memory store which should not be used in the production environment. Please refer to the other branches if you want to deploy this application: The [deploy](https://github.com/DanielWidmayer/swabianGaigel/tree/deploy) branch covers the deployment on Heroku and the [deploy-docker](https://github.com/DanielWidmayer/swabianGaigel/tree/deploy-docker) branch covers the deployment using Docker Containers. Of course you can always feel free to edit the code from this branch and deploy the way you like to, those are just examples on how we managed it.
+
 To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+First of all you should make sure that you have the latest version of Node.js installed. You can check your version with:
 ```sh
-npm install npm@latest -g
+node -v
 ```
-* sails.js
+if your version is not up-to-date we would recommend updating to the newest version either via Node Version Manager, which can be found here: https://github.com/nvm-sh/nvm (or here: https://github.com/coreybutler/nvm-windows for Windows respectively), or by downloading the pre-built installer from https://nodejs.org/en/download/.
+
+After you have installed Node.js and/or verified the installation, you can proceed to install Sails.js globally via npm
 ```sh
 npm install sails -g
 ```
+These are the only two prerequisites you will need to run this application locally.
+
 
 ### Installation
 
@@ -104,7 +108,7 @@ npm install sails -g
 ```sh
 git clone https://github.com/DanielWidmayer/swabianGaigel.git
 ```
-2. Install NPM packages
+2. Install required dependencies via npm
 ```sh
 npm install
 ```
@@ -115,12 +119,9 @@ sails lift
 
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
+## How to play
 
-[How to play](https://github.com/DanielWidmayer/swabianGaigel).
-
-_For more, please refer to the [Documentation](https://github.com/DanielWidmayer/swabianGaigel)_
+For a complete Tutorial on how to play and the game rule set with pictures, please refer to the available [Website](https://www.gaigel.club/#rules).
 
 
 
@@ -155,6 +156,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de
+Jens Buehler - inf18145@lehre.dhbw-stuttgart.de
 
 Project Link: [https://github.com/DanielWidmayer/swabianGaigel](https://github.com/DanielWidmayer/swabianGaigel)
 
