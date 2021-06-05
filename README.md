@@ -44,7 +44,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#installation">Deployment</a></li>
       </ul>
     </li>
     <li><a href="#usage">How to play</a></li>
@@ -77,48 +77,70 @@ Gaigel is a traditionally swabian card game. However there is no website to play
 * [Bootstrap](https://getbootstrap.com)
 * [JQuery](https://jquery.com)
 * [Sails.js](https://sailsjs.com/)
+* [Docker](https://www.docker.com/)
+* [MongoDB](https://www.mongodb.com/)
+* [Redis](https://redis.io/)
 
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-<b>Please note:</b> This branch should only be used for local deployment and development as it's using the native sails-disk engine and in-memory store which should not be used in the production environment. Please refer to the other branches if you want to deploy this application: The [deploy](https://github.com/DanielWidmayer/swabianGaigel/tree/deploy) branch covers the deployment on Heroku and the [deploy-docker](https://github.com/DanielWidmayer/swabianGaigel/tree/deploy-docker) branch covers the deployment using Docker Containers. Of course you can always feel free to edit the code from this branch and deploy the way you like to, those are just examples on how we managed it.
+<b>Please note:</b> This branch contains our approach to deploy this application to a production environment using Docker. Docker provides an easy and fast deployment but it should probably not be used for an application that is expecting heavy traffic.
 
-To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-First of all you should make sure that you have the latest version of Node.js installed. You can check your version with:
-```sh
-node -v
-```
-if your version is not up-to-date we would recommend updating to the newest version either via Node Version Manager, which can be found here: https://github.com/nvm-sh/nvm (or here: https://github.com/coreybutler/nvm-windows for Windows respectively), or by downloading the pre-built installer from https://nodejs.org/en/download/.
+As you will need the Docker Engine to run Docker Containers, you should make sure to install it first. This can either be done by downloading and installing the whole software package from https://docs.docker.com/get-docker/ or by your prefered CLI. For more Information on _how to install Docker Engine_ please refer to the official [documentation](https://docs.docker.com/engine/install/).
 
-After you have installed Node.js and/or verified the installation, you can proceed to install Sails.js globally via npm
-```sh
-npm install sails -g
-```
-These are the only two prerequisites you will need to run this application locally.
+Once you have installed the Docker Engine you should check if Docker Compose has also been already installed by trying the ```docker compose``` command. If it fails you will have to aslo install [Docker Compose](https://docs.docker.com/compose/install/) as well.
+
+To make deployment even easier, we provided a little python script that deals with the creation of the .env-file so you don't have to do it manually. You can still create the .env-file youself manually but if you would like to use this little helper function you will need to have python (v3.6 or greater) installed on your machine. But this should generally not be a problem since most operating systems will have python pre-installed.
+
+The Docker Engine and Docker Compose are the only two mandatory prerequisites you will need to launch this application.
 
 
-### Installation
+### Deployment
 
 1. Clone the repo
-```sh
-git clone https://github.com/DanielWidmayer/swabianGaigel.git
-```
-2. Install required dependencies via npm
-```sh
-npm install
-```
-3. Run the server
-```JS
-sails lift
-```
+   ```sh
+   git clone https://github.com/DanielWidmayer/swabianGaigel/tree/docker-deploy.git
+   ```
+2. Provide a .env-file
+   This can either be done manually or by calling the python script. If you choose to do this manually, these are the environment variables you should consider:
+   ```
+   NODE_ENV                       _should be set to production_
+   SESSION_SECRET                 _used to compute the hash of existing sessions. provide a random string_
+   DATA_ENCRYPTION_KEY            _used to encrypt password protected database entries. provide a ! 32byte long ! string_
+   MONGODB_INITDB_ROOT_USERNAME   _can be omitted. provide ! URL-safe ! username if wanted_
+   MONGODB_INITDB_ROOT_PASSWORD   _can be omitted. provide ! URL-safe ! password if wanted_
+   DOMAIN_NAME                    _trusted Domain for Websocket connections. provide your domain ! with protocol ! (e.g. https//www.example.com or http://93.184.216.34)
+   SERVED_PORT                    _port this application will be served on. port 80 would be default for webapplications_
+   SSL_ENABLE                     _set to True if this application should be served over HTTPS. omit if it should be served on HTTP_
+   ```
+   Please note that we are not completely sure if just setting SSL_ENABLE to "True" will result in the application being served over HTTPS as we haven't tested it yet because we 
+   are missing an appropriate private server and certificate.
+   
+   Or you can call the python script which will automatically create some of the environment variables if you don't want to pass them manually.
+   ```sh
+   py envGenerator.py
+   ```
+3. Build the Containers
+   ```sh
+   docker compose build
+   ```
+4. Run the Containers
+   ```sh
+   docker compose up
+   ```
+   (_if you want to run them in the background you can add the ```-d``` parameter_)
+5. (optional) Stop the Containers
+   ```sh
+   docker compose down
+   ```
+   (_if they are running in the foreground you may have to stop them using [ctrl+c] first_)
 
-
-
+<!-- USAGE -->
 ## How to play
 
 For a complete Tutorial on how to play and the game rule set with pictures, please refer to the available [Website](https://www.gaigel.club/#rules).
@@ -155,7 +177,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de
+Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de <br>
 Jens Buehler - inf18145@lehre.dhbw-stuttgart.de
 
 Project Link: [https://github.com/DanielWidmayer/swabianGaigel](https://github.com/DanielWidmayer/swabianGaigel)
