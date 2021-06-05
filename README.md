@@ -182,7 +182,7 @@ Project Link: [https://github.com/DanielWidmayer/swabianGaigel](https://github.c
 [forks-shield]: https://img.shields.io/github/forks/DanielWidmayer/swabianGaigel.svg?style=for-the-badge
 [forks-url]: https://github.com/DanielWidmayer/swabianGaigel/network/members
 [stars-shield]: https://img.shields.io/github/stars/DanielWidmayer/swabianGaigel.svg?style=for-the-badge
-[stars-url]: hhttps://github.com/DanielWidmayer/swabianGaigel/stargazers
+[stars-url]: https://github.com/DanielWidmayer/swabianGaigel/stargazers
 [issues-shield]: https://img.shields.io/github/issues/DanielWidmayer/swabianGaigel.svg?style=for-the-badge
 [issues-url]: https://github.com/DanielWidmayer/swabianGaigel/issues
 [license-shield]: https://img.shields.io/github/license/DanielWidmayer/swabianGaigel.svg?style=for-the-badge
