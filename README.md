@@ -11,7 +11,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/DanielWidmayer/swabianGaigel">
-    <img src="assets/images/headLogo.png" alt="Logo" height="200" width="450>
+    <img src="assets/images/headLogo.png" alt="Logo" height="200" width="450">
   </a>
 
   <h3 align="center">Gaigel Webapp</h3>
@@ -20,11 +20,11 @@
     An awesome way to play Gaigel with your friends online, for free & without registration!
     <br />
     <br />
-    <a href="https://github.com/DanielWidmayer/swabianGaigel">Play Now</a>
+    <a href="https://www.gaigel.club">Play Now</a>
     ·
     <a href="https://github.com/DanielWidmayer/swabianGaigel/issues">Report Bug</a>
     ·
-    <a href="https://github.com/DanielWidmayer/swabianGaigel/issues">Request Feature</a>
+    <a href="https://github.com/DanielWidmayer/swabianGaigel/pulls">Request Feature</a>
   </p>
 </p>
 
@@ -44,10 +44,10 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#installation">Deployment</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#usage">How to play</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -74,53 +74,47 @@ Gaigel is a traditionally swabian card game. However there is no website to play
 
 ### Built With
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 * [Bootstrap](https://getbootstrap.com)
 * [JQuery](https://jquery.com)
 * [Sails.js](https://sailsjs.com/)
+* [Heroku Postgres](https://www.heroku.com/postgres)
+* [Heroku Redis](https://elements.heroku.com/addons/heroku-redis)
 
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+<b>Please note:</b> This branch contains our approach to deploy this application to Heroku using Herokus Postgres and Redis service.
+
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
-```
-* sails.js
-```sh
-npm install sails -g
-```
+There are no prerequisites to install, as this application will solely be connected to Heroku. You will only need any editor to perform some small changes.
 
-### Installation
+
+### Deployment
 
 1. Clone the repo
-```sh
-git clone https://github.com/DanielWidmayer/swabianGaigel.git
-```
-2. Install NPM packages
-```sh
-npm install
-```
-3. Run the server
-```JS
-sails lift
-```
+   ```sh
+   git clone https://github.com/DanielWidmayer/swabianGaigel/tree/deploy.git
+   ```
+2. Create a new App on Heroku and add the additional services you want to use like Redis, PostgreSQL, MongoDB, etc. You should also already provide the connection credentials to 
+   these services as environment variables (they can be set under the "settings"-Tab). These Variables should be formatted as a connection-URL.
+   
+3. Perform some changes to ```/config/env/production.js```<br>
+   If you want to use a Database other than PostgreSQL or a Session Store other than Redis, please follow the instructions in the corresponding section of the file and add your 
+   personal environment variables instead.<br>
+   <b>Mandatory:</b> Under the section "sockets" change the "onlyAllowOrigins" values to the Domain, where your application will be hosted on Heroku (typ. 
+   `https://APP_NAME.herokuapp.com`)
+
+4. Go to the "Deploy"-Tab of your newly created App on Heroku, there you will find the option to connect a repository for deployment. Connect your repository and you are done.
 
 
+<!-- USAGE -->
+## How to play
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-[How to play](https://github.com/DanielWidmayer/swabianGaigel).
-
-_For more, please refer to the [Documentation](https://github.com/DanielWidmayer/swabianGaigel)_
+For a complete Tutorial on how to play and the game rule set with pictures, please refer to the available [Website](https://www.gaigel.club/#rules).
 
 
 
@@ -154,7 +148,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de
+Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de <br>
+Jens Buehler - inf18145@lehre.dhbw-stuttgart.de
 
 Project Link: [https://github.com/DanielWidmayer/swabianGaigel](https://github.com/DanielWidmayer/swabianGaigel)
 
