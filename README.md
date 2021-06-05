@@ -121,9 +121,7 @@ sails lift
 
 ## How to play
 
-[How to play](https://github.com/DanielWidmayer/swabianGaigel).
-
-_For more information, please refer to the [Documentation](https://github.com/DanielWidmayer/swabianGaigel)_
+For a complete Tutorial on how to play and the game rule set with pictures, please refer to the available [Website](https://www.gaigel.club/#rules).
 
 
 
