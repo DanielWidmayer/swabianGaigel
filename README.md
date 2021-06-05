@@ -155,7 +155,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de
+Daniel Widmayer - inf18157@lehre-dhbw-stuttgart.de<br>
 Jens Buehler - inf18145@lehre.dhbw-stuttgart.de
 
 Project Link: [https://github.com/DanielWidmayer/swabianGaigel](https://github.com/DanielWidmayer/swabianGaigel)
