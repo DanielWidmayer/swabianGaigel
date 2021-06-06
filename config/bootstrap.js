@@ -13,17 +13,14 @@
 module.exports.bootstrap = async function() {
 
   let values = [0, 2, 3, 4, 10, 11];
-  let ctr = 1;
 
   for (deck_ctr = 0; deck_ctr < 2; deck_ctr++) {
     for (let sym = 0; sym < 4; sym++) {
       for (let val of values) {
         await Card.create({
-          id: ctr,
           value: val,
           symbol: sym
         });
-        ctr += 1;
       }
     }
   }

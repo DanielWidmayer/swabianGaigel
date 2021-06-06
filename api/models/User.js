@@ -34,6 +34,30 @@ module.exports = {
             defaultsTo: false,
         },
 
+        hand: {
+            collection: "card",
+        },
+
+        score: {
+            type: "number",
+            defaultsTo: 0,
+        },
+
+        ready: {
+            type: "boolean",
+            defaultsTo: false,
+        },
+
+        wins: {
+            type: "number",
+            defaultsTo: 0,
+        },
+
+        team: {
+            type: "number",
+            defaultsTo: 0
+        },
+
         unload: {
             type: "boolean",
             defaultsTo: false,
@@ -145,6 +169,7 @@ module.exports = {
                 name: "bot",
                 botname: bot,
                 bot: true,
+                ready: true
             });
 
             bot = await User.findOne({ hashID: hash });

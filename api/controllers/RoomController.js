@@ -98,8 +98,8 @@ module.exports = {
                 name: data.roomname,
                 password: pw,
                 maxplayers: mp,
-                jsonplayers: [],
                 showscore: data.score ? true : false,
+                order: [],
                 stack: [],
             });
             let room = await Room.findOne({ hashID: hash });
@@ -164,7 +164,7 @@ module.exports = {
                 room = null;
 
             // check if room exists
-            room = await Room.findOne({ hashID: hash }).populate("admin");
+            room = await Room.findOne({ hashID: hash }).populate("admin").populate("players");
             if (!room) {
                 throw error(102, "Sorry, but the room you tried to join does not exist!");
             }
@@ -205,7 +205,7 @@ module.exports = {
             // no room connection, carry on
             // check if room is joinable
             if (room.status == "game") throw error(102, "Sorry, but this game is already running!");
-            if (room.jsonplayers.length >= room.maxplayers) throw error(102, "Sorry, but this game is already full!");
+            if (room.players.length >= room.maxplayers) throw error(102, "Sorry, but this game is already full!");
 
             req.session.roomid = room.id;
 
@@ -230,7 +230,7 @@ module.exports = {
                 admin_flag = false;
             sails.log(req.cookies.username);
             if (!req.session.roomid) throw error(101, "You were not authenticated to join this room, please try again!");
-            room = await Room.findOne({ id: req.session.roomid }).populate("admin");
+            room = await Room.findOne({ id: req.session.roomid }).populate("admin").populate("players");
 
             if (req.session.userid) {
                 user = await User.findOne({ id: req.session.userid });
@@ -247,7 +247,7 @@ module.exports = {
                 req.session.userid = user.id;
 
                 // make user admin if he is the first one to join
-                if (room.jsonplayers.length == 0) {
+                if (room.players.length == 0) {
                     await Room.updateOne({ id: room.id }).set({ admin: user.id });
                     admin_flag = true;
                 }
@@ -256,16 +256,19 @@ module.exports = {
                 ChatController.joinmsg(user.name, room.hashID);
 
                 // add user to player list
-                room.jsonplayers.push({ playerID: user.id, hand: [], score: 0, ready: false, wins: 0, team: 0 });
-                await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+                await Room.addToCollection(room.id, "players", user.id);
+                room.players.push(user);
+                room.order.push(user.id);
+                await Room.updateOne({ id: room.id }).set({ order: room.order });
 
                 sails.sockets.blast("listevent", { room: await Room.getListRoom({ id: room.id }) });
             }
 
-            for (const el of room.jsonplayers) {
-                players.push(await User.getNameAndHash(el.playerID));
-                players[players.length - 1].team = el.team;
-                if (room.status == "lobby") players[players.length - 1].ready = el.ready;
+            for (const id of room.order) {
+                let tp_obj = room.players.find((el) => el.id == id);
+                players.push(await User.getNameAndHash(id));
+                players[players.length - 1].team = tp_obj.team;
+                if (room.status == "lobby") players[players.length - 1].ready = tp_obj.ready;
             }
 
             sails.sockets.join(req, room.hashID);
@@ -278,22 +281,21 @@ module.exports = {
 
             // check if game is running, provide necessary data for reconnect-render
             if (room.status == "game") {
-                room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump").populate("called");
-                let p_index = room.jsonplayers.findIndex((pl) => pl.playerID == req.session.userid);
-                let hand = await Card.find().where({ id: room.jsonplayers[p_index].hand });
+                room = await Room.findOne({ id: req.session.roomid }).populate("deck").populate("trump").populate("called").populate("players");
+                
+                let p_i = await User.findOne({ id: req.session.userid }).populate("hand");
+                let hand = p_i.hand;
+                let req_user = await User.getNameAndHash(p_i.id);
+
                 let allCards = new Array(48);
                 for (let i = 0; i < 48; i++) allCards[i] = i + 1;
                 let unplayedcards = [];
                 let playedcard;
-                let req_user = {};
-
+                
                 let round = 1;
-                if (!room.jsonplayers.find((el) => el.wins > 0)) round = 0;
+                if (!room.players.find((el) => el.wins > 0)) round = 0;
                 else if (room.deck.length <= 0) round = 2;
 
-                for (const pl of room.jsonplayers) {
-                    unplayedcards = unplayedcards.concat(pl.hand);
-                }
                 //sails.log.info(unplayedcards);
                 if (room.deck.length) unplayedcards.push(room.trump.id);
                 for (const cl of room.deck) {
@@ -301,38 +303,38 @@ module.exports = {
                 }
                 //sails.log.info(unplayedcards);
 
-                let p_temp;
+                let p_temp, playerhand;
                 let stack = [];
 
                 for (let i = 0; i < room.stack.length; i++) {
-                    if (room.stack[i].playerID == req.session.userid) playedcard = room.stack[i].card;
+                    if (room.stack[i].playerID == req.session.userid) playedcard = await Card.findOne({ id: room.stack[i].cardID });
                     p_temp = await User.getNameAndHash(room.stack[i].playerID);
                     stack[i] = { uhash: p_temp.hashID };
-                    if (round > 0) stack[i].card = room.stack[i].card;
-                    unplayedcards.push(room.stack[i].card.id);
+                    if (round > 0) stack[i].cardID = room.stack[i].cardID;
+                    unplayedcards.push(room.stack[i].cardID);
+                }
+
+                players = [];
+                for (let id of room.order) {
+                    playerhand = await User.findOne({ id: id }).populate("hand");
+                    playerhand = playerhand.hand.map((co) => co.id);
+                    p_temp = await User.getNameAndHash(el.id);
+                    players.push({
+                        name: p_temp.name,
+                        hashID: p_temp.hashID,
+                        hand: playerhand.length,
+                        score: el.score,
+                        wins: el.wins,
+                        team: el.team,
+                    });
+                    unplayedcards = unplayedcards.concat(playerhand);
+
                 }
 
                 allCards = allCards.filter(function (val) {
                     return unplayedcards.indexOf(val) == -1;
                 });
                 unplayedcards = await Card.find({ id: allCards });
-
-                players = [];
-                for (let el of room.jsonplayers) {
-                    p_temp = await User.getNameAndHash(el.playerID);
-                    players.push({
-                        name: p_temp.name,
-                        hashID: p_temp.hashID,
-                        hand: el.hand.length,
-                        score: el.score,
-                        wins: el.wins,
-                        team: el.team,
-                    });
-                    if (el.playerID == req.session.userid) {
-                        req_user.username = p_temp.name;
-                        req_user.userhash = p_temp.hashID;
-                    }
-                }
 
                 let r_temp = {
                     deck: room.deck.length,
@@ -428,20 +430,19 @@ module.exports = {
 
 async function handleEmptyRoom(roomID) {
     let pids = [],
-        bots = [],
         empty = true;
-    let room = await Room.findOne({ id: roomID }).populate("admin");
+    let room = await Room.findOne({ id: roomID }).populate("admin").populate("players");
     // check if room is empty
-    if (room.jsonplayers.length > 0) {
-        for (const pl of room.jsonplayers) pids.push(pl.playerID);
-        bots = await User.find().where({ id: pids });
-        let human = bots.find((el) => el.bot == false);
+    if (room.players.length > 0) {
+        pids = room.players.map((el) => el.id);
+        let human = room.players.find((el) => el.bot == false);
         if (human) {
             // still at least one human player
             let users = [];
-            for (const pl of room.jsonplayers) {
-                users.push(await User.getNameAndHash(pl.playerID));
-                users[users.length - 1].team = pl.team;
+            for (const id of room.order) {
+                let tp_obj = room.players.find((el) => el.id == id);
+                users.push(await User.getNameAndHash(id));
+                users[users.length - 1].team = tp_obj.team;
                 if (room.status == "lobby") users[users.length - 1].ready = false;
             }
             empty = false;
@@ -498,10 +499,9 @@ async function leavehandler(args) {
         return 0;
     } else {
         // remove user from player list of connected room
-        let pin = room.jsonplayers.findIndex((el) => el.playerID == user.id);
-        if (pin >= 0) room.jsonplayers.splice(pin, 1);
-
-        await Room.updateOne({ id: room.id }).set({ jsonplayers: room.jsonplayers });
+        await Room.removeFromCollection(room.id, "players", user.id);
+        room.oder.splice(room.order.indexOf(user.id), 1);
+        await Room.updateOne({ id: room.id }).set({ order: room.order });
 
         room = await handleEmptyRoom(room.id);
 
