@@ -82,6 +82,8 @@ module.exports = {
 
             // check if user in room
             if (room.players.find((player) => player.id == user.id)) {
+                // escape html or script tags
+                req.body.text = req.body.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 // broadcast message
                 sails.sockets.broadcast(room.hashID, "chatmsg", { user: user.name, text: req.body.text });
                 return res.ok();
