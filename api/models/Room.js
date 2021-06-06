@@ -30,28 +30,19 @@ module.exports = {
 
         maxplayers: {
             type: "number",
-            defaultsTo: 4,
+            isIn: [2,3,4,6],
         },
 
         admin: {
             model: "user",
         },
 
-        /*
-      jsonplayers: [
-        { 
-          playerID: User.id ,
-          hand: [ Card.id ],
-          score: Integer,
-          ready: true/false,
-          wins: Integer,
-          team: Integer
-        }
-      ]
-    */
-        jsonplayers: {
+        players: {
+            collection: "user",
+        },
+
+        order: {
             type: "json",
-            defaultsTo: "",
         },
 
         activePlayer: {
@@ -88,7 +79,7 @@ module.exports = {
 
         /*
       stack: [
-        { playerID: Integer, card: Card }
+        { playerID: Integer, cardID: Integer }
       ]
     */
         stack: {
@@ -99,12 +90,10 @@ module.exports = {
     getListRoom: async (ident) => {
         let room;
         try {
-            if (ident.id) room = await Room.findOne({ id: ident.id });
-            else if (ident.hash) room = await Room.findOne({ hashID: ident.hash });
+            if (ident.id) room = await Room.findOne({ id: ident.id }).populate("players");
+            else if (ident.hash) room = await Room.findOne({ hashID: ident.hash }).populate("players");
             if (room) {
-                let players = room.jsonplayers.map((pl) => pl.playerID);
-                players = await User.find({ id: players });
-                players = players.map((pl) => pl.hashID);
+                let players = room.players.map((pl) => pl.hashID);
                 return { hashID: room.hashID, name: room.name, password: room.password.length ? true : false, maxplayers: room.maxplayers, players: players };
             } else {
                 return null;
@@ -116,13 +105,11 @@ module.exports = {
 
     getList: async () => {
         try {
-            let rooms = await Room.find();
+            let rooms = await Room.find().populate("players");
             let lrooms = [],
                 players = [];
             for (const el of rooms) {
-                players = el.jsonplayers.map((pl) => pl.playerID);
-                players = await User.find({ id: players });
-                players = players.map((pl) => pl.hashID);
+                players = el.players.map((pl) => pl.hashID);
                 lrooms.push({ hashID: el.hashID, name: el.name, password: el.password.length ? true : false, maxplayers: el.maxplayers, players: players });
             }
 
