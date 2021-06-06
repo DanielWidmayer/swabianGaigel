@@ -77,11 +77,11 @@ module.exports = {
             if (!userid || !roomid) return res.badRequest(new Error("session failure"));
 
             // get user and room
-            let room = await Room.findOne({ id: roomid });
+            let room = await Room.findOne({ id: roomid }).populate("players");
             let user = await User.findOne({ id: userid });
 
             // check if user in room
-            if (room.jsonplayers.find((player) => player.playerID == user.id)) {
+            if (room.players.find((player) => player.id == user.id)) {
                 // escape html or script tags
                 req.body.text = req.body.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 // broadcast message
