@@ -264,16 +264,15 @@ module.exports = {
 
                 players = [];
                 for (let id of room.order) {
-                    playerhand = await User.findOne({ id: id }).populate("hand");
-                    playerhand = playerhand.hand.map((co) => co.id);
-                    p_temp = await User.getNameAndHash(el.id);
+                    p_temp = await User.findOne({ id: id }).populate("hand");
+                    playerhand = p_temp.hand.map((co) => co.id);
                     players.push({
-                        name: p_temp.name,
+                        name: p_temp.bot ? p_temp.botname : p_temp.name,
                         hashID: p_temp.hashID,
                         hand: playerhand.length,
-                        score: el.score,
-                        wins: el.wins,
-                        team: el.team,
+                        score: p_temp.score,
+                        wins: p_temp.wins,
+                        team: p_temp.team,
                     });
                     unplayedcards = unplayedcards.concat(playerhand);
 
@@ -448,7 +447,7 @@ async function leavehandler(args) {
     } else {
         // remove user from player list of connected room
         await Room.removeFromCollection(room.id, "players", user.id);
-        room.oder.splice(room.order.indexOf(user.id), 1);
+        room.order.splice(room.order.indexOf(user.id), 1);
         await Room.updateOne({ id: room.id }).set({ order: room.order });
 
         room = await handleEmptyRoom(room.id);
