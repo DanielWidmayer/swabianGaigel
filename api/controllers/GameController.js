@@ -47,7 +47,7 @@ module.exports = {
                 temp[i] = temp[j];
                 temp[j] = m;
             }
-            
+
             room.order = temp.map((el) => el.id);
 
             if (room.maxplayers >= 4) {
@@ -115,7 +115,7 @@ module.exports = {
             for (const pl of room.players) {
                 teams[pl.team] += 1;
             }
-  
+
             if (user.team == t_team) user.team = 0;
             else if (teams[t_team] >= 2) throw error(104, "This Teams is already full!");
             else user.team = t_team;
@@ -189,7 +189,7 @@ module.exports = {
             users.push(await User.getNameAndHash(bot.id));
             users[users.length - 1].ready = bot.ready;
             users[users.length - 1].team = bot.team;
-            
+
             sails.sockets.broadcast(room.hashID, "userevent", { users: users, max: room.maxplayers, ingame: false });
             ChatController.botmsg(bot.botname, room.hashID, 1);
 
@@ -485,8 +485,8 @@ module.exports = {
                     if (el.card.value > t_val && el.card.symbol == room.trump.symbol) t_val = el.card.value;
                 }
                 if (card.symbol == room.trump.symbol) {
-                    if (card.value < t_val && hand.find((el) => el.value >= t_val && el.symbol == card.symbol)) throw error(104, "You have to play a higher card if you own one!");
-                } else if (card.value < s_val && hand.find((el) => el.value >= s_val && el.symbol == card.symbol)) throw error(104, "You have to play a higher card if you own one!");
+                    if (card.value < t_val && hand.find((el) => el.value > t_val && el.symbol == card.symbol)) throw error(104, "You have to play a higher card if you own one!");
+                } else if (card.value < s_val && hand.find((el) => el.value > s_val && el.symbol == card.symbol)) throw error(104, "You have to play a higher card if you own one!");
             }
 
             // add card to stack and remove from hand
@@ -634,7 +634,6 @@ module.exports = {
                     t_user.team = user.team;
                 }
 
-                
                 // socket call event
                 sails.sockets.broadcast(room.hashID, "paircalled", { user: t_user, cards: cards }, req);
                 ChatController.paircalledmsg(t_user, cards[0].symbol, room.showscore, room.hashID);
@@ -702,7 +701,7 @@ module.exports = {
                 // switch trump card with player card
                 await User.removeFromCollection(user.id, "hand", card.id);
                 await User.addToCollection(user.id, "hand", room.trump.id);
- 
+
                 user = await User.getNameAndHash(user.id);
                 sails.sockets.broadcast(room.hashID, "cardrob", { user: user, card: card }, req);
                 ChatController.cardrobmsg(user, room.trump, room.hashID);
