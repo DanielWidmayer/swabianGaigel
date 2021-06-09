@@ -228,6 +228,7 @@ function stealTrumpCard() {
                     userhand.render();
                     trumpCard.render({ callback: trumpCard.topCard().rotate(90) });
                     trumpCard.topCard().moveToBack();
+                    checkMeldAndRob();
                 }
             });
         }
