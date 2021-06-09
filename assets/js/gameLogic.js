@@ -33,11 +33,13 @@ $(function () {
 function initialize(data) {
     let usr_ctr = data.users.length;
     let positions = [];
+    
     if (usr_ctr == 6) positions.push({ x: containerWidth - 135, y: (containerHeight * 5) / 6 });
     if (usr_ctr > 3) positions.push({ x: containerWidth - 135, y: containerHeight / 2 });
     if (usr_ctr > 2) positions.push({ x: containerWidth - 135, y: containerHeight / 6 });
     if (usr_ctr == 6 || usr_ctr == 2) positions.push({ x: containerWidth / 2, y: containerHeight / 6 });
     if (usr_ctr > 2) positions.push({ x: containerWidth / 6, y: containerHeight / 6 });
+
     let j = data.users.findIndex((el) => el.hashID == userHash);
     if (j == -1) j = 0;
     for (let i = 0; i < usr_ctr; i++) {
