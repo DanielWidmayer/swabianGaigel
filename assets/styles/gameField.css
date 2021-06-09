@@ -209,6 +209,15 @@ footer {
     width: 12px;
 }
 
+.img-trump {
+    height: 50px;
+    width: 50px;
+}
+.img-trump-thin {
+    height: 50px;
+    width: 30px;
+}
+
 .gameover-img {
     position: absolute;
     top: 30%;
@@ -252,3 +261,20 @@ footer {
 .gameroom-wrapper{
     margin: 5vh 3vw 5vh 3vw;
 }
+
+#game-trump{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 9500;
+}
+
+.usr-field{
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    border-radius: .25rem;
+}
+
+.modal-backdrop {
+    z-index: 9998;
+  }

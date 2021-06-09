@@ -78,7 +78,7 @@ function initialize(data) {
         userhands[user.hashID] = tempusrobj;
 
         // playernames
-        $("#userFieldNames").append(`<div id="userField${user.hashID}" class="userField btn btn-secondary" style="top:${tempusrobj.hand.y + 140}px; left:${tempusrobj.hand.x}px;"><i class="bi bi-person-fill"></i>${user.name}</div>`);
+        $("#userFieldNames").append(`<div id="userField${user.hashID}" class="userField usr-field btn-secondary" style="top:${tempusrobj.hand.y + 140}px; left:${tempusrobj.hand.x}px;"><i class="bi bi-person-fill"></i>${user.name}</div>`);
 
         j++;
         if (j >= usr_ctr) j = 0;
@@ -92,6 +92,8 @@ function initialize(data) {
     $("#bstart").hide();
     $(".bi-check-circle-fill").remove();
     $(".bi-x-circle-fill").remove();
+
+    $("#game-trump").append(getHtmlSymbol(data.trump.symbol).replace("img-icon", "img-trump"));
 
     ownScore = -1;
     if (data.trump != null) {
@@ -229,6 +231,13 @@ io.socket.on("dealTrump", function (data) {
         let tCard = uhand.findCardByID(data.card.id);
         tCard.rotate(0);
         uhand.render();
+        for (const key in userhands) {
+            if (key != userHash && userhands[key].hand.length != 5) {
+                let card = deck.topCard();
+                userhands[key].hand.addCard(card);
+                userhands[key].hand.render({ callback: card.rotate(0) });
+            }
+        }
     }, 2500);
 });
 
