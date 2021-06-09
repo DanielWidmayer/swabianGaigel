@@ -139,7 +139,7 @@ module.exports = {
         }
     },
 
-    getBots: async (roomID) => {
+    /*getBots: async (roomID) => {
         try {
             let bots = [];
             let room = await Room.findOne({ id: roomID });
@@ -152,7 +152,7 @@ module.exports = {
         } catch (err) {
             throw err;
         }
-    },
+    },*/
 
     newBot: async () => {
         try {
