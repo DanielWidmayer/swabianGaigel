@@ -235,8 +235,6 @@ module.exports = {
                 let hand = p_i.hand;
                 let req_user = await User.getNameAndHash(p_i.id);
 
-                let allCards = new Array(48);
-                for (let i = 0; i < 48; i++) allCards[i] = i + 1;
                 let unplayedcards = [];
                 let playedcard;
                 
@@ -278,22 +276,19 @@ module.exports = {
 
                 }
 
-                allCards = allCards.filter(function (val) {
-                    return unplayedcards.indexOf(val) == -1;
-                });
-                unplayedcards = await Card.find({ id: allCards });
+                let allCards = await Card.find({ id: { nin: unplayedcards } });
 
                 let r_temp = {
                     deck: room.deck.length,
                     acPl: room.activePlayer,
                     robbed: room.robbed,
                     called: room.called,
-                    played: unplayedcards,
+                    played: allCards,
                     stack: stack,
                     status: room.status,
                 };
 
-                return res.status(200).json({ username: req_user.username, userhash: req_user.userhash, users: players, room: r_temp, hand: hand, trump: room.trump, round: round, playedcard: playedcard });
+                return res.status(200).json({ username: req_user.name, userhash: req_user.hashID, users: players, room: r_temp, hand: hand, trump: room.trump, round: round, playedcard: playedcard });
             }
 
             return res.status(200).json({ username: user.name, userhash: user.hashID });

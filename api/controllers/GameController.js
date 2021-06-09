@@ -370,9 +370,10 @@ module.exports = {
 
                 // deal cards to players, start game
                 let hand;
-                for (const pl of room.players) {
-                    players.push(await User.getNameAndHash(pl.id));
-                    players[players.length - 1].team = pl.team;
+                for (const id of room.order) {
+                    let tp_obj = room.players.find((el) => el.id == id);
+                    players.push(await User.getNameAndHash(id));
+                    players[players.length - 1].team = tp_obj.team;
                 }
                 sails.sockets.broadcast(room.hashID, "userevent", { users: players, max: room.maxplayers, ingame: true });
 
@@ -383,12 +384,12 @@ module.exports = {
                 }
 
                 // broadcast firstturn event
-                user = await User.getNameAndHash(room.players[0].id);
+                user = await User.getNameAndHash(room.order[0]);
                 ChatController.firstturnmsg(user, room.hashID);
                 sails.log.info("its " + user.name + " turn");
                 sails.sockets.broadcast(room.hashID, "firstturn", { user: user });
 
-                if (user.bot) setTimeout(botPlay, 1000, { roomid: room.id, botid: room.players[0].id });
+                if (user.bot) setTimeout(botPlay, 1000, { roomid: room.id, botid: room.order[0] });
 
                 return res.ok();
             } catch (err) {
