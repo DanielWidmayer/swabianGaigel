@@ -62,10 +62,10 @@ if mongo_pw == "y":
 else:
     mongo_pw = ""
 print(" *")
-print(" * [4/7] setting 'MONGO_INITDB_ROOT_USERNAME' to '" + mongo_un + "'")
-print(" * [4/7] setting 'MONGO_INITDB_ROOT_PASSWORD' to '" + mongo_pw + "'")
-f.write("MONGO_INITDB_ROOT_USERNAME=" + mongo_un + "\n")
-f.write("MONGO_INITDB_ROOT_PASSWORD=" + mongo_pw + "\n")
+print(" * [4/7] setting 'MONGO_USER' to '" + mongo_un + "'")
+print(" * [4/7] setting 'MONGO_PASSWORD' to '" + mongo_pw + "'")
+f.write("MONGO_USER=" + mongo_un + "\n")
+f.write("MONGO_PASSWORD=" + mongo_pw + "\n")
 print(" *")
 
 print(" *   Please provide the Domain name of the server this application will be running on. This is essential because socket")

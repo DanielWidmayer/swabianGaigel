@@ -45,8 +45,8 @@ module.exports = {
      ***************************************************************************/
     default: {
       adapter: 'sails-mongo',
-      user: process.env.MONGO_INITDB_ROOT_USERNAME,
-      password: process.env.MONGO_INITDB_ROOT_PASSWORD,
+      user: process.env.MONGO_USER,
+      password: process.env.MONGO_PASSWORD,
       host: 'mongodb',
       port: 27017,
       database: 'admin'
